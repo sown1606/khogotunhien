@@ -7,7 +7,12 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { getOptionalEnv, validateAuthEnvironment } from "@/lib/env";
 
-validateAuthEnvironment();
+const isProductionRuntime =
+  process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build";
+
+if (isProductionRuntime) {
+  validateAuthEnvironment();
+}
 
 const nextAuthSecret = getOptionalEnv("NEXTAUTH_SECRET");
 
