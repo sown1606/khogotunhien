@@ -1,5 +1,4 @@
 import { Prisma, type HomepageSectionType, type SiteSetting } from "@prisma/client";
-import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { type Locale, localizeValue, normalizeLocale } from "@/lib/i18n";
@@ -212,7 +211,7 @@ async function withDatabaseFallback<T>(
   }
 }
 
-export const getSiteSettings = cache(async (inputLocale: Locale = "vi") => {
+export async function getSiteSettings(inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
   const fallbackSettings = getFallbackSiteSetting();
 
@@ -253,9 +252,9 @@ export const getSiteSettings = cache(async (inputLocale: Locale = "vi") => {
   });
 
   return localizeSiteSetting(locale, settings);
-});
+}
 
-export const getSiteSettingsForAdmin = cache(async () => {
+export async function getSiteSettingsForAdmin() {
   const fallbackSettings = getFallbackSiteSetting();
 
   return withDatabaseFallback("getSiteSettingsForAdmin", fallbackSettings, async () => {
@@ -283,9 +282,9 @@ export const getSiteSettingsForAdmin = cache(async () => {
       },
     });
   });
-});
+}
 
-export const getNavigationCategories = cache(async (inputLocale: Locale = "vi") => {
+export async function getNavigationCategories(inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
 
   const categories = await withDatabaseFallback("getNavigationCategories", [], () =>
@@ -299,9 +298,9 @@ export const getNavigationCategories = cache(async (inputLocale: Locale = "vi") 
   return categories.map((category) =>
     localizeCategory(locale, category as typeof category & Record<string, unknown>),
   );
-});
+}
 
-export const getHomepageSections = cache(async (inputLocale: Locale = "vi") => {
+export async function getHomepageSections(inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
 
   const sections = await withDatabaseFallback("getHomepageSections", [], () =>
@@ -331,9 +330,9 @@ export const getHomepageSections = cache(async (inputLocale: Locale = "vi") => {
   return sections.map((section) =>
     localizeHomepageSection(locale, section as typeof section & Record<string, unknown>),
   );
-});
+}
 
-export const getFeaturedProducts = cache(async (limit = 12, inputLocale: Locale = "vi") => {
+export async function getFeaturedProducts(limit = 12, inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
 
   const products = await withDatabaseFallback("getFeaturedProducts", [], () =>
@@ -353,9 +352,9 @@ export const getFeaturedProducts = cache(async (limit = 12, inputLocale: Locale 
   return products.map((product) =>
     localizeProduct(locale, product as typeof product & Record<string, unknown>),
   );
-});
+}
 
-export const getFeaturedCategories = cache(async (limit = 10, inputLocale: Locale = "vi") => {
+export async function getFeaturedCategories(limit = 10, inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
 
   const categories = await withDatabaseFallback("getFeaturedCategories", [], () =>
@@ -369,7 +368,7 @@ export const getFeaturedCategories = cache(async (limit = 10, inputLocale: Local
   return categories.map((category) =>
     localizeCategory(locale, category as typeof category & Record<string, unknown>),
   );
-});
+}
 
 type ProductQuery = {
   q?: string;
@@ -460,7 +459,7 @@ export async function getProductBySlug(slug: string, inputLocale: Locale = "vi")
   return localizeProduct(locale, product as typeof product & Record<string, unknown>);
 }
 
-export const getCategories = cache(async (inputLocale: Locale = "vi") => {
+export async function getCategories(inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
 
   const categories = await withDatabaseFallback("getCategories", [], () =>
@@ -482,7 +481,7 @@ export const getCategories = cache(async (inputLocale: Locale = "vi") => {
   return categories.map((category) =>
     localizeCategory(locale, category as typeof category & Record<string, unknown>),
   );
-});
+}
 
 export async function getCategoryBySlug(slug: string, inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
