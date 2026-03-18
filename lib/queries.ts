@@ -4,6 +4,9 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 
 export const getSiteSettings = cache(async () => {
+  const fallbackCompanyPhone = process.env.COMPANY_PHONE || "0786531966";
+  const fallbackZaloUrl = process.env.ZALO_URL || "https://zalo.me/0786531966";
+
   const settings = await db.siteSetting.findUnique({
     where: { id: "default" },
   });
@@ -16,9 +19,9 @@ export const getSiteSettings = cache(async () => {
       companyName: "Woodoria Studio",
       companyDescription:
         "Premium wood products, custom craftsmanship, and design-ready wood materials.",
-      phoneNumber: "+84901234567",
-      email: "hello@woodoria.vn",
-      zaloLink: "https://zalo.me/0901234567",
+      phoneNumber: fallbackCompanyPhone,
+      email: "maithihongsang79@gmail.com",
+      zaloLink: fallbackZaloUrl,
       contactPrimaryLabel: "Contact via Zalo",
       contactSecondaryLabel: "Call now",
     },

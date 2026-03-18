@@ -50,6 +50,7 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
   const [state, formAction] = useActionState(action, {});
   const [logoUrl, setLogoUrl] = useState(initialValues.logoUrl || "");
   const [faviconUrl, setFaviconUrl] = useState(initialValues.faviconUrl || "");
+  const fieldErrorMessages = Object.values(state.fieldErrors || {}).flat();
 
   useEffect(() => {
     if (state.error) {
@@ -62,6 +63,17 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
 
   return (
     <form action={formAction} className="space-y-5">
+      {fieldErrorMessages.length ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <p className="font-medium">Please correct the highlighted fields.</p>
+          <ul className="mt-1 list-disc pl-5">
+            {fieldErrorMessages.map((message, index) => (
+              <li key={`${message}-${index}`}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Company information</CardTitle>
@@ -91,7 +103,7 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" defaultValue={initialValues.email || ""} />
+            <Input id="email" name="email" type="email" defaultValue={initialValues.email || ""} />
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="address">Address</Label>
@@ -115,19 +127,20 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="zaloLink">Zalo link</Label>
-            <Input id="zaloLink" name="zaloLink" defaultValue={initialValues.zaloLink || ""} />
+            <Input id="zaloLink" name="zaloLink" type="url" defaultValue={initialValues.zaloLink || ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="facebookLink">Facebook link</Label>
             <Input
               id="facebookLink"
               name="facebookLink"
+              type="url"
               defaultValue={initialValues.facebookLink || ""}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="tiktokLink">TikTok link</Label>
-            <Input id="tiktokLink" name="tiktokLink" defaultValue={initialValues.tiktokLink || ""} />
+            <Input id="tiktokLink" name="tiktokLink" type="url" defaultValue={initialValues.tiktokLink || ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="contactPrimaryLabel">Primary CTA label</Label>

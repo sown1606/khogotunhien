@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type { ActionResult } from "@/lib/actions/types";
+import { logError } from "@/lib/logger";
+import { getSafeErrorMessage, toUserFacingError } from "@/lib/server-errors";
 import { normalizeProductPayload, productSchema } from "@/lib/validators/product";
 import { parseBoolean, parseNumber } from "@/lib/utils";
 
@@ -99,9 +101,11 @@ export async function createProductAction(
       message: "Product created successfully.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to create product.", {
+      error: getSafeErrorMessage(error),
+    });
     return {
-      error: "Failed to create product.",
+      error: toUserFacingError(error, "Failed to create product."),
     };
   }
 }
@@ -195,9 +199,12 @@ export async function updateProductAction(
       message: "Product updated successfully.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to update product.", {
+      error: getSafeErrorMessage(error),
+      productId,
+    });
     return {
-      error: "Failed to update product.",
+      error: toUserFacingError(error, "Failed to update product."),
     };
   }
 }
@@ -229,9 +236,12 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
       message: "Product deleted.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to delete product.", {
+      error: getSafeErrorMessage(error),
+      productId,
+    });
     return {
-      error: "Failed to delete product.",
+      error: toUserFacingError(error, "Failed to delete product."),
     };
   }
 }
@@ -257,9 +267,12 @@ export async function toggleProductActiveAction(
       message: active ? "Product activated." : "Product deactivated.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to toggle product status.", {
+      error: getSafeErrorMessage(error),
+      productId,
+    });
     return {
-      error: "Failed to update status.",
+      error: toUserFacingError(error, "Failed to update status."),
     };
   }
 }

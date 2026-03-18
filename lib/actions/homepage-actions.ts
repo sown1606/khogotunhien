@@ -7,6 +7,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type { ActionResult } from "@/lib/actions/types";
+import { logError } from "@/lib/logger";
+import { getSafeErrorMessage, toUserFacingError } from "@/lib/server-errors";
 import {
   homepageSectionSchema,
   normalizeHomepageSectionPayload,
@@ -98,8 +100,10 @@ export async function createHomepageSectionAction(
       message: "Homepage section created.",
     };
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to create section." };
+    logError("Failed to create homepage section.", {
+      error: getSafeErrorMessage(error),
+    });
+    return { error: toUserFacingError(error, "Failed to create section.") };
   }
 }
 
@@ -172,8 +176,11 @@ export async function updateHomepageSectionAction(
       message: "Homepage section updated.",
     };
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to update section." };
+    logError("Failed to update homepage section.", {
+      error: getSafeErrorMessage(error),
+      sectionId,
+    });
+    return { error: toUserFacingError(error, "Failed to update section.") };
   }
 }
 
@@ -193,8 +200,11 @@ export async function deleteHomepageSectionAction(sectionId: string): Promise<Ac
       message: "Section removed.",
     };
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to delete section." };
+    logError("Failed to delete homepage section.", {
+      error: getSafeErrorMessage(error),
+      sectionId,
+    });
+    return { error: toUserFacingError(error, "Failed to delete section.") };
   }
 }
 
@@ -218,7 +228,10 @@ export async function toggleHomepageSectionVisibilityAction(
       message: visible ? "Section is visible." : "Section hidden.",
     };
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to update section visibility." };
+    logError("Failed to update homepage section visibility.", {
+      error: getSafeErrorMessage(error),
+      sectionId,
+    });
+    return { error: toUserFacingError(error, "Failed to update section visibility.") };
   }
 }

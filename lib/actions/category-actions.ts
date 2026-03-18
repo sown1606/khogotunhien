@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type { ActionResult } from "@/lib/actions/types";
+import { logError } from "@/lib/logger";
+import { getSafeErrorMessage, toUserFacingError } from "@/lib/server-errors";
 import { categorySchema, normalizeCategoryPayload } from "@/lib/validators/category";
 import { parseBoolean, parseNumber } from "@/lib/utils";
 
@@ -63,9 +65,11 @@ export async function createCategoryAction(
       message: "Category created successfully.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to create category.", {
+      error: getSafeErrorMessage(error),
+    });
     return {
-      error: "Failed to create category.",
+      error: toUserFacingError(error, "Failed to create category."),
     };
   }
 }
@@ -131,9 +135,12 @@ export async function updateCategoryAction(
       message: "Category updated successfully.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to update category.", {
+      error: getSafeErrorMessage(error),
+      categoryId,
+    });
     return {
-      error: "Failed to update category.",
+      error: toUserFacingError(error, "Failed to update category."),
     };
   }
 }
@@ -165,9 +172,12 @@ export async function deleteCategoryAction(categoryId: string): Promise<ActionRe
       message: "Category deleted.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to delete category.", {
+      error: getSafeErrorMessage(error),
+      categoryId,
+    });
     return {
-      error: "Failed to delete category.",
+      error: toUserFacingError(error, "Failed to delete category."),
     };
   }
 }
@@ -193,9 +203,12 @@ export async function toggleCategoryActiveAction(
       message: active ? "Category activated." : "Category deactivated.",
     };
   } catch (error) {
-    console.error(error);
+    logError("Failed to toggle category status.", {
+      error: getSafeErrorMessage(error),
+      categoryId,
+    });
     return {
-      error: "Failed to update status.",
+      error: toUserFacingError(error, "Failed to update status."),
     };
   }
 }

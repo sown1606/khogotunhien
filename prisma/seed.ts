@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+import { ensureDatabaseUrlInProcessEnv } from "../lib/database-url";
+
+ensureDatabaseUrlInProcessEnv();
+
 const prisma = new PrismaClient();
 
 type CategorySeed = {
@@ -315,10 +319,29 @@ const products: ProductSeed[] = [
 ];
 
 async function main() {
-  const passwordHash = await bcrypt.hash("Admin@123456", 10);
+  const isProduction = process.env.NODE_ENV === "production";
+  const allowProductionSeed = process.env.ALLOW_PRODUCTION_SEED === "true";
+
+  if (isProduction && !allowProductionSeed) {
+    throw new Error(
+      "Seeding is blocked in production by default. Set ALLOW_PRODUCTION_SEED=true only if you explicitly need it.",
+    );
+  }
+
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD are required for seeding.");
+  }
+
+  const companyPhone = process.env.COMPANY_PHONE || "0786531966";
+  const zaloUrl = process.env.ZALO_URL || "https://zalo.me/0786531966";
+
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
 
   await prisma.adminUser.upsert({
-    where: { email: "admin@woodoria.com" },
+    where: { email: adminEmail },
     update: {
       name: "Woodoria Admin",
       passwordHash,
@@ -326,7 +349,7 @@ async function main() {
     },
     create: {
       name: "Woodoria Admin",
-      email: "admin@woodoria.com",
+      email: adminEmail,
       passwordHash,
       active: true,
       role: "ADMIN",
@@ -507,9 +530,9 @@ async function main() {
       companyDescription:
         "Woodoria Studio provides premium wood materials, custom wood products, and design-ready solutions for modern interiors.",
       address: "128 Riverside Craft District, Ho Chi Minh City, Vietnam",
-      phoneNumber: "+84901234567",
+      phoneNumber: companyPhone,
       email: "hello@woodoria.vn",
-      zaloLink: "https://zalo.me/0901234567",
+      zaloLink: zaloUrl,
       facebookLink: "https://facebook.com/woodoriastudio",
       tiktokLink: "https://tiktok.com/@woodoriastudio",
       logoUrl: "/logo.svg",
@@ -530,9 +553,9 @@ async function main() {
       companyDescription:
         "Woodoria Studio provides premium wood materials, custom wood products, and design-ready solutions for modern interiors.",
       address: "128 Riverside Craft District, Ho Chi Minh City, Vietnam",
-      phoneNumber: "+84901234567",
+      phoneNumber: companyPhone,
       email: "hello@woodoria.vn",
-      zaloLink: "https://zalo.me/0901234567",
+      zaloLink: zaloUrl,
       facebookLink: "https://facebook.com/woodoriastudio",
       tiktokLink: "https://tiktok.com/@woodoriastudio",
       logoUrl: "/logo.svg",
@@ -550,7 +573,7 @@ async function main() {
   });
 
   console.log("Seed completed successfully.");
-  console.log("Admin login: admin@woodoria.com / Admin@123456");
+  console.log(`Admin login email: ${adminEmail}`);
 }
 
 main()

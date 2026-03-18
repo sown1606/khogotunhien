@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type { ActionResult } from "@/lib/actions/types";
+import { logError } from "@/lib/logger";
+import { getSafeErrorMessage, toUserFacingError } from "@/lib/server-errors";
 import { normalizeSettingsPayload, settingsSchema } from "@/lib/validators/settings";
 
 async function ensureAdmin() {
@@ -89,7 +91,9 @@ export async function updateSettingsAction(
       message: "Settings saved.",
     };
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to update settings." };
+    logError("Failed to update website settings.", {
+      error: getSafeErrorMessage(error),
+    });
+    return { error: toUserFacingError(error, "Failed to update settings.") };
   }
 }

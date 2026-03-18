@@ -4,6 +4,8 @@ import { z } from "zod";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logError } from "@/lib/logger";
+import { getSafeErrorMessage, toUserFacingError } from "@/lib/server-errors";
 
 const bulkSchema = z.object({
   ids: z.array(z.string().min(1)).min(1).max(100),
@@ -59,7 +61,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Bulk action failed." }, { status: 500 });
+    logError("Bulk product action failed.", {
+      error: getSafeErrorMessage(error),
+      action: parsed.data.action,
+      idsCount: parsed.data.ids.length,
+    });
+    return NextResponse.json(
+      { error: toUserFacingError(error, "Bulk action failed.") },
+      { status: 500 },
+    );
   }
 }

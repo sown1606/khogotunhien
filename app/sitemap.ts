@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 
 import { db } from "@/lib/db";
+import { getSiteUrl } from "@/lib/env";
 
-const BASE_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+const BASE_URL = getSiteUrl();
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -40,6 +40,7 @@ export function CategoryForm({ action, initialValues }: CategoryFormProps) {
   const [state, formAction] = useActionState(action, {});
   const [imageUrl, setImageUrl] = useState(initialValues?.imageUrl || "");
   const router = useRouter();
+  const fieldErrorMessages = Object.values(state.fieldErrors || {}).flat();
 
   useEffect(() => {
     if (state.error) {
@@ -54,6 +55,17 @@ export function CategoryForm({ action, initialValues }: CategoryFormProps) {
 
   return (
     <form action={formAction} className="space-y-5">
+      {fieldErrorMessages.length ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <p className="font-medium">Please correct the highlighted fields.</p>
+          <ul className="mt-1 list-disc pl-5">
+            {fieldErrorMessages.map((message, index) => (
+              <li key={`${message}-${index}`}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <Card>
         <CardContent className="grid gap-4 p-5 md:grid-cols-2">
           <div className="space-y-2">

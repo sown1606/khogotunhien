@@ -58,9 +58,6 @@ export function LoginForm() {
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? "Signing in..." : "Sign in"}
           </Button>
-          <p className="text-xs text-stone-500">
-            Demo credentials: <strong>admin@woodoria.com / Admin@123456</strong>
-          </p>
         </form>
       </CardContent>
     </Card>

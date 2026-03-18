@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { getOptionalEnv, validateAuthEnvironment } from "@/lib/env";
+
+validateAuthEnvironment();
+
+const nextAuthSecret = getOptionalEnv("NEXTAUTH_SECRET");
 
 const credentialsSchema = z.object({
   email: z.email().min(1),
@@ -74,7 +79,7 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/admin/login",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: nextAuthSecret,
 };
 
 export async function getAuthSession() {

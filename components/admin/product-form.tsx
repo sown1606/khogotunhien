@@ -62,6 +62,7 @@ export function ProductForm({
   const [relatedIds, setRelatedIds] = useState<string[]>(initialValues?.relatedProductIds || []);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fieldErrorMessages = Object.values(state.fieldErrors || {}).flat();
 
   useEffect(() => {
     if (state?.error) {
@@ -112,6 +113,17 @@ export function ProductForm({
 
   return (
     <form action={formAction} className="space-y-5">
+      {fieldErrorMessages.length ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <p className="font-medium">Please correct the highlighted fields.</p>
+          <ul className="mt-1 list-disc pl-5">
+            {fieldErrorMessages.map((message, index) => (
+              <li key={`${message}-${index}`}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <input type="hidden" name="galleryUrls" value={JSON.stringify(galleryUrls)} />
       <input type="hidden" name="relatedProductIds" value={JSON.stringify(relatedIds)} />
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/logger";
 import { UploadValidationError, saveImageFile } from "@/lib/upload";
 
 export async function POST(request: Request) {
@@ -26,7 +27,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error(error);
+    logError("Image upload failed.", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     return NextResponse.json({ error: "Upload failed." }, { status: 500 });
   }
 }
