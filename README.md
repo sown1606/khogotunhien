@@ -16,7 +16,7 @@ This repository is configured as a Next.js full-stack app with:
 - Hostinger preset runs `npm run build`, so this repository's `build` script includes:
   - `prisma generate`
   - `prisma migrate deploy`
-  - `next build`
+  - `next build --webpack`
 
 - Start command:
 
