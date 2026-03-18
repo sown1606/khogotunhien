@@ -54,6 +54,7 @@ Notes:
 - Production format: `mysql://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME`
 - If credentials contain special characters (`@`, `#`, `!`, `:`, `/`, `?`, `&`) and you set `DATABASE_URL` manually, URL-encode `DB_USER` and `DB_PASSWORD`.
 - For Hostinger Node.js apps, use the remote MySQL host (`srvXXXX.hstgr.io`) instead of `localhost`.
+- If deployment logs show `Datasource ... at "localhost:3306"` but you expect remote MySQL, update `DB_HOST` in Hostinger Environment Variables.
 
 ## 3. GitHub auto deploy flow
 
