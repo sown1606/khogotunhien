@@ -5,14 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import { getOptionalEnv, validateAuthEnvironment } from "@/lib/env";
-
-const isProductionRuntime =
-  process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build";
-
-if (isProductionRuntime) {
-  validateAuthEnvironment();
-}
+import { getOptionalEnv } from "@/lib/env";
 
 const nextAuthSecret = getOptionalEnv("NEXTAUTH_SECRET");
 

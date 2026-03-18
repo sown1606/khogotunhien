@@ -10,7 +10,7 @@ This repository is configured as a Next.js full-stack app with:
 ## 1. Hostinger deploy settings (exact)
 
 - Framework: `Next.js`
-- Node.js version: `20.x`
+- Node.js version: `24.x`
 - Root directory: `./`
 - Build command:
 
