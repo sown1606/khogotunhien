@@ -29,22 +29,22 @@ npm run start
 Set these in Hostinger (do not commit real values):
 
 ```bash
-DATABASE_URL="mysql://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME"
-DB_HOST="localhost"
+DATABASE_URL="mysql://DB_USER:DB_PASSWORD@DB_HOST:3306/DB_NAME"
+DB_HOST="srv1983.hstgr.io"
 DB_PORT="3306"
-DB_NAME="u895251657_khogotunhien"
-DB_USER="u895251657_khogotunhien"
+DB_NAME="your_database_name"
+DB_USER="your_database_user"
 DB_PASSWORD="your-real-password"
 
 NEXTAUTH_URL="https://your-domain.com"
 NEXTAUTH_SECRET="your-long-random-secret"
 SITE_URL="https://your-domain.com"
 
-ADMIN_EMAIL="maithihongsang79@gmail.com"
+ADMIN_EMAIL="admin@your-domain.com"
 ADMIN_PASSWORD="your-strong-admin-password"
 
-COMPANY_PHONE="0786531966"
-ZALO_URL="https://zalo.me/0786531966"
+COMPANY_PHONE="your-company-phone"
+ZALO_URL="https://zalo.me/your-zalo-phone"
 ```
 
 Notes:
@@ -52,6 +52,7 @@ Notes:
 - Preferred production value is `DATABASE_URL`.
 - If `DATABASE_URL` is not set, runtime and Prisma config can construct it from `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`.
 - Production format: `mysql://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME`
+- For Hostinger Node.js apps, use the remote MySQL host (`srvXXXX.hstgr.io`) instead of `localhost`.
 
 ## 3. GitHub auto deploy flow
 
