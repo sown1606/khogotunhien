@@ -10,25 +10,41 @@ import { getNavigationCategories, getSiteSettings } from "@/lib/queries";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings("en");
-  const title = settings.seoTitle || `${settings.companyName} | Premium wood products`;
-  const description =
-    settings.seoDescription ||
-    settings.companyDescription ||
-    "Premium wood products, custom fabrication, and interior materials for modern Vietnamese homes.";
+  try {
+    const settings = await getSiteSettings("en");
+    const title = settings.seoTitle || `${settings.companyName} | Premium wood products`;
+    const description =
+      settings.seoDescription ||
+      settings.companyDescription ||
+      "Premium wood products, custom fabrication, and interior materials for modern Vietnamese homes.";
 
-  return {
-    metadataBase: getSiteMetadataBase(),
-    title,
-    description,
-    alternates: {
-      canonical: "/en",
-      languages: {
-        vi: "/",
-        en: "/en",
+    return {
+      metadataBase: getSiteMetadataBase(),
+      title,
+      description,
+      alternates: {
+        canonical: "/en",
+        languages: {
+          vi: "/",
+          en: "/en",
+        },
       },
-    },
-  };
+    };
+  } catch {
+    return {
+      metadataBase: getSiteMetadataBase(),
+      title: "ĐẠI THIÊN PHÚ WOOD | The essence of Vietnamese family craftsmanship",
+      description:
+        "Premium wood products, custom fabrication, and interior materials for modern Vietnamese homes.",
+      alternates: {
+        canonical: "/en",
+        languages: {
+          vi: "/",
+          en: "/en",
+        },
+      },
+    };
+  }
 }
 
 export default async function EnglishPublicLayout({
