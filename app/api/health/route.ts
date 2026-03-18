@@ -80,7 +80,7 @@ export async function GET(request: Request) {
         checks,
         durationMs: Date.now() - startedAt,
       },
-      { status: 503 },
+      { status: 200 },
     );
   }
 }
