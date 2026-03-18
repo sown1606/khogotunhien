@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AdminRole {
+  ADMIN
+  EDITOR
+}
+
+enum HomepageSectionType {
+  FEATURED_PRODUCTS
+  FEATURED_CATEGORIES
+  CURATED_COLLECTION
+  PROMOTIONAL
+  CUSTOM
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(ADMIN)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Category {
+  id               String                @id @default(cuid())
+  name             String
+  slug             String                @unique
+  imageUrl         String?
+  shortDescription String?
+  featured         Boolean               @default(false)
+  active           Boolean               @default(true)
+  sortOrder        Int                   @default(0)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  products         Product[]
+  homepageItems    HomepageSectionItem[]
+
+  @@index([active, sortOrder])
+  @@index([featured, sortOrder])
+}
+
+model Product {
+  id               String                @id @default(cuid())
+  name             String
+  slug             String                @unique
+  shortDescription String?
+  description      String?               @db.Text
+  thumbnailUrl     String?
+  woodType         String?
+  material         String?
+  dimensions       String?
+  finish           String?
+  featured         Boolean               @default(false)
+  active           Boolean               @default(true)
+  sortOrder        Int                   @default(0)
+  categoryId       String?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  category         Category?             @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images           ProductImage[]
+  homepageItems    HomepageSectionItem[]
+  relatedProducts  Product[]             @relation("RelatedProducts")
+  relatedTo        Product[]             @relation("RelatedProducts")
+
+  @@index([active, sortOrder])
+  @@index([featured, sortOrder])
+  @@index([categoryId, active, sortOrder])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+model HomepageSection {
+  id          String              @id @default(cuid())
+  title       String
+  slug        String              @unique
+  description String?
+  type        HomepageSectionType @default(CUSTOM)
+  visible     Boolean             @default(true)
+  sortOrder   Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  items       HomepageSectionItem[]
+
+  @@index([visible, sortOrder])
+}
+
+model HomepageSectionItem {
+  id                String          @id @default(cuid())
+  sectionId         String
+  productId         String?
+  categoryId        String?
+  customTitle       String?
+  customDescription String?
+  imageUrl          String?
+  linkUrl           String?
+  active            Boolean         @default(true)
+  sortOrder         Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  section           HomepageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  product           Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  category          Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([sectionId, sortOrder])
+  @@index([productId])
+  @@index([categoryId])
+}
+
+model SiteSetting {
+  id                  String   @id @default("default")
+  companyName         String
+  companyDescription  String?  @db.Text
+  address             String?
+  phoneNumber         String?
+  email               String?
+  zaloLink            String?
+  facebookLink        String?
+  tiktokLink          String?
+  logoUrl             String?
+  faviconUrl          String?
+  seoTitle            String?
+  seoDescription      String?
+  seoKeywords         String?
+  footerContent       String?  @db.Text
+  openingHours        String?
+  contactPrimaryLabel String   @default("Contact via Zalo")
+  contactSecondaryLabel String @default("Call now")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
