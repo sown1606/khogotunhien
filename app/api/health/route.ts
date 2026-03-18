@@ -21,10 +21,12 @@ function getEnvironmentReadiness() {
 
   const authConfig =
     getOptionalEnv("NEXTAUTH_URL") && getOptionalEnv("NEXTAUTH_SECRET") ? "ok" : "missing";
+  const demoCatalogFallback = process.env.DEMO_CATALOG_FALLBACK === "false" ? "off" : "on";
 
   return {
     databaseConfig,
     authConfig,
+    demoCatalogFallback,
   };
 }
 

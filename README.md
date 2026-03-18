@@ -52,6 +52,9 @@ ADMIN_PASSWORD="your-strong-admin-password"
 
 COMPANY_PHONE="your-company-phone"
 ZALO_URL="https://zalo.me/your-zalo-number"
+
+# Optional storefront fallback. Keep true to show local demo catalog when DB is empty/unreachable.
+DEMO_CATALOG_FALLBACK="true"
 ```
 
 ## 3. GitHub auto deploy workflow (exact)
@@ -167,3 +170,4 @@ Vietnamese fields are primary. English fields are optional and can be left empty
   - `DATABASE_URL`
   - or fallback `DB_HOST` + `DB_PORT` + `DB_NAME` + `DB_USER` + `DB_PASSWORD`
 - When building `DATABASE_URL` from `DB_*`, credentials are URL-encoded automatically to support special characters.
+- If the database is temporarily unavailable (or connected to an empty schema), public storefront queries can fall back to a local 12-category / 36-product demo catalog when `DEMO_CATALOG_FALLBACK=true`.

@@ -45,7 +45,7 @@ export function ProductStrip({
         locale={locale}
       />
       <div className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-2">
-        <div className="grid min-w-max snap-x snap-mandatory grid-flow-col auto-cols-[70%] gap-3.5 sm:auto-cols-[42%] lg:auto-cols-[24%]">
+        <div className="grid min-w-max snap-x snap-mandatory grid-flow-col auto-cols-[64%] gap-3 sm:auto-cols-[39%] lg:auto-cols-[22%]">
           {products.map((product) => (
             <div key={product.id} className="snap-start">
               <ProductCard

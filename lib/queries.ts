@@ -1,6 +1,18 @@
 import { Prisma, type HomepageSectionType, type SiteSetting } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import {
+  getDemoCategories,
+  getDemoCategoryBySlug,
+  getDemoFeaturedCategories,
+  getDemoFeaturedProducts,
+  getDemoHomepageSections,
+  getDemoNavigationCategories,
+  getDemoProductBySlug,
+  getDemoProducts,
+  getDemoSearchResults,
+  isDemoCatalogFallbackEnabled,
+} from "@/lib/demo-catalog";
 import { type Locale, localizeValue, normalizeLocale } from "@/lib/i18n";
 import { logError } from "@/lib/logger";
 
@@ -211,6 +223,10 @@ async function withDatabaseFallback<T>(
   }
 }
 
+function shouldUseDemoFallback() {
+  return isDemoCatalogFallbackEnabled();
+}
+
 export async function getSiteSettings(inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
   const fallbackSettings = getFallbackSiteSetting();
@@ -294,8 +310,12 @@ export async function getNavigationCategories(inputLocale: Locale = "vi") {
       take: 10,
     }),
   );
+  const sourceCategories =
+    categories.length > 0 || !shouldUseDemoFallback()
+      ? categories
+      : getDemoNavigationCategories(10);
 
-  return categories.map((category) =>
+  return sourceCategories.map((category) =>
     localizeCategory(locale, category as typeof category & Record<string, unknown>),
   );
 }
@@ -326,8 +346,12 @@ export async function getHomepageSections(inputLocale: Locale = "vi") {
       },
     }),
   );
+  const sourceSections =
+    sections.length > 0 || !shouldUseDemoFallback()
+      ? sections
+      : getDemoHomepageSections();
 
-  return sections.map((section) =>
+  return sourceSections.map((section) =>
     localizeHomepageSection(locale, section as typeof section & Record<string, unknown>),
   );
 }
@@ -348,8 +372,12 @@ export async function getFeaturedProducts(limit = 12, inputLocale: Locale = "vi"
       },
     }),
   );
+  const sourceProducts =
+    products.length > 0 || !shouldUseDemoFallback()
+      ? products
+      : getDemoFeaturedProducts(limit);
 
-  return products.map((product) =>
+  return sourceProducts.map((product) =>
     localizeProduct(locale, product as typeof product & Record<string, unknown>),
   );
 }
@@ -364,8 +392,12 @@ export async function getFeaturedCategories(limit = 10, inputLocale: Locale = "v
       take: limit,
     }),
   );
+  const sourceCategories =
+    categories.length > 0 || !shouldUseDemoFallback()
+      ? categories
+      : getDemoFeaturedCategories(limit);
 
-  return categories.map((category) =>
+  return sourceCategories.map((category) =>
     localizeCategory(locale, category as typeof category & Record<string, unknown>),
   );
 }
@@ -423,8 +455,12 @@ export async function getProducts(query: ProductQuery = {}, inputLocale: Locale 
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     }),
   );
+  const sourceProducts =
+    products.length > 0 || !shouldUseDemoFallback()
+      ? products
+      : getDemoProducts(query);
 
-  return products.map((product) =>
+  return sourceProducts.map((product) =>
     localizeProduct(locale, product as typeof product & Record<string, unknown>),
   );
 }
@@ -453,10 +489,13 @@ export async function getProductBySlug(slug: string, inputLocale: Locale = "vi")
       },
     }),
   );
+  const resolvedProduct = product ?? (shouldUseDemoFallback() ? getDemoProductBySlug(slug) : null);
+  if (!resolvedProduct) return null;
 
-  if (!product) return null;
-
-  return localizeProduct(locale, product as typeof product & Record<string, unknown>);
+  return localizeProduct(
+    locale,
+    resolvedProduct as typeof resolvedProduct & Record<string, unknown>,
+  );
 }
 
 export async function getCategories(inputLocale: Locale = "vi") {
@@ -477,8 +516,10 @@ export async function getCategories(inputLocale: Locale = "vi") {
       },
     }),
   );
+  const sourceCategories =
+    categories.length > 0 || !shouldUseDemoFallback() ? categories : getDemoCategories();
 
-  return categories.map((category) =>
+  return sourceCategories.map((category) =>
     localizeCategory(locale, category as typeof category & Record<string, unknown>),
   );
 }
@@ -503,12 +544,15 @@ export async function getCategoryBySlug(slug: string, inputLocale: Locale = "vi"
       },
     }),
   );
-
-  if (!category) return null;
+  const resolvedCategory = category ?? (shouldUseDemoFallback() ? getDemoCategoryBySlug(slug) : null);
+  if (!resolvedCategory) return null;
 
   return {
-    ...localizeCategory(locale, category as typeof category & Record<string, unknown>),
-    products: category.products.map((product) =>
+    ...localizeCategory(
+      locale,
+      resolvedCategory as typeof resolvedCategory & Record<string, unknown>,
+    ),
+    products: resolvedCategory.products.map((product) =>
       localizeProduct(locale, product as typeof product & Record<string, unknown>),
     ),
   };
@@ -573,12 +617,16 @@ export async function getSearchResults(term: string, inputLocale: Locale = "vi")
 
     return { products, categories };
   });
+  const sourceResult =
+    result.products.length > 0 || result.categories.length > 0 || !shouldUseDemoFallback()
+      ? result
+      : getDemoSearchResults(normalizedTerm);
 
   return {
-    products: result.products.map((product) =>
+    products: sourceResult.products.map((product) =>
       localizeProduct(locale, product as typeof product & Record<string, unknown>),
     ),
-    categories: result.categories.map((category) =>
+    categories: sourceResult.categories.map((category) =>
       localizeCategory(locale, category as typeof category & Record<string, unknown>),
     ),
   };

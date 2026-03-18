@@ -33,7 +33,7 @@ export function CategoryStrip({ title, description, categories, href, locale = "
         locale={locale}
       />
       <div className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-2">
-        <div className="grid min-w-max snap-x snap-mandatory grid-flow-col auto-cols-[72%] gap-3.5 sm:auto-cols-[44%] lg:auto-cols-[27%]">
+        <div className="grid min-w-max snap-x snap-mandatory grid-flow-col auto-cols-[66%] gap-3 sm:auto-cols-[40%] lg:auto-cols-[24%]">
           {categories.map((category) => (
             <div key={category.id} className="snap-start">
               <CategoryCard category={category} locale={locale} />
