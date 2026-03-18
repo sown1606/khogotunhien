@@ -2,6 +2,8 @@ import { HomepageDynamicSections } from "@/components/public/homepage-dynamic-se
 import { HeroSection } from "@/components/public/hero-section";
 import { CategoryStrip } from "@/components/public/category-strip";
 import { ProductStrip } from "@/components/public/product-strip";
+import { DiscoveryToolbar } from "@/components/public/discovery-toolbar";
+import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import {
   getFeaturedCategories,
   getFeaturedProducts,
@@ -9,13 +11,15 @@ import {
   getSiteSettings,
 } from "@/lib/queries";
 
-export default async function HomePage() {
+async function HomePageContent({ locale }: { locale: Locale }) {
   const [settings, featuredCategories, featuredProducts, sections] = await Promise.all([
-    getSiteSettings(),
-    getFeaturedCategories(8),
-    getFeaturedProducts(10),
-    getHomepageSections(),
+    getSiteSettings(locale),
+    getFeaturedCategories(8, locale),
+    getFeaturedProducts(10, locale),
+    getHomepageSections(locale),
   ]);
+  const hasDynamicSections = sections.length > 0;
+  const hasFallbackContent = featuredCategories.length > 0 || featuredProducts.length > 0;
 
   return (
     <div className="space-y-14 pb-6">
@@ -24,29 +28,62 @@ export default async function HomePage() {
         companyDescription={settings.companyDescription}
         phoneNumber={settings.phoneNumber}
         zaloLink={settings.zaloLink}
+        locale={locale}
       />
+      <DiscoveryToolbar categories={featuredCategories} locale={locale} />
 
-      <CategoryStrip
-        title="Browse Popular Wood Categories"
-        description="Find solid wood, specialty panels, and handcrafted material groups in one place."
-        categories={featuredCategories}
-        href="/categories"
-      />
+      {hasDynamicSections ? (
+        <HomepageDynamicSections
+          sections={sections}
+          phoneNumber={settings.phoneNumber}
+          zaloLink={settings.zaloLink}
+        />
+      ) : hasFallbackContent ? (
+        <>
+          <CategoryStrip
+            title={t(locale, "Danh mục nổi bật", "Featured Categories")}
+            description={t(
+              locale,
+              "Khám phá các nhóm vật liệu được chọn lọc cho nội thất và dự án thi công.",
+              "Explore curated material families for custom furniture and interior projects.",
+            )}
+            categories={featuredCategories}
+            href={withLocalePath(locale, "/categories")}
+            locale={locale}
+          />
 
-      <ProductStrip
-        title="Featured Products"
-        description="Carefully selected pieces and materials from our current workshop lineup."
-        products={featuredProducts}
-        phoneNumber={settings.phoneNumber}
-        zaloLink={settings.zaloLink}
-        href="/products"
-      />
-
-      <HomepageDynamicSections
-        sections={sections}
-        phoneNumber={settings.phoneNumber}
-        zaloLink={settings.zaloLink}
-      />
+          <ProductStrip
+            title={t(locale, "Sản phẩm nổi bật", "Featured Products")}
+            description={t(
+              locale,
+              "Sản phẩm thủ công và vật liệu cao cấp sẵn sàng tư vấn theo yêu cầu.",
+              "Crafted products and ready-to-order materials from our workshop.",
+            )}
+            products={featuredProducts}
+            phoneNumber={settings.phoneNumber}
+            zaloLink={settings.zaloLink}
+            href={withLocalePath(locale, "/products")}
+            locale={locale}
+          />
+        </>
+      ) : (
+        <section className="rounded-3xl border border-dashed border-stone-300 bg-white p-8 text-center">
+          <h2 className="text-2xl text-stone-900">
+            {t(locale, "Danh mục đang được cập nhật", "Fresh catalog in progress")}
+          </h2>
+          <p className="mt-2 text-sm text-stone-600">
+            {t(
+              locale,
+              "Hãy thêm danh mục và sản phẩm từ trang quản trị để hiển thị nội dung trang chủ.",
+              "Add categories and products from admin to publish your live showroom sections.",
+            )}
+          </p>
+        </section>
+      )}
     </div>
   );
+}
+
+export default async function HomePage() {
+  return <HomePageContent locale="vi" />;
 }

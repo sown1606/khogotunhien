@@ -39,9 +39,9 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md border-stone-200">
       <CardHeader>
-        <CardTitle className="text-2xl">Admin Login</CardTitle>
+        <CardTitle className="text-2xl">ĐẠI THIÊN PHÚ WOOD Admin</CardTitle>
         <CardDescription>
-          Sign in to manage products, categories, homepage sections, and settings.
+          Sign in to manage products, categories, homepage sections, and brand settings.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -8,31 +8,53 @@ import { ProductGallery } from "@/components/public/product-gallery";
 import { ProductCard } from "@/components/public/product-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import { getProductBySlug, getSiteSettings } from "@/lib/queries";
 
 type ProductDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
+async function generateProductDetailMetadata(
+  { params }: ProductDetailPageProps,
+  locale: Locale,
+): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const product = await getProductBySlug(slug, locale);
 
   if (!product) {
     return {
-      title: "Product not found",
+      title: t(locale, "Không tìm thấy sản phẩm", "Product not found"),
     };
   }
 
   return {
-    title: `${product.name} | Wood Product`,
+    title: `${product.name} | ${t(locale, "Sản phẩm gỗ", "Wood Product")}`,
     description: product.shortDescription || product.description || undefined,
+    alternates: {
+      canonical: `/products/${slug}`,
+      languages: {
+        vi: `/products/${slug}`,
+        en: `/en/products/${slug}`,
+      },
+    },
   };
 }
 
+export async function generateMetadata(props: ProductDetailPageProps): Promise<Metadata> {
+  return generateProductDetailMetadata(props, "vi");
+}
+
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  return <ProductDetailPageContent params={params} locale="vi" />;
+}
+
+async function ProductDetailPageContent({
+  params,
+  locale,
+}: ProductDetailPageProps & { locale: Locale }) {
   const { slug } = await params;
-  const [settings, product] = await Promise.all([getSiteSettings(), getProductBySlug(slug)]);
+  const [settings, product] = await Promise.all([getSiteSettings(locale), getProductBySlug(slug, locale)]);
 
   if (!product || !product.active) {
     notFound();
@@ -46,17 +68,17 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-1 text-sm text-stone-500">
-        <Link href="/" className="hover:text-stone-700">
-          Home
+        <Link href={withLocalePath(locale, "/")} className="hover:text-stone-700">
+          {t(locale, "Trang chủ", "Home")}
         </Link>
         <ChevronRight className="size-4" />
-        <Link href="/products" className="hover:text-stone-700">
-          Products
+        <Link href={withLocalePath(locale, "/products")} className="hover:text-stone-700">
+          {t(locale, "Sản phẩm", "Products")}
         </Link>
         {product.category ? (
           <>
             <ChevronRight className="size-4" />
-            <Link href={`/categories/${product.category.slug}`} className="hover:text-stone-700">
+            <Link href={withLocalePath(locale, `/categories/${product.category.slug}`)} className="hover:text-stone-700">
               {product.category.name}
             </Link>
           </>
@@ -77,23 +99,33 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
           <Card>
             <CardContent className="p-5">
-              <h2 className="mb-3 text-xl font-semibold text-stone-900">Specifications</h2>
+              <h2 className="mb-3 text-xl font-semibold text-stone-900">
+                {t(locale, "Thông số kỹ thuật", "Specifications")}
+              </h2>
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <dt className="text-stone-500">Wood type</dt>
-                  <dd className="font-medium text-stone-900">{product.woodType || "Custom"}</dd>
+                  <dt className="text-stone-500">{t(locale, "Loại gỗ", "Wood type")}</dt>
+                  <dd className="font-medium text-stone-900">
+                    {product.woodType || t(locale, "Theo yêu cầu", "Custom")}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-stone-500">Material</dt>
-                  <dd className="font-medium text-stone-900">{product.material || "Custom"}</dd>
+                  <dt className="text-stone-500">{t(locale, "Vật liệu", "Material")}</dt>
+                  <dd className="font-medium text-stone-900">
+                    {product.material || t(locale, "Theo yêu cầu", "Custom")}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-stone-500">Dimensions</dt>
-                  <dd className="font-medium text-stone-900">{product.dimensions || "On request"}</dd>
+                  <dt className="text-stone-500">{t(locale, "Kích thước", "Dimensions")}</dt>
+                  <dd className="font-medium text-stone-900">
+                    {product.dimensions || t(locale, "Theo yêu cầu", "On request")}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-stone-500">Finish</dt>
-                  <dd className="font-medium text-stone-900">{product.finish || "On request"}</dd>
+                  <dt className="text-stone-500">{t(locale, "Hoàn thiện", "Finish")}</dt>
+                  <dd className="font-medium text-stone-900">
+                    {product.finish || t(locale, "Theo yêu cầu", "On request")}
+                  </dd>
                 </div>
               </dl>
             </CardContent>
@@ -105,13 +137,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             primaryLabel={settings.contactPrimaryLabel}
             secondaryLabel={settings.contactSecondaryLabel}
             vertical
+            locale={locale}
           />
         </div>
       </div>
 
       {product.relatedProducts.length ? (
         <section className="space-y-4">
-          <h2 className="text-3xl text-stone-900">Related products</h2>
+          <h2 className="text-3xl text-stone-900">
+            {t(locale, "Sản phẩm liên quan", "Related products")}
+          </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {product.relatedProducts.map((relatedProduct) => (
               <ProductCard
@@ -119,6 +154,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 product={relatedProduct}
                 phoneNumber={settings.phoneNumber}
                 zaloLink={settings.zaloLink}
+                locale={locale}
               />
             ))}
           </div>

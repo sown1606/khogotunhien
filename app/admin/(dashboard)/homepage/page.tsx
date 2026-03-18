@@ -91,8 +91,10 @@ export default async function AdminHomepagePage({ searchParams }: AdminHomepageP
               editingSection
                 ? {
                     title: editingSection.title,
+                    titleEn: editingSection.titleEn,
                     slug: editingSection.slug,
                     description: editingSection.description,
+                    descriptionEn: editingSection.descriptionEn,
                     type: editingSection.type,
                     visible: editingSection.visible,
                     sortOrder: editingSection.sortOrder,
@@ -101,7 +103,9 @@ export default async function AdminHomepagePage({ searchParams }: AdminHomepageP
                       productId: item.productId || "",
                       categoryId: item.categoryId || "",
                       customTitle: item.customTitle || "",
+                      customTitleEn: item.customTitleEn || "",
                       customDescription: item.customDescription || "",
+                      customDescriptionEn: item.customDescriptionEn || "",
                       imageUrl: item.imageUrl || "",
                       linkUrl: item.linkUrl || "",
                       active: item.active,

@@ -27,8 +27,10 @@ export async function createCategoryAction(
 
     const payload = normalizeCategoryPayload({
       name: formData.get("name"),
+      nameEn: formData.get("nameEn"),
       slug: formData.get("slug"),
       shortDescription: formData.get("shortDescription"),
+      shortDescriptionEn: formData.get("shortDescriptionEn"),
       imageUrl: formData.get("imageUrl"),
       featured: parseBoolean(formData.get("featured")),
       active: parseBoolean(formData.get("active")),
@@ -47,8 +49,10 @@ export async function createCategoryAction(
     await db.category.create({
       data: {
         name: parsed.data.name,
+        nameEn: parsed.data.nameEn || null,
         slug: parsed.data.slug,
         shortDescription: parsed.data.shortDescription || null,
+        shortDescriptionEn: parsed.data.shortDescriptionEn || null,
         imageUrl: parsed.data.imageUrl || null,
         featured: parsed.data.featured,
         active: parsed.data.active,
@@ -57,7 +61,9 @@ export async function createCategoryAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/categories");
+    revalidatePath("/en/categories");
     revalidatePath("/admin/categories");
 
     return {
@@ -84,8 +90,10 @@ export async function updateCategoryAction(
 
     const payload = normalizeCategoryPayload({
       name: formData.get("name"),
+      nameEn: formData.get("nameEn"),
       slug: formData.get("slug"),
       shortDescription: formData.get("shortDescription"),
+      shortDescriptionEn: formData.get("shortDescriptionEn"),
       imageUrl: formData.get("imageUrl"),
       featured: parseBoolean(formData.get("featured")),
       active: parseBoolean(formData.get("active")),
@@ -114,8 +122,10 @@ export async function updateCategoryAction(
       where: { id: categoryId },
       data: {
         name: parsed.data.name,
+        nameEn: parsed.data.nameEn || null,
         slug: parsed.data.slug,
         shortDescription: parsed.data.shortDescription || null,
+        shortDescriptionEn: parsed.data.shortDescriptionEn || null,
         imageUrl: parsed.data.imageUrl || null,
         featured: parsed.data.featured,
         active: parsed.data.active,
@@ -125,9 +135,13 @@ export async function updateCategoryAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/categories");
+    revalidatePath("/en/categories");
     revalidatePath(`/categories/${existing.slug}`);
+    revalidatePath(`/en/categories/${existing.slug}`);
     revalidatePath(`/categories/${updated.slug}`);
+    revalidatePath(`/en/categories/${updated.slug}`);
     revalidatePath("/admin/categories");
 
     return {
@@ -163,8 +177,11 @@ export async function deleteCategoryAction(categoryId: string): Promise<ActionRe
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/categories");
+    revalidatePath("/en/categories");
     revalidatePath(`/categories/${existing.slug}`);
+    revalidatePath(`/en/categories/${existing.slug}`);
     revalidatePath("/admin/categories");
 
     return {
@@ -195,7 +212,9 @@ export async function toggleCategoryActiveAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/categories");
+    revalidatePath("/en/categories");
     revalidatePath("/admin/categories");
 
     return {

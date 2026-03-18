@@ -1,0 +1,60 @@
+<svg width="520" height="640" viewBox="0 0 520 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="520" height="640" fill="none" />
+  <g transform="translate(132 30)">
+    <defs>
+      <linearGradient id="primary-d-frame" x1="44" y1="40" x2="228" y2="244" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#C9A25A" />
+        <stop offset="1" stop-color="#8A5A36" />
+      </linearGradient>
+      <linearGradient id="primary-w-core" x1="92" y1="96" x2="200" y2="194" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#8A5A36" />
+        <stop offset="1" stop-color="#6A2E24" />
+      </linearGradient>
+    </defs>
+    <path
+      d="M44 40H126C186 40 228 82 228 142C228 202 186 244 126 244H44V40ZM84 80V204H124C161 204 188 178 188 142C188 106 161 80 124 80H84Z"
+      fill="url(#primary-d-frame)"
+    />
+    <path
+      d="M92 188L122 102L146 148L170 102L200 188H170L153 138L146 154L139 138L122 188H92Z"
+      fill="url(#primary-w-core)"
+    />
+    <path d="M152 86L166 86L210 206H196L152 86Z" fill="#8C9BB0" fill-opacity="0.4" />
+  </g>
+  <text
+    x="260"
+    y="366"
+    text-anchor="middle"
+    font-family="Cormorant Garamond, Georgia, serif"
+    font-size="74"
+    font-weight="700"
+    letter-spacing="3"
+    fill="#4A231C"
+  >
+    ĐẠI THIÊN PHÚ
+  </text>
+  <text
+    x="260"
+    y="438"
+    text-anchor="middle"
+    font-family="Manrope, Arial, sans-serif"
+    font-size="66"
+    font-weight="800"
+    letter-spacing="8"
+    fill="#8A5A36"
+  >
+    WOOD
+  </text>
+  <text
+    x="260"
+    y="486"
+    text-anchor="middle"
+    font-family="Cormorant Garamond, Georgia, serif"
+    font-size="30"
+    font-weight="600"
+    letter-spacing="1.5"
+    fill="#6A2E24"
+  >
+    Tinh hoa của gia đình Việt
+  </text>
+</svg>

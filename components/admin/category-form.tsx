@@ -18,8 +18,10 @@ type CategoryFormProps = {
   action: (state: ActionResult, formData: FormData) => Promise<ActionResult>;
   initialValues?: {
     name?: string;
+    nameEn?: string | null;
     slug?: string;
     shortDescription?: string | null;
+    shortDescriptionEn?: string | null;
     imageUrl?: string | null;
     featured?: boolean;
     active?: boolean;
@@ -69,19 +71,32 @@ export function CategoryForm({ action, initialValues }: CategoryFormProps) {
       <Card>
         <CardContent className="grid gap-4 p-5 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Category name</Label>
+            <Label htmlFor="name">Category name (Vietnamese)</Label>
             <Input id="name" name="name" defaultValue={initialValues?.name || ""} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nameEn">Category name (English)</Label>
+            <Input id="nameEn" name="nameEn" defaultValue={initialValues?.nameEn || ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="slug">Slug</Label>
             <Input id="slug" name="slug" defaultValue={initialValues?.slug || ""} required />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="shortDescription">Short description</Label>
+            <Label htmlFor="shortDescription">Short description (Vietnamese)</Label>
             <Textarea
               id="shortDescription"
               name="shortDescription"
               defaultValue={initialValues?.shortDescription || ""}
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="shortDescriptionEn">Short description (English)</Label>
+            <Textarea
+              id="shortDescriptionEn"
+              name="shortDescriptionEn"
+              defaultValue={initialValues?.shortDescriptionEn || ""}
               rows={3}
             />
           </div>

@@ -26,8 +26,10 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
       OR: keyword
         ? [
             { name: { contains: keyword } },
+            { nameEn: { contains: keyword } },
             { slug: { contains: keyword } },
             { woodType: { contains: keyword } },
+            { woodTypeEn: { contains: keyword } },
           ]
         : undefined,
       category: categorySlug ? { slug: categorySlug } : undefined,

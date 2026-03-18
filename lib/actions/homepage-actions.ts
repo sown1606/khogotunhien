@@ -52,8 +52,10 @@ export async function createHomepageSectionAction(
 
     const payload = normalizeHomepageSectionPayload({
       title: formData.get("title"),
+      titleEn: formData.get("titleEn"),
       slug: formData.get("slug"),
       description: formData.get("description"),
+      descriptionEn: formData.get("descriptionEn"),
       type: parseType(formData.get("type")),
       visible: parseBoolean(formData.get("visible")),
       sortOrder: parseNumber(formData.get("sortOrder"), 0),
@@ -72,8 +74,10 @@ export async function createHomepageSectionAction(
     await db.homepageSection.create({
       data: {
         title: parsed.data.title,
+        titleEn: parsed.data.titleEn || null,
         slug: parsed.data.slug,
         description: parsed.data.description || null,
+        descriptionEn: parsed.data.descriptionEn || null,
         type: parsed.data.type,
         visible: parsed.data.visible,
         sortOrder: parsed.data.sortOrder,
@@ -82,7 +86,9 @@ export async function createHomepageSectionAction(
             productId: item.productId || null,
             categoryId: item.categoryId || null,
             customTitle: item.customTitle || null,
+            customTitleEn: item.customTitleEn || null,
             customDescription: item.customDescription || null,
+            customDescriptionEn: item.customDescriptionEn || null,
             imageUrl: item.imageUrl || null,
             linkUrl: item.linkUrl || null,
             active: item.active,
@@ -93,6 +99,7 @@ export async function createHomepageSectionAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/admin/homepage");
 
     return {
@@ -117,8 +124,10 @@ export async function updateHomepageSectionAction(
 
     const payload = normalizeHomepageSectionPayload({
       title: formData.get("title"),
+      titleEn: formData.get("titleEn"),
       slug: formData.get("slug"),
       description: formData.get("description"),
+      descriptionEn: formData.get("descriptionEn"),
       type: parseType(formData.get("type")),
       visible: parseBoolean(formData.get("visible")),
       sortOrder: parseNumber(formData.get("sortOrder"), 0),
@@ -147,8 +156,10 @@ export async function updateHomepageSectionAction(
       where: { id: sectionId },
       data: {
         title: parsed.data.title,
+        titleEn: parsed.data.titleEn || null,
         slug: parsed.data.slug,
         description: parsed.data.description || null,
+        descriptionEn: parsed.data.descriptionEn || null,
         type: parsed.data.type,
         visible: parsed.data.visible,
         sortOrder: parsed.data.sortOrder,
@@ -158,7 +169,9 @@ export async function updateHomepageSectionAction(
             productId: item.productId || null,
             categoryId: item.categoryId || null,
             customTitle: item.customTitle || null,
+            customTitleEn: item.customTitleEn || null,
             customDescription: item.customDescription || null,
+            customDescriptionEn: item.customDescriptionEn || null,
             imageUrl: item.imageUrl || null,
             linkUrl: item.linkUrl || null,
             active: item.active,
@@ -169,6 +182,7 @@ export async function updateHomepageSectionAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/admin/homepage");
 
     return {
@@ -193,6 +207,7 @@ export async function deleteHomepageSectionAction(sectionId: string): Promise<Ac
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/admin/homepage");
 
     return {
@@ -221,6 +236,7 @@ export async function toggleHomepageSectionVisibilityAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/admin/homepage");
 
     return {

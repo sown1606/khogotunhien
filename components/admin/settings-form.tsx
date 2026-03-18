@@ -15,7 +15,9 @@ import { Textarea } from "@/components/ui/textarea";
 type SettingsValues = {
   companyName: string;
   companyDescription: string | null;
+  companyDescriptionEn: string | null;
   address: string | null;
+  addressEn: string | null;
   phoneNumber: string | null;
   email: string | null;
   zaloLink: string | null;
@@ -24,12 +26,18 @@ type SettingsValues = {
   logoUrl: string | null;
   faviconUrl: string | null;
   seoTitle: string | null;
+  seoTitleEn: string | null;
   seoDescription: string | null;
+  seoDescriptionEn: string | null;
   seoKeywords: string | null;
   footerContent: string | null;
+  footerContentEn: string | null;
   openingHours: string | null;
+  openingHoursEn: string | null;
   contactPrimaryLabel: string;
+  contactPrimaryLabelEn: string | null;
   contactSecondaryLabel: string;
+  contactSecondaryLabelEn: string | null;
 };
 
 type SettingsFormProps = {
@@ -89,11 +97,20 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
             />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="companyDescription">Company description</Label>
+            <Label htmlFor="companyDescription">Company description (Vietnamese)</Label>
             <Textarea
               id="companyDescription"
               name="companyDescription"
               defaultValue={initialValues.companyDescription || ""}
+              rows={4}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="companyDescriptionEn">Company description (English)</Label>
+            <Textarea
+              id="companyDescriptionEn"
+              name="companyDescriptionEn"
+              defaultValue={initialValues.companyDescriptionEn || ""}
               rows={4}
             />
           </div>
@@ -106,15 +123,27 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
             <Input id="email" name="email" type="email" defaultValue={initialValues.email || ""} />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">Address (Vietnamese)</Label>
             <Input id="address" name="address" defaultValue={initialValues.address || ""} />
           </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="addressEn">Address (English)</Label>
+            <Input id="addressEn" name="addressEn" defaultValue={initialValues.addressEn || ""} />
+          </div>
           <div className="space-y-2">
-            <Label htmlFor="openingHours">Opening hours</Label>
+            <Label htmlFor="openingHours">Opening hours (Vietnamese)</Label>
             <Input
               id="openingHours"
               name="openingHours"
               defaultValue={initialValues.openingHours || ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="openingHoursEn">Opening hours (English)</Label>
+            <Input
+              id="openingHoursEn"
+              name="openingHoursEn"
+              defaultValue={initialValues.openingHoursEn || ""}
             />
           </div>
         </CardContent>
@@ -143,7 +172,7 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
             <Input id="tiktokLink" name="tiktokLink" type="url" defaultValue={initialValues.tiktokLink || ""} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contactPrimaryLabel">Primary CTA label</Label>
+            <Label htmlFor="contactPrimaryLabel">Primary CTA label (Vietnamese)</Label>
             <Input
               id="contactPrimaryLabel"
               name="contactPrimaryLabel"
@@ -151,11 +180,27 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contactSecondaryLabel">Secondary CTA label</Label>
+            <Label htmlFor="contactPrimaryLabelEn">Primary CTA label (English)</Label>
+            <Input
+              id="contactPrimaryLabelEn"
+              name="contactPrimaryLabelEn"
+              defaultValue={initialValues.contactPrimaryLabelEn || ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactSecondaryLabel">Secondary CTA label (Vietnamese)</Label>
             <Input
               id="contactSecondaryLabel"
               name="contactSecondaryLabel"
               defaultValue={initialValues.contactSecondaryLabel}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactSecondaryLabelEn">Secondary CTA label (English)</Label>
+            <Input
+              id="contactSecondaryLabelEn"
+              name="contactSecondaryLabelEn"
+              defaultValue={initialValues.contactSecondaryLabelEn || ""}
             />
           </div>
         </CardContent>
@@ -182,11 +227,15 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="seoTitle">SEO title</Label>
+            <Label htmlFor="seoTitle">SEO title (Vietnamese)</Label>
             <Input id="seoTitle" name="seoTitle" defaultValue={initialValues.seoTitle || ""} />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="seoDescription">SEO description</Label>
+            <Label htmlFor="seoTitleEn">SEO title (English)</Label>
+            <Input id="seoTitleEn" name="seoTitleEn" defaultValue={initialValues.seoTitleEn || ""} />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="seoDescription">SEO description (Vietnamese)</Label>
             <Textarea
               id="seoDescription"
               name="seoDescription"
@@ -195,15 +244,33 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
             />
           </div>
           <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="seoDescriptionEn">SEO description (English)</Label>
+            <Textarea
+              id="seoDescriptionEn"
+              name="seoDescriptionEn"
+              defaultValue={initialValues.seoDescriptionEn || ""}
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
             <Label htmlFor="seoKeywords">SEO keywords</Label>
             <Input id="seoKeywords" name="seoKeywords" defaultValue={initialValues.seoKeywords || ""} />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="footerContent">Footer content</Label>
+            <Label htmlFor="footerContent">Footer content (Vietnamese)</Label>
             <Textarea
               id="footerContent"
               name="footerContent"
               defaultValue={initialValues.footerContent || ""}
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="footerContentEn">Footer content (English)</Label>
+            <Textarea
+              id="footerContentEn"
+              name="footerContentEn"
+              defaultValue={initialValues.footerContentEn || ""}
               rows={3}
             />
           </div>

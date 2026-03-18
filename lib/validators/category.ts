@@ -4,8 +4,10 @@ import { toSlug } from "@/lib/utils";
 
 export const categorySchema = z.object({
   name: z.string().min(2).max(120),
+  nameEn: z.string().max(120).optional().or(z.literal("")),
   slug: z.string().min(2).max(140),
   shortDescription: z.string().max(240).optional().or(z.literal("")),
+  shortDescriptionEn: z.string().max(240).optional().or(z.literal("")),
   imageUrl: z.string().max(500).optional().or(z.literal("")),
   featured: z.boolean(),
   active: z.boolean(),
@@ -18,8 +20,10 @@ export function normalizeCategoryPayload(payload: Partial<Record<string, unknown
 
   return {
     name: name.trim(),
+    nameEn: String(payload.nameEn ?? "").trim(),
     slug: toSlug(givenSlug || name),
     shortDescription: String(payload.shortDescription ?? "").trim(),
+    shortDescriptionEn: String(payload.shortDescriptionEn ?? "").trim(),
     imageUrl: String(payload.imageUrl ?? "").trim(),
     featured: Boolean(payload.featured),
     active: Boolean(payload.active),

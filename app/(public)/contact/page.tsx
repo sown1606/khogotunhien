@@ -3,26 +3,39 @@ import { Mail, MapPin, MessageCircle, Phone, Timer } from "lucide-react";
 
 import { ContactActions } from "@/components/public/contact-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { type Locale, t } from "@/lib/i18n";
 import { getSiteSettings } from "@/lib/queries";
 import { normalizePhoneLink } from "@/lib/utils";
 
 export default async function ContactPage() {
-  const settings = await getSiteSettings();
+  return <ContactPageContent locale="vi" />;
+}
+
+async function ContactPageContent({ locale }: { locale: Locale }) {
+  const settings = await getSiteSettings(locale);
 
   return (
     <div className="space-y-8">
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">Let&apos;s talk</p>
-        <h1 className="text-5xl leading-tight text-stone-900">Contact {settings.companyName}</h1>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">
+          {t(locale, "Liên hệ", "Let's talk")}
+        </p>
+        <h1 className="text-5xl leading-tight text-stone-900">
+          {t(locale, `Liên hệ ${settings.companyName}`, `Contact ${settings.companyName}`)}
+        </h1>
         <p className="max-w-2xl text-stone-700">
-          Send your project details through Zalo or phone. We will suggest suitable products and materials quickly.
+          {t(
+            locale,
+            "Gửi thông tin dự án qua Zalo hoặc điện thoại. Chúng tôi sẽ tư vấn vật liệu và sản phẩm phù hợp nhanh chóng.",
+            "Send your project details through Zalo or phone. We will suggest suitable products and materials quickly.",
+          )}
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-12">
         <Card className="lg:col-span-7">
           <CardHeader>
-            <CardTitle>Contact details</CardTitle>
+            <CardTitle>{t(locale, "Thông tin liên hệ", "Contact details")}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 text-sm text-stone-700">
             {settings.address ? (
@@ -61,6 +74,7 @@ export default async function ContactPage() {
                 primaryLabel={settings.contactPrimaryLabel}
                 secondaryLabel={settings.contactSecondaryLabel}
                 vertical
+                locale={locale}
               />
             </div>
           </CardContent>
@@ -68,7 +82,7 @@ export default async function ContactPage() {
 
         <Card className="lg:col-span-5">
           <CardHeader>
-            <CardTitle>Social channels</CardTitle>
+            <CardTitle>{t(locale, "Kênh mạng xã hội", "Social channels")}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3">
             {settings.zaloLink ? (
@@ -79,7 +93,7 @@ export default async function ContactPage() {
                 className="flex items-center gap-2 rounded-xl border border-stone-200 p-3 text-sm font-medium text-stone-700 hover:border-amber-400 hover:text-amber-900"
               >
                 <MessageCircle className="size-4" />
-                Zalo chat
+                {t(locale, "Nhắn Zalo", "Zalo chat")}
               </Link>
             ) : null}
             {settings.facebookLink ? (
@@ -89,7 +103,7 @@ export default async function ContactPage() {
                 rel="noreferrer"
                 className="rounded-xl border border-stone-200 p-3 text-sm font-medium text-stone-700 hover:border-amber-400 hover:text-amber-900"
               >
-                Facebook
+                {t(locale, "Facebook", "Facebook")}
               </Link>
             ) : null}
             {settings.tiktokLink ? (
@@ -99,7 +113,7 @@ export default async function ContactPage() {
                 rel="noreferrer"
                 className="rounded-xl border border-stone-200 p-3 text-sm font-medium text-stone-700 hover:border-amber-400 hover:text-amber-900"
               >
-                TikTok
+                {t(locale, "TikTok", "TikTok")}
               </Link>
             ) : null}
           </CardContent>

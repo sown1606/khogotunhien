@@ -23,14 +23,21 @@ type ProductFormProps = {
   initialValues?: {
     id?: string;
     name?: string;
+    nameEn?: string | null;
     slug?: string;
     shortDescription?: string | null;
+    shortDescriptionEn?: string | null;
     description?: string | null;
+    descriptionEn?: string | null;
     thumbnailUrl?: string | null;
     woodType?: string | null;
+    woodTypeEn?: string | null;
     material?: string | null;
+    materialEn?: string | null;
     dimensions?: string | null;
+    dimensionsEn?: string | null;
     finish?: string | null;
+    finishEn?: string | null;
     featured?: boolean;
     active?: boolean;
     sortOrder?: number;
@@ -130,15 +137,19 @@ export function ProductForm({
       <Card>
         <CardContent className="grid gap-4 p-5 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Product name</Label>
+            <Label htmlFor="name">Product name (Vietnamese)</Label>
             <Input id="name" name="name" defaultValue={initialValues?.name || ""} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nameEn">Product name (English)</Label>
+            <Input id="nameEn" name="nameEn" defaultValue={initialValues?.nameEn || ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="slug">Slug</Label>
             <Input id="slug" name="slug" defaultValue={initialValues?.slug || ""} required />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="shortDescription">Short description</Label>
+            <Label htmlFor="shortDescription">Short description (Vietnamese)</Label>
             <Textarea
               id="shortDescription"
               name="shortDescription"
@@ -147,11 +158,29 @@ export function ProductForm({
             />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="description">Overview</Label>
+            <Label htmlFor="shortDescriptionEn">Short description (English)</Label>
+            <Textarea
+              id="shortDescriptionEn"
+              name="shortDescriptionEn"
+              defaultValue={initialValues?.shortDescriptionEn || ""}
+              rows={2}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="description">Overview (Vietnamese)</Label>
             <Textarea
               id="description"
               name="description"
               defaultValue={initialValues?.description || ""}
+              rows={5}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="descriptionEn">Overview (English)</Label>
+            <Textarea
+              id="descriptionEn"
+              name="descriptionEn"
+              defaultValue={initialValues?.descriptionEn || ""}
               rows={5}
             />
           </div>
@@ -184,20 +213,40 @@ export function ProductForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="woodType">Wood type</Label>
+            <Label htmlFor="woodType">Wood type (Vietnamese)</Label>
             <Input id="woodType" name="woodType" defaultValue={initialValues?.woodType || ""} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="material">Material</Label>
+            <Label htmlFor="woodTypeEn">Wood type (English)</Label>
+            <Input id="woodTypeEn" name="woodTypeEn" defaultValue={initialValues?.woodTypeEn || ""} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="material">Material (Vietnamese)</Label>
             <Input id="material" name="material" defaultValue={initialValues?.material || ""} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dimensions">Dimensions</Label>
+            <Label htmlFor="materialEn">Material (English)</Label>
+            <Input id="materialEn" name="materialEn" defaultValue={initialValues?.materialEn || ""} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="dimensions">Dimensions (Vietnamese)</Label>
             <Input id="dimensions" name="dimensions" defaultValue={initialValues?.dimensions || ""} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="finish">Finish</Label>
+            <Label htmlFor="dimensionsEn">Dimensions (English)</Label>
+            <Input
+              id="dimensionsEn"
+              name="dimensionsEn"
+              defaultValue={initialValues?.dimensionsEn || ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="finish">Finish (Vietnamese)</Label>
             <Input id="finish" name="finish" defaultValue={initialValues?.finish || ""} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="finishEn">Finish (English)</Label>
+            <Input id="finishEn" name="finishEn" defaultValue={initialValues?.finishEn || ""} />
           </div>
 
           <div className="flex items-center gap-2">

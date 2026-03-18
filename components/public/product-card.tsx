@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import { cn, normalizePhoneLink } from "@/lib/utils";
 
 type ProductCardProps = {
@@ -26,16 +27,17 @@ type ProductCardProps = {
   phoneNumber?: string | null;
   zaloLink?: string | null;
   compact?: boolean;
+  locale?: Locale;
 };
 
-export function ProductCard({ product, phoneNumber, zaloLink, compact }: ProductCardProps) {
+export function ProductCard({ product, phoneNumber, zaloLink, compact, locale = "vi" }: ProductCardProps) {
   return (
     <motion.article
       whileHover={{ y: -6 }}
       transition={{ type: "spring", stiffness: 320, damping: 26 }}
       className="group h-full overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_12px_24px_-20px_rgba(77,50,31,0.45)]"
     >
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link href={withLocalePath(locale, `/products/${product.slug}`)} className="block">
         <div
           className={cn(
             "relative overflow-hidden",
@@ -68,8 +70,8 @@ export function ProductCard({ product, phoneNumber, zaloLink, compact }: Product
 
         <div className="grid grid-cols-2 gap-2 pt-1">
           <Button asChild size="sm" variant="outline" className="justify-start">
-            <Link href={`/products/${product.slug}`}>
-              Details
+            <Link href={withLocalePath(locale, `/products/${product.slug}`)}>
+              {t(locale, "Chi tiết", "Details")}
               <ArrowRight className="size-4" />
             </Link>
           </Button>
@@ -84,7 +86,7 @@ export function ProductCard({ product, phoneNumber, zaloLink, compact }: Product
             <Button asChild size="sm" className="justify-start">
               <a href={normalizePhoneLink(phoneNumber)}>
                 <Phone className="size-4" />
-                Call
+                {t(locale, "Gọi", "Call")}
               </a>
             </Button>
           ) : null}

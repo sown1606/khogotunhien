@@ -1,19 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f3ef;
-  --foreground: #1f1914;
-  --wood-900: #2d1d13;
-  --wood-800: #4b2f1f;
-  --wood-700: #6c4329;
-  --wood-600: #8f5d36;
-  --wood-500: #b27a4b;
-  --wood-100: #f2e7db;
-  --stone-100: #efe9e2;
-  --stone-300: #d4c7ba;
-  --stone-500: #8a7868;
-  --stone-700: #4c3f34;
-  --ring: #9f6d44;
+  --background: #f8f3eb;
+  --foreground: #4a231c;
+  --wood-900: #4a231c;
+  --wood-800: #6a2e24;
+  --wood-700: #8a5a36;
+  --wood-600: #b07a63;
+  --wood-500: #c9a25a;
+  --wood-100: #f6ebdc;
+  --wood-accent-cool: #8c9bb0;
+  --wood-accent-warm: #b07a63;
+  --stone-100: #f0e7dc;
+  --stone-300: #dbc8b1;
+  --stone-500: #8b7460;
+  --stone-700: #5a4333;
+  --ring: #8a5a36;
 }
 
 @theme inline {
@@ -47,9 +49,9 @@ h4 {
 }
 
 .wood-gradient {
-  background-image: radial-gradient(1100px circle at 0% 0%, #f7efe6 0%, transparent 45%),
-    radial-gradient(900px circle at 100% 30%, #ead9c8 0%, transparent 35%),
-    linear-gradient(180deg, #f7f3ee 0%, #f3ede6 100%);
+  background-image: radial-gradient(1100px circle at 0% 0%, #f8eedf 0%, transparent 45%),
+    radial-gradient(900px circle at 100% 30%, #ebd8be 0%, transparent 35%),
+    linear-gradient(180deg, #fbf6ef 0%, #f2e6d7 100%);
 }
 
 .ring-focus {

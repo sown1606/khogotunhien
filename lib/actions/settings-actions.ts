@@ -27,7 +27,9 @@ export async function updateSettingsAction(
     const payload = normalizeSettingsPayload({
       companyName: formData.get("companyName"),
       companyDescription: formData.get("companyDescription"),
+      companyDescriptionEn: formData.get("companyDescriptionEn"),
       address: formData.get("address"),
+      addressEn: formData.get("addressEn"),
       phoneNumber: formData.get("phoneNumber"),
       email: formData.get("email"),
       zaloLink: formData.get("zaloLink"),
@@ -36,12 +38,18 @@ export async function updateSettingsAction(
       logoUrl: formData.get("logoUrl"),
       faviconUrl: formData.get("faviconUrl"),
       seoTitle: formData.get("seoTitle"),
+      seoTitleEn: formData.get("seoTitleEn"),
       seoDescription: formData.get("seoDescription"),
+      seoDescriptionEn: formData.get("seoDescriptionEn"),
       seoKeywords: formData.get("seoKeywords"),
       footerContent: formData.get("footerContent"),
+      footerContentEn: formData.get("footerContentEn"),
       openingHours: formData.get("openingHours"),
+      openingHoursEn: formData.get("openingHoursEn"),
       contactPrimaryLabel: formData.get("contactPrimaryLabel"),
+      contactPrimaryLabelEn: formData.get("contactPrimaryLabelEn"),
       contactSecondaryLabel: formData.get("contactSecondaryLabel"),
+      contactSecondaryLabelEn: formData.get("contactSecondaryLabelEn"),
     });
 
     const parsed = settingsSchema.safeParse(payload);
@@ -58,7 +66,9 @@ export async function updateSettingsAction(
       update: {
         ...parsed.data,
         companyDescription: parsed.data.companyDescription || null,
+        companyDescriptionEn: parsed.data.companyDescriptionEn || null,
         address: parsed.data.address || null,
+        addressEn: parsed.data.addressEn || null,
         phoneNumber: parsed.data.phoneNumber || null,
         email: parsed.data.email || null,
         zaloLink: parsed.data.zaloLink || null,
@@ -67,12 +77,18 @@ export async function updateSettingsAction(
         logoUrl: parsed.data.logoUrl || null,
         faviconUrl: parsed.data.faviconUrl || null,
         seoTitle: parsed.data.seoTitle || null,
+        seoTitleEn: parsed.data.seoTitleEn || null,
         seoDescription: parsed.data.seoDescription || null,
+        seoDescriptionEn: parsed.data.seoDescriptionEn || null,
         seoKeywords: parsed.data.seoKeywords || null,
         footerContent: parsed.data.footerContent || null,
+        footerContentEn: parsed.data.footerContentEn || null,
         openingHours: parsed.data.openingHours || null,
+        openingHoursEn: parsed.data.openingHoursEn || null,
         contactPrimaryLabel: parsed.data.contactPrimaryLabel || "Contact via Zalo",
+        contactPrimaryLabelEn: parsed.data.contactPrimaryLabelEn || null,
         contactSecondaryLabel: parsed.data.contactSecondaryLabel || "Call now",
+        contactSecondaryLabelEn: parsed.data.contactSecondaryLabelEn || null,
       },
       create: {
         id: "default",
@@ -82,8 +98,15 @@ export async function updateSettingsAction(
 
     revalidatePath("/", "layout");
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/contact");
+    revalidatePath("/en/contact");
     revalidatePath("/about");
+    revalidatePath("/en/about");
+    revalidatePath("/products");
+    revalidatePath("/en/products");
+    revalidatePath("/categories");
+    revalidatePath("/en/categories");
     revalidatePath("/admin/settings");
 
     return {

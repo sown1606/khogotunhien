@@ -2,10 +2,155 @@ import { Prisma, type HomepageSectionType, type SiteSetting } from "@prisma/clie
 import { cache } from "react";
 
 import { db } from "@/lib/db";
+import { type Locale, localizeValue, normalizeLocale } from "@/lib/i18n";
 import { logError } from "@/lib/logger";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
+}
+
+function readStringField(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function localizeRecordField<T extends Record<string, unknown>>(
+  locale: Locale,
+  record: T,
+  viKey: keyof T & string,
+  enKey: string,
+) {
+  const viValue = record[viKey];
+  const vi = typeof viValue === "string" ? viValue : null;
+  const en = readStringField(record, enKey) ?? null;
+  return localizeValue(locale, vi, en);
+}
+
+function localizeSiteSetting(locale: Locale, setting: SiteSetting): SiteSetting {
+  const source = setting as SiteSetting & Record<string, unknown>;
+
+  return {
+    ...setting,
+    companyDescription:
+      localizeRecordField(locale, source, "companyDescription", "companyDescriptionEn") || null,
+    address: localizeRecordField(locale, source, "address", "addressEn") || null,
+    footerContent: localizeRecordField(locale, source, "footerContent", "footerContentEn") || null,
+    openingHours: localizeRecordField(locale, source, "openingHours", "openingHoursEn") || null,
+    contactPrimaryLabel:
+      localizeRecordField(locale, source, "contactPrimaryLabel", "contactPrimaryLabelEn") ||
+      setting.contactPrimaryLabel,
+    contactSecondaryLabel:
+      localizeRecordField(locale, source, "contactSecondaryLabel", "contactSecondaryLabelEn") ||
+      setting.contactSecondaryLabel,
+    seoTitle: localizeRecordField(locale, source, "seoTitle", "seoTitleEn") || null,
+    seoDescription: localizeRecordField(locale, source, "seoDescription", "seoDescriptionEn") || null,
+  };
+}
+
+function localizeCategory<T extends { name: string; shortDescription: string | null }>(
+  locale: Locale,
+  category: T & Record<string, unknown>,
+) {
+  return {
+    ...category,
+    name: localizeRecordField(locale, category, "name", "nameEn") || category.name,
+    shortDescription:
+      localizeRecordField(locale, category, "shortDescription", "shortDescriptionEn") || null,
+  };
+}
+
+function localizeProduct<T extends {
+  name: string;
+  shortDescription: string | null;
+  description: string | null;
+  woodType: string | null;
+  material: string | null;
+  dimensions: string | null;
+  finish: string | null;
+  category?: { name: string; shortDescription: string | null } | null;
+  relatedProducts?: Array<{
+    name: string;
+    shortDescription: string | null;
+    description: string | null;
+    woodType: string | null;
+    material: string | null;
+    dimensions: string | null;
+    finish: string | null;
+    category?: { name: string; shortDescription: string | null } | null;
+  }>;
+}>(
+  locale: Locale,
+  product: T & Record<string, unknown>,
+): T {
+  const localizedCategory = product.category
+    ? localizeCategory(locale, product.category as typeof product.category & Record<string, unknown>)
+    : product.category;
+
+  const localizedRelated =
+    product.relatedProducts?.map((related) =>
+      localizeProduct(
+        locale,
+        related as typeof related & Record<string, unknown>,
+      ),
+    ) || product.relatedProducts;
+
+  return {
+    ...product,
+    name: localizeRecordField(locale, product, "name", "nameEn") || product.name,
+    shortDescription:
+      localizeRecordField(locale, product, "shortDescription", "shortDescriptionEn") || null,
+    description: localizeRecordField(locale, product, "description", "descriptionEn") || null,
+    woodType: localizeRecordField(locale, product, "woodType", "woodTypeEn") || null,
+    material: localizeRecordField(locale, product, "material", "materialEn") || null,
+    dimensions: localizeRecordField(locale, product, "dimensions", "dimensionsEn") || null,
+    finish: localizeRecordField(locale, product, "finish", "finishEn") || null,
+    category: localizedCategory,
+    relatedProducts: localizedRelated as T["relatedProducts"],
+  };
+}
+
+function localizeHomepageSection<T extends {
+  title: string;
+  description: string | null;
+  items: Array<{
+    customTitle: string | null;
+    customDescription: string | null;
+    product: {
+      name: string;
+      shortDescription: string | null;
+      description: string | null;
+      woodType: string | null;
+      material: string | null;
+      dimensions: string | null;
+      finish: string | null;
+      category?: { name: string; shortDescription: string | null } | null;
+    } | null;
+    category: { name: string; shortDescription: string | null } | null;
+  }>;
+}>(
+  locale: Locale,
+  section: T & Record<string, unknown>,
+) {
+  return {
+    ...section,
+    title: localizeRecordField(locale, section, "title", "titleEn") || section.title,
+    description: localizeRecordField(locale, section, "description", "descriptionEn") || null,
+    items: section.items.map((item) => {
+      const source = item as typeof item & Record<string, unknown>;
+      return {
+        ...item,
+        customTitle: localizeRecordField(locale, source, "customTitle", "customTitleEn") || null,
+        customDescription:
+          localizeRecordField(locale, source, "customDescription", "customDescriptionEn") || null,
+        product: item.product
+          ? localizeProduct(locale, item.product as typeof item.product & Record<string, unknown>)
+          : null,
+        category: item.category
+          ? localizeCategory(locale, item.category as typeof item.category & Record<string, unknown>)
+          : null,
+      };
+    }),
+  };
 }
 
 function getFallbackSiteSetting(): SiteSetting {
@@ -15,23 +160,38 @@ function getFallbackSiteSetting(): SiteSetting {
 
   return {
     id: "default",
-    companyName: "Hồng Sang",
-    companyDescription: "Premium wood products and custom wood solutions.",
-    address: null,
+    companyName: "ĐẠI THIÊN PHÚ WOOD",
+    companyDescription:
+      "Tinh hoa của gia đình Việt. Vật liệu gỗ cao cấp, sản phẩm thủ công tinh xảo và dịch vụ gia công theo yêu cầu cho gia đình, cửa hàng và dự án nội thất.",
+    companyDescriptionEn:
+      "The essence of Vietnamese family craftsmanship. Premium wood materials and custom builds for homes and businesses.",
+    address: "Showroom và xưởng sản xuất, TP. Hồ Chí Minh, Việt Nam",
+    addressEn: "Showroom and Workshop, Ho Chi Minh City, Vietnam",
     phoneNumber: fallbackCompanyPhone,
     email: "maithihongsang79@gmail.com",
     zaloLink: fallbackZaloUrl,
     facebookLink: null,
     tiktokLink: null,
-    logoUrl: null,
-    faviconUrl: null,
-    seoTitle: null,
-    seoDescription: null,
-    seoKeywords: null,
-    footerContent: null,
-    openingHours: null,
-    contactPrimaryLabel: "Contact via Zalo",
-    contactSecondaryLabel: "Call now",
+    logoUrl: "/brand/logo-horizontal.svg",
+    faviconUrl: "/favicon.svg",
+    seoTitle: "ĐẠI THIÊN PHÚ WOOD | Tinh hoa của gia đình Việt",
+    seoTitleEn: "ĐẠI THIÊN PHÚ WOOD | The essence of Vietnamese family craftsmanship",
+    seoDescription:
+      "Khám phá gỗ óc chó, gỗ sồi, gỗ dẻ gai, slab gỗ tự nhiên, thớt cao cấp và vật liệu nội thất từ ĐẠI THIÊN PHÚ WOOD.",
+    seoDescriptionEn:
+      "Premium wood products, decorative panels, custom signs, cutting boards, and interior wood materials from Đại Thiên Phú Wood.",
+    seoKeywords:
+      "wood products, walnut boards, oak panels, cutting boards, wood signs, interior wood materials",
+    footerContent:
+      "Chúng tôi cung cấp vật liệu gỗ tuyển chọn và giải pháp gia công theo yêu cầu cho bếp, nội thất và quà tặng cá nhân hóa.",
+    footerContentEn:
+      "Premium timber selection and custom wood craftsmanship for kitchens, interiors, and personalized gifts.",
+    openingHours: "Thứ 2 - Thứ 7: 08:00 - 18:00",
+    openingHoursEn: "Mon - Sat: 8:00 AM - 6:00 PM",
+    contactPrimaryLabel: "Nhắn Zalo",
+    contactPrimaryLabelEn: "Chat on Zalo",
+    contactSecondaryLabel: "Gọi ngay",
+    contactSecondaryLabelEn: "Call now",
     createdAt: now,
     updatedAt: now,
   };
@@ -52,10 +212,53 @@ async function withDatabaseFallback<T>(
   }
 }
 
-export const getSiteSettings = cache(async () => {
+export const getSiteSettings = cache(async (inputLocale: Locale = "vi") => {
+  const locale = normalizeLocale(inputLocale);
   const fallbackSettings = getFallbackSiteSetting();
 
-  return withDatabaseFallback("getSiteSettings", fallbackSettings, async () => {
+  const settings = await withDatabaseFallback("getSiteSettings", fallbackSettings, async () => {
+    const existing = await db.siteSetting.findUnique({
+      where: { id: "default" },
+    });
+
+    if (existing) return existing;
+
+    return db.siteSetting.create({
+      data: {
+        id: "default",
+        companyName: fallbackSettings.companyName,
+        companyDescription: fallbackSettings.companyDescription,
+        companyDescriptionEn: fallbackSettings.companyDescriptionEn,
+        address: fallbackSettings.address,
+        addressEn: fallbackSettings.addressEn,
+        phoneNumber: fallbackSettings.phoneNumber,
+        email: fallbackSettings.email,
+        zaloLink: fallbackSettings.zaloLink,
+        contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
+        contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
+        contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
+        contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
+        logoUrl: fallbackSettings.logoUrl,
+        faviconUrl: fallbackSettings.faviconUrl,
+        seoTitle: fallbackSettings.seoTitle,
+        seoTitleEn: fallbackSettings.seoTitleEn,
+        seoDescription: fallbackSettings.seoDescription,
+        seoDescriptionEn: fallbackSettings.seoDescriptionEn,
+        footerContent: fallbackSettings.footerContent,
+        footerContentEn: fallbackSettings.footerContentEn,
+        openingHours: fallbackSettings.openingHours,
+        openingHoursEn: fallbackSettings.openingHoursEn,
+      },
+    });
+  });
+
+  return localizeSiteSetting(locale, settings);
+});
+
+export const getSiteSettingsForAdmin = cache(async () => {
+  const fallbackSettings = getFallbackSiteSetting();
+
+  return withDatabaseFallback("getSiteSettingsForAdmin", fallbackSettings, async () => {
     const settings = await db.siteSetting.findUnique({
       where: { id: "default" },
     });
@@ -67,28 +270,41 @@ export const getSiteSettings = cache(async () => {
         id: "default",
         companyName: fallbackSettings.companyName,
         companyDescription: fallbackSettings.companyDescription,
+        companyDescriptionEn: fallbackSettings.companyDescriptionEn,
+        address: fallbackSettings.address,
+        addressEn: fallbackSettings.addressEn,
         phoneNumber: fallbackSettings.phoneNumber,
         email: fallbackSettings.email,
         zaloLink: fallbackSettings.zaloLink,
         contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
+        contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
         contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
+        contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
       },
     });
   });
 });
 
-export const getNavigationCategories = cache(async () => {
-  return withDatabaseFallback("getNavigationCategories", [], () =>
+export const getNavigationCategories = cache(async (inputLocale: Locale = "vi") => {
+  const locale = normalizeLocale(inputLocale);
+
+  const categories = await withDatabaseFallback("getNavigationCategories", [], () =>
     db.category.findMany({
       where: { active: true },
       orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
       take: 10,
     }),
   );
+
+  return categories.map((category) =>
+    localizeCategory(locale, category as typeof category & Record<string, unknown>),
+  );
 });
 
-export const getHomepageSections = cache(async () => {
-  return withDatabaseFallback("getHomepageSections", [], () =>
+export const getHomepageSections = cache(async (inputLocale: Locale = "vi") => {
+  const locale = normalizeLocale(inputLocale);
+
+  const sections = await withDatabaseFallback("getHomepageSections", [], () =>
     db.homepageSection.findMany({
       where: { visible: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
@@ -111,10 +327,16 @@ export const getHomepageSections = cache(async () => {
       },
     }),
   );
+
+  return sections.map((section) =>
+    localizeHomepageSection(locale, section as typeof section & Record<string, unknown>),
+  );
 });
 
-export const getFeaturedProducts = cache(async (limit = 12) => {
-  return withDatabaseFallback("getFeaturedProducts", [], () =>
+export const getFeaturedProducts = cache(async (limit = 12, inputLocale: Locale = "vi") => {
+  const locale = normalizeLocale(inputLocale);
+
+  const products = await withDatabaseFallback("getFeaturedProducts", [], () =>
     db.product.findMany({
       where: { active: true, featured: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
@@ -127,15 +349,25 @@ export const getFeaturedProducts = cache(async (limit = 12) => {
       },
     }),
   );
+
+  return products.map((product) =>
+    localizeProduct(locale, product as typeof product & Record<string, unknown>),
+  );
 });
 
-export const getFeaturedCategories = cache(async (limit = 10) => {
-  return withDatabaseFallback("getFeaturedCategories", [], () =>
+export const getFeaturedCategories = cache(async (limit = 10, inputLocale: Locale = "vi") => {
+  const locale = normalizeLocale(inputLocale);
+
+  const categories = await withDatabaseFallback("getFeaturedCategories", [], () =>
     db.category.findMany({
       where: { active: true, featured: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       take: limit,
     }),
+  );
+
+  return categories.map((category) =>
+    localizeCategory(locale, category as typeof category & Record<string, unknown>),
   );
 });
 
@@ -146,7 +378,8 @@ type ProductQuery = {
   featured?: string;
 };
 
-export async function getProducts(query: ProductQuery = {}) {
+export async function getProducts(query: ProductQuery = {}, inputLocale: Locale = "vi") {
+  const locale = normalizeLocale(inputLocale);
   const where: Prisma.ProductWhereInput = {
     active: true,
   };
@@ -155,10 +388,15 @@ export async function getProducts(query: ProductQuery = {}) {
     const normalized = query.q.trim();
     where.OR = [
       { name: { contains: normalized } },
+      { nameEn: { contains: normalized } },
       { shortDescription: { contains: normalized } },
+      { shortDescriptionEn: { contains: normalized } },
       { woodType: { contains: normalized } },
+      { woodTypeEn: { contains: normalized } },
       { material: { contains: normalized } },
+      { materialEn: { contains: normalized } },
       { category: { name: { contains: normalized } } },
+      { category: { nameEn: { contains: normalized } } },
     ];
   }
 
@@ -167,14 +405,14 @@ export async function getProducts(query: ProductQuery = {}) {
   }
 
   if (query.material) {
-    where.OR = [...(where.OR ?? []), { material: { contains: query.material } }];
+    where.OR = [...(where.OR ?? []), { material: { contains: query.material } }, { materialEn: { contains: query.material } }];
   }
 
   if (query.featured === "true") {
     where.featured = true;
   }
 
-  return withDatabaseFallback("getProducts", [], () =>
+  const products = await withDatabaseFallback("getProducts", [], () =>
     db.product.findMany({
       where,
       include: {
@@ -186,10 +424,16 @@ export async function getProducts(query: ProductQuery = {}) {
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     }),
   );
+
+  return products.map((product) =>
+    localizeProduct(locale, product as typeof product & Record<string, unknown>),
+  );
 }
 
-export async function getProductBySlug(slug: string) {
-  return withDatabaseFallback("getProductBySlug", null, () =>
+export async function getProductBySlug(slug: string, inputLocale: Locale = "vi") {
+  const locale = normalizeLocale(inputLocale);
+
+  const product = await withDatabaseFallback("getProductBySlug", null, () =>
     db.product.findUnique({
       where: { slug },
       include: {
@@ -210,10 +454,16 @@ export async function getProductBySlug(slug: string) {
       },
     }),
   );
+
+  if (!product) return null;
+
+  return localizeProduct(locale, product as typeof product & Record<string, unknown>);
 }
 
-export const getCategories = cache(async () => {
-  return withDatabaseFallback("getCategories", [], () =>
+export const getCategories = cache(async (inputLocale: Locale = "vi") => {
+  const locale = normalizeLocale(inputLocale);
+
+  const categories = await withDatabaseFallback("getCategories", [], () =>
     db.category.findMany({
       where: { active: true },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -228,10 +478,16 @@ export const getCategories = cache(async () => {
       },
     }),
   );
+
+  return categories.map((category) =>
+    localizeCategory(locale, category as typeof category & Record<string, unknown>),
+  );
 });
 
-export async function getCategoryBySlug(slug: string) {
-  return withDatabaseFallback("getCategoryBySlug", null, () =>
+export async function getCategoryBySlug(slug: string, inputLocale: Locale = "vi") {
+  const locale = normalizeLocale(inputLocale);
+
+  const category = await withDatabaseFallback("getCategoryBySlug", null, () =>
     db.category.findUnique({
       where: { slug },
       include: {
@@ -248,25 +504,39 @@ export async function getCategoryBySlug(slug: string) {
       },
     }),
   );
+
+  if (!category) return null;
+
+  return {
+    ...localizeCategory(locale, category as typeof category & Record<string, unknown>),
+    products: category.products.map((product) =>
+      localizeProduct(locale, product as typeof product & Record<string, unknown>),
+    ),
+  };
 }
 
-export async function getSearchResults(term: string) {
+export async function getSearchResults(term: string, inputLocale: Locale = "vi") {
+  const locale = normalizeLocale(inputLocale);
   const normalizedTerm = term.trim();
 
   if (!normalizedTerm) {
     return { products: [], categories: [] };
   }
 
-  return withDatabaseFallback("getSearchResults", { products: [], categories: [] }, async () => {
+  const result = await withDatabaseFallback("getSearchResults", { products: [], categories: [] }, async () => {
     const [products, categories] = await Promise.all([
       db.product.findMany({
         where: {
           active: true,
           OR: [
             { name: { contains: normalizedTerm } },
+            { nameEn: { contains: normalizedTerm } },
             { shortDescription: { contains: normalizedTerm } },
+            { shortDescriptionEn: { contains: normalizedTerm } },
             { woodType: { contains: normalizedTerm } },
+            { woodTypeEn: { contains: normalizedTerm } },
             { material: { contains: normalizedTerm } },
+            { materialEn: { contains: normalizedTerm } },
           ],
         },
         include: {
@@ -283,7 +553,9 @@ export async function getSearchResults(term: string) {
           active: true,
           OR: [
             { name: { contains: normalizedTerm } },
+            { nameEn: { contains: normalizedTerm } },
             { shortDescription: { contains: normalizedTerm } },
+            { shortDescriptionEn: { contains: normalizedTerm } },
           ],
         },
         orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
@@ -302,6 +574,15 @@ export async function getSearchResults(term: string) {
 
     return { products, categories };
   });
+
+  return {
+    products: result.products.map((product) =>
+      localizeProduct(locale, product as typeof product & Record<string, unknown>),
+    ),
+    categories: result.categories.map((category) =>
+      localizeCategory(locale, category as typeof category & Record<string, unknown>),
+    ),
+  };
 }
 
 export async function getHomepageSectionsForAdmin(type?: HomepageSectionType) {

@@ -7,7 +7,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/public/language-switcher";
 import { SearchInput } from "@/components/public/search-input";
+import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import { cn, normalizePhoneLink } from "@/lib/utils";
 
 type HeaderCategory = {
@@ -22,14 +24,8 @@ type SiteHeaderProps = {
   phoneNumber?: string | null;
   zaloLink?: string | null;
   categories: HeaderCategory[];
+  locale?: Locale;
 };
-
-const navigationItems = [
-  { href: "/products", label: "Products" },
-  { href: "/categories", label: "Categories" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
 
 export function SiteHeader({
   companyName,
@@ -37,9 +33,16 @@ export function SiteHeader({
   phoneNumber,
   zaloLink,
   categories,
+  locale = "vi",
 }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const navigationItems = [
+    { href: withLocalePath(locale, "/products"), label: t(locale, "Sản phẩm", "Products") },
+    { href: withLocalePath(locale, "/categories"), label: t(locale, "Danh mục", "Categories") },
+    { href: withLocalePath(locale, "/about"), label: t(locale, "Giới thiệu", "About") },
+    { href: withLocalePath(locale, "/contact"), label: t(locale, "Liên hệ", "Contact") },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -65,19 +68,19 @@ export function SiteHeader({
       >
         <div className="mx-auto max-w-7xl px-4 py-3 lg:px-8">
           <div className="flex items-center gap-3 lg:gap-6">
-            <Link href="/" className="flex shrink-0 items-center gap-2">
+            <Link href={withLocalePath(locale, "/")} className="flex shrink-0 items-center gap-2">
               <Image
-                src={logoUrl || "/logo.svg"}
+                src={logoUrl || "/brand/logo-horizontal.svg"}
                 alt={companyName}
-                width={180}
-                height={42}
-                className="h-9 w-auto object-contain"
+                width={920}
+                height={260}
+                className="h-8 w-auto max-w-[190px] object-contain sm:h-9 sm:max-w-[230px]"
                 priority
               />
             </Link>
 
             <div className="hidden flex-1 lg:block">
-              <SearchInput />
+              <SearchInput locale={locale} />
             </div>
 
             <nav className="hidden items-center gap-1 lg:flex">
@@ -89,6 +92,7 @@ export function SiteHeader({
             </nav>
 
             <div className="ml-auto hidden items-center gap-2 lg:flex">
+              <LanguageSwitcher />
               {zaloLink ? (
                 <Button asChild size="sm" variant="secondary">
                   <Link href={zaloLink} target="_blank" rel="noreferrer">
@@ -101,7 +105,7 @@ export function SiteHeader({
                 <Button asChild size="sm">
                   <a href={normalizePhoneLink(phoneNumber)}>
                     <Phone className="size-4" />
-                    Call now
+                    {t(locale, "Gọi ngay", "Call now")}
                   </a>
                 </Button>
               ) : null}
@@ -112,14 +116,14 @@ export function SiteHeader({
               variant="outline"
               className="h-10 w-10 rounded-full lg:hidden"
               onClick={() => setMenuOpen((previous) => !previous)}
-              aria-label="Toggle menu"
+              aria-label={t(locale, "Mở menu", "Toggle menu")}
             >
               {menuOpen ? <X /> : <Menu />}
             </Button>
           </div>
 
           <div className="mt-3 lg:hidden">
-            <SearchInput />
+            <SearchInput locale={locale} />
           </div>
 
           <div className="no-scrollbar -mx-1 mt-3 hidden overflow-x-auto lg:block">
@@ -127,7 +131,7 @@ export function SiteHeader({
               {categories.map((category) => (
                 <Link
                   key={category.id}
-                  href={`/categories/${category.slug}`}
+                  href={withLocalePath(locale, `/categories/${category.slug}`)}
                   className="rounded-full border border-stone-300/80 bg-white px-3 py-1.5 text-sm text-stone-700 transition-colors hover:border-amber-400 hover:text-amber-900"
                 >
                   {category.name}
@@ -155,22 +159,25 @@ export function SiteHeader({
               className="absolute right-0 top-0 h-full w-[86vw] max-w-sm bg-[#f8f5f1] p-6"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="mb-6 flex items-center justify-between">
+              <div className="mb-6 flex items-center justify-between gap-2">
                 <Image
-                  src={logoUrl || "/logo.svg"}
+                  src={logoUrl || "/brand/logo-horizontal.svg"}
                   alt={companyName}
-                  width={160}
-                  height={38}
-                  className="h-8 w-auto"
+                  width={920}
+                  height={260}
+                  className="h-8 w-auto max-w-[170px] object-contain"
                 />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="rounded-full"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <X />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <LanguageSwitcher />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <X />
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-1">
@@ -191,7 +198,7 @@ export function SiteHeader({
                   <Button asChild variant="secondary" onClick={() => setMenuOpen(false)}>
                     <Link href={zaloLink} target="_blank" rel="noreferrer">
                       <MessageCircle className="size-4" />
-                      Contact via Zalo
+                      {t(locale, "Nhắn Zalo", "Contact via Zalo")}
                     </Link>
                   </Button>
                 ) : null}
@@ -199,7 +206,7 @@ export function SiteHeader({
                   <Button asChild onClick={() => setMenuOpen(false)}>
                     <a href={normalizePhoneLink(phoneNumber)}>
                       <Phone className="size-4" />
-                      Call now
+                      {t(locale, "Gọi ngay", "Call now")}
                     </a>
                   </Button>
                 ) : null}
@@ -207,13 +214,13 @@ export function SiteHeader({
 
               <div className="mt-8">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">
-                  Browse materials
+                  {t(locale, "Khám phá vật liệu", "Browse materials")}
                 </p>
                 <div className="grid gap-2">
                   {categories.slice(0, 8).map((category) => (
                     <Link
                       key={category.id}
-                      href={`/categories/${category.slug}`}
+                      href={withLocalePath(locale, `/categories/${category.slug}`)}
                       className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700"
                       onClick={() => setMenuOpen(false)}
                     >

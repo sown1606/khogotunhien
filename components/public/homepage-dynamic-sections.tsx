@@ -5,6 +5,7 @@ import { CategoryStrip } from "@/components/public/category-strip";
 import { ProductStrip } from "@/components/public/product-strip";
 import { SectionHeading } from "@/components/public/section-heading";
 import { Badge } from "@/components/ui/badge";
+import { type Locale, t, withLocalePath } from "@/lib/i18n";
 
 type HomepageSectionWithItems = {
   id: string;
@@ -41,6 +42,7 @@ type HomepageDynamicSectionsProps = {
   sections: HomepageSectionWithItems[];
   phoneNumber?: string | null;
   zaloLink?: string | null;
+  locale?: Locale;
 };
 
 type SectionProduct = NonNullable<HomepageSectionWithItems["items"][number]["product"]>;
@@ -50,6 +52,7 @@ export function HomepageDynamicSections({
   sections,
   phoneNumber,
   zaloLink,
+  locale = "vi",
 }: HomepageDynamicSectionsProps) {
   return (
     <>
@@ -65,7 +68,8 @@ export function HomepageDynamicSections({
               title={section.title}
               description={section.description}
               categories={categories.map((category) => ({ ...category }))}
-              href="/categories"
+              href={withLocalePath(locale, "/categories")}
+              locale={locale}
             />
           );
         }
@@ -83,7 +87,8 @@ export function HomepageDynamicSections({
               products={products.map((product) => ({ ...product }))}
               phoneNumber={phoneNumber}
               zaloLink={zaloLink}
-              href="/products"
+              href={withLocalePath(locale, "/products")}
+              locale={locale}
             />
           );
         }
@@ -91,28 +96,37 @@ export function HomepageDynamicSections({
         return (
           <section key={section.id}>
             <SectionHeading
-              eyebrow={section.type === "PROMOTIONAL" ? "Highlights" : "Curated"}
+              eyebrow={section.type === "PROMOTIONAL" ? t(locale, "Nổi bật", "Highlights") : t(locale, "Tuyển chọn", "Curated")}
               title={section.title}
               description={section.description}
+              locale={locale}
             />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {section.items.map((item) => {
                 const href =
-                  item.linkUrl ||
-                  (item.product ? `/products/${item.product.slug}` : null) ||
-                  (item.category ? `/categories/${item.category.slug}` : null) ||
+                  (item.linkUrl
+                    ? item.linkUrl.startsWith("/")
+                      ? withLocalePath(locale, item.linkUrl)
+                      : item.linkUrl
+                    : null) ||
+                  (item.product ? withLocalePath(locale, `/products/${item.product.slug}`) : null) ||
+                  (item.category ? withLocalePath(locale, `/categories/${item.category.slug}`) : null) ||
                   "#";
                 const image =
                   item.imageUrl ||
                   item.product?.thumbnailUrl ||
                   item.category?.imageUrl ||
-                  "/globe.svg";
-                const title = item.customTitle || item.product?.name || item.category?.name || "Section item";
+                  "/demo/brand/texture.webp";
+                const title =
+                  item.customTitle ||
+                  item.product?.name ||
+                  item.category?.name ||
+                  t(locale, "Mục nội dung", "Section item");
                 const description =
                   item.customDescription ||
                   item.product?.shortDescription ||
                   item.category?.shortDescription ||
-                  "Explore this wood collection.";
+                  t(locale, "Khám phá bộ sưu tập gỗ này.", "Explore this wood collection.");
 
                 return (
                   <Link
@@ -131,9 +145,9 @@ export function HomepageDynamicSections({
                     </div>
                     <div className="space-y-2 p-4">
                       {section.type === "PROMOTIONAL" ? (
-                        <Badge variant="warning">Promotional</Badge>
+                        <Badge variant="warning">{t(locale, "Khuyến nghị", "Promotional")}</Badge>
                       ) : (
-                        <Badge variant="outline">Collection</Badge>
+                        <Badge variant="outline">{t(locale, "Bộ sưu tập", "Collection")}</Badge>
                       )}
                       <h3 className="text-xl font-semibold text-stone-900">{title}</h3>
                       <p className="line-clamp-2 text-sm text-stone-600">{description}</p>

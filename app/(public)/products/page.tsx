@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/public/product-card";
 import { SectionHeading } from "@/components/public/section-heading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import { getCategories, getProducts, getSiteSettings } from "@/lib/queries";
 
 type ProductsPageProps = {
@@ -16,16 +17,23 @@ type ProductsPageProps = {
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  return <ProductsPageContent searchParams={searchParams} locale="vi" />;
+}
+
+async function ProductsPageContent({
+  searchParams,
+  locale,
+}: ProductsPageProps & { locale: Locale }) {
   const params = await searchParams;
   const [settings, products, categories] = await Promise.all([
-    getSiteSettings(),
+    getSiteSettings(locale),
     getProducts({
       q: params.q,
       category: params.category,
       material: params.material,
       featured: params.featured,
-    }),
-    getCategories(),
+    }, locale),
+    getCategories(locale),
   ]);
 
   const selectedCategory = categories.find((category) => category.slug === params.category);
@@ -33,9 +41,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow="Product catalog"
-        title="Browse wood products"
-        description="Search and filter premium wood products without checkout distractions. Reach out directly for consultation."
+        eyebrow={t(locale, "Danh mục sản phẩm", "Product catalog")}
+        title={t(locale, "Khám phá sản phẩm gỗ", "Browse wood products")}
+        description={t(
+          locale,
+          "Tìm kiếm và lọc sản phẩm gỗ cao cấp. Liên hệ trực tiếp để nhận tư vấn phù hợp.",
+          "Search and filter premium wood products without checkout distractions. Reach out directly for consultation.",
+        )}
+        locale={locale}
       />
 
       <form className="grid gap-3 rounded-2xl border border-stone-200 bg-white p-4 md:grid-cols-12">
@@ -43,7 +56,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <Input
             name="q"
             defaultValue={params.q ?? ""}
-            placeholder="Search by product, category, wood type..."
+            placeholder={t(
+              locale,
+              "Tìm theo tên sản phẩm, danh mục, loại gỗ...",
+              "Search by product, category, wood type...",
+            )}
           />
         </div>
         <div className="md:col-span-3">
@@ -52,7 +69,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             defaultValue={params.category ?? ""}
             className="h-10 w-full rounded-xl border border-stone-300 bg-white px-3 text-sm text-stone-900 ring-focus"
           >
-            <option value="">All categories</option>
+            <option value="">{t(locale, "Tất cả danh mục", "All categories")}</option>
             {categories.map((category) => (
               <option key={category.id} value={category.slug}>
                 {category.name}
@@ -61,17 +78,53 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </select>
         </div>
         <div className="md:col-span-2">
-          <Input name="material" defaultValue={params.material ?? ""} placeholder="Material" />
+          <Input
+            name="material"
+            defaultValue={params.material ?? ""}
+            placeholder={t(locale, "Vật liệu", "Material")}
+          />
         </div>
         <div className="flex items-center gap-2 md:col-span-2">
           <Button type="submit" className="w-full">
-            Filter
+            {t(locale, "Lọc", "Filter")}
           </Button>
         </div>
       </form>
 
+      {categories.length ? (
+        <div className="no-scrollbar -mx-1 overflow-x-auto px-1">
+          <div className="flex min-w-max items-center gap-2">
+            <Link
+              href={withLocalePath(locale, "/products")}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                !params.category
+                  ? "border-stone-900 bg-stone-900 text-white"
+                  : "border-stone-300 bg-white text-stone-700 hover:border-amber-500 hover:text-amber-900"
+              }`}
+            >
+              {t(locale, "Tất cả", "All")}
+            </Link>
+            {categories.slice(0, 18).map((category) => (
+              <Link
+                key={category.id}
+                href={`${withLocalePath(locale, "/products")}?category=${category.slug}`}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  params.category === category.slug
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-stone-300 bg-white text-stone-700 hover:border-amber-500 hover:text-amber-900"
+                }`}
+              >
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
-        <span>{products.length} products found</span>
+        <span>
+          {t(locale, `${products.length} sản phẩm`, `${products.length} products found`)}
+        </span>
         {selectedCategory ? (
           <span className="rounded-full bg-stone-200 px-2.5 py-0.5 text-xs text-stone-700">
             {selectedCategory.name}
@@ -87,17 +140,22 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               product={product}
               phoneNumber={settings.phoneNumber}
               zaloLink={settings.zaloLink}
+              locale={locale}
             />
           ))}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-8 text-center">
-          <p className="text-lg font-semibold text-stone-900">No products matched your filters.</p>
+          <p className="text-lg font-semibold text-stone-900">
+            {t(locale, "Không có sản phẩm phù hợp bộ lọc.", "No products matched your filters.")}
+          </p>
           <p className="mt-1 text-sm text-stone-600">
-            Try another keyword or browse all categories.
+            {t(locale, "Hãy thử từ khóa khác hoặc xem tất cả danh mục.", "Try another keyword or browse all categories.")}
           </p>
           <Button asChild variant="secondary" className="mt-4">
-            <Link href="/categories">View categories</Link>
+            <Link href={withLocalePath(locale, "/categories")}>
+              {t(locale, "Xem danh mục", "View categories")}
+            </Link>
           </Button>
         </div>
       )}

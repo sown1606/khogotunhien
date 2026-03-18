@@ -1,11 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, MessageCircle, Phone, Timer, Music2 } from "lucide-react";
 
 import { normalizePhoneLink } from "@/lib/utils";
+import { type Locale, t, withLocalePath } from "@/lib/i18n";
 
 type SiteFooterProps = {
   companyName: string;
   companyDescription?: string | null;
+  logoUrl?: string | null;
   address?: string | null;
   email?: string | null;
   phoneNumber?: string | null;
@@ -14,11 +17,13 @@ type SiteFooterProps = {
   tiktokLink?: string | null;
   footerContent?: string | null;
   openingHours?: string | null;
+  locale?: Locale;
 };
 
 export function SiteFooter({
   companyName,
   companyDescription,
+  logoUrl,
   address,
   email,
   phoneNumber,
@@ -27,22 +32,34 @@ export function SiteFooter({
   tiktokLink,
   footerContent,
   openingHours,
+  locale = "vi",
 }: SiteFooterProps) {
   return (
     <footer className="mt-24 border-t border-stone-300 bg-[#f1ebe3]">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 lg:grid-cols-12 lg:px-8">
         <div className="space-y-3 lg:col-span-5">
+          <Image
+            src={logoUrl || "/brand/logo-horizontal.svg"}
+            alt={companyName}
+            width={920}
+            height={260}
+            className="h-10 w-auto max-w-[260px] object-contain"
+          />
           <p className="text-3xl font-semibold leading-none text-[var(--wood-900)]">{companyName}</p>
           <p className="max-w-lg text-sm text-stone-700">
             {companyDescription ||
-              "Premium wood products and bespoke material solutions for modern spaces."}
+              t(
+                locale,
+                "Giải pháp gỗ cao cấp và thi công theo yêu cầu cho không gian hiện đại.",
+                "Premium wood products and bespoke material solutions for modern spaces.",
+              )}
           </p>
           {footerContent ? <p className="text-sm text-stone-600">{footerContent}</p> : null}
         </div>
 
         <div className="space-y-3 lg:col-span-4">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-stone-600">
-            Contact information
+            {t(locale, "Thông tin liên hệ", "Contact information")}
           </h3>
           <div className="space-y-2 text-sm text-stone-700">
             {address ? <p>{address}</p> : null}
@@ -71,20 +88,20 @@ export function SiteFooter({
 
         <div className="space-y-3 lg:col-span-3">
           <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-stone-600">
-            Quick links
+            {t(locale, "Liên kết nhanh", "Quick links")}
           </h3>
           <div className="grid gap-2 text-sm text-stone-700">
-            <Link href="/products" className="hover:text-amber-900">
-              All products
+            <Link href={withLocalePath(locale, "/products")} className="hover:text-amber-900">
+              {t(locale, "Tất cả sản phẩm", "All products")}
             </Link>
-            <Link href="/categories" className="hover:text-amber-900">
-              Categories
+            <Link href={withLocalePath(locale, "/categories")} className="hover:text-amber-900">
+              {t(locale, "Danh mục", "Categories")}
             </Link>
-            <Link href="/about" className="hover:text-amber-900">
-              About us
+            <Link href={withLocalePath(locale, "/about")} className="hover:text-amber-900">
+              {t(locale, "Giới thiệu", "About us")}
             </Link>
-            <Link href="/contact" className="hover:text-amber-900">
-              Contact
+            <Link href={withLocalePath(locale, "/contact")} className="hover:text-amber-900">
+              {t(locale, "Liên hệ", "Contact")}
             </Link>
           </div>
 

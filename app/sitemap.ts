@@ -49,21 +49,67 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/en`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/en/products`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/en/categories`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/en/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/en/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
   ];
 
-  const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${BASE_URL}/products/${product.slug}`,
-    lastModified: product.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  const productRoutes: MetadataRoute.Sitemap = products.flatMap((product) => [
+    {
+      url: `${BASE_URL}/products/${product.slug}`,
+      lastModified: product.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/en/products/${product.slug}`,
+      lastModified: product.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+  ]);
 
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${BASE_URL}/categories/${category.slug}`,
-    lastModified: category.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  const categoryRoutes: MetadataRoute.Sitemap = categories.flatMap((category) => [
+    {
+      url: `${BASE_URL}/categories/${category.slug}`,
+      lastModified: category.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/en/categories/${category.slug}`,
+      lastModified: category.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+  ]);
 
   return [...staticRoutes, ...categoryRoutes, ...productRoutes];
 }

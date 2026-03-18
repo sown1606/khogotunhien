@@ -34,9 +34,11 @@ model AdminUser {
 model Category {
   id               String                @id @default(cuid())
   name             String
+  nameEn           String?
   slug             String                @unique
   imageUrl         String?
   shortDescription String?
+  shortDescriptionEn String?
   featured         Boolean               @default(false)
   active           Boolean               @default(true)
   sortOrder        Int                   @default(0)
@@ -52,14 +54,21 @@ model Category {
 model Product {
   id               String                @id @default(cuid())
   name             String
+  nameEn           String?
   slug             String                @unique
   shortDescription String?
+  shortDescriptionEn String?
   description      String?               @db.Text
+  descriptionEn    String?               @db.Text
   thumbnailUrl     String?
   woodType         String?
+  woodTypeEn       String?
   material         String?
+  materialEn       String?
   dimensions       String?
+  dimensionsEn     String?
   finish           String?
+  finishEn         String?
   featured         Boolean               @default(false)
   active           Boolean               @default(true)
   sortOrder        Int                   @default(0)
@@ -92,8 +101,10 @@ model ProductImage {
 model HomepageSection {
   id          String              @id @default(cuid())
   title       String
+  titleEn     String?
   slug        String              @unique
   description String?
+  descriptionEn String?
   type        HomepageSectionType @default(CUSTOM)
   visible     Boolean             @default(true)
   sortOrder   Int                 @default(0)
@@ -110,7 +121,9 @@ model HomepageSectionItem {
   productId         String?
   categoryId        String?
   customTitle       String?
+  customTitleEn     String?
   customDescription String?
+  customDescriptionEn String?
   imageUrl          String?
   linkUrl           String?
   active            Boolean         @default(true)
@@ -130,7 +143,9 @@ model SiteSetting {
   id                  String   @id @default("default")
   companyName         String
   companyDescription  String?  @db.Text
+  companyDescriptionEn String? @db.Text
   address             String?
+  addressEn           String?
   phoneNumber         String?
   email               String?
   zaloLink            String?
@@ -139,12 +154,18 @@ model SiteSetting {
   logoUrl             String?
   faviconUrl          String?
   seoTitle            String?
+  seoTitleEn          String?
   seoDescription      String?
+  seoDescriptionEn    String?
   seoKeywords         String?
   footerContent       String?  @db.Text
+  footerContentEn     String?  @db.Text
   openingHours        String?
+  openingHoursEn      String?
   contactPrimaryLabel String   @default("Contact via Zalo")
+  contactPrimaryLabelEn String?
   contactSecondaryLabel String @default("Call now")
+  contactSecondaryLabelEn String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }

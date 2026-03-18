@@ -38,14 +38,21 @@ export async function createProductAction(
 
     const payload = normalizeProductPayload({
       name: formData.get("name"),
+      nameEn: formData.get("nameEn"),
       slug: formData.get("slug"),
       shortDescription: formData.get("shortDescription"),
+      shortDescriptionEn: formData.get("shortDescriptionEn"),
       description: formData.get("description"),
+      descriptionEn: formData.get("descriptionEn"),
       thumbnailUrl: formData.get("thumbnailUrl"),
       woodType: formData.get("woodType"),
+      woodTypeEn: formData.get("woodTypeEn"),
       material: formData.get("material"),
+      materialEn: formData.get("materialEn"),
       dimensions: formData.get("dimensions"),
+      dimensionsEn: formData.get("dimensionsEn"),
       finish: formData.get("finish"),
+      finishEn: formData.get("finishEn"),
       featured: parseBoolean(formData.get("featured")),
       active: parseBoolean(formData.get("active")),
       sortOrder: parseNumber(formData.get("sortOrder"), 0),
@@ -66,14 +73,21 @@ export async function createProductAction(
     const created = await db.product.create({
       data: {
         name: parsed.data.name,
+        nameEn: parsed.data.nameEn || null,
         slug: parsed.data.slug,
         shortDescription: parsed.data.shortDescription || null,
+        shortDescriptionEn: parsed.data.shortDescriptionEn || null,
         description: parsed.data.description || null,
+        descriptionEn: parsed.data.descriptionEn || null,
         thumbnailUrl: parsed.data.thumbnailUrl || parsed.data.galleryUrls[0] || null,
         woodType: parsed.data.woodType || null,
+        woodTypeEn: parsed.data.woodTypeEn || null,
         material: parsed.data.material || null,
+        materialEn: parsed.data.materialEn || null,
         dimensions: parsed.data.dimensions || null,
+        dimensionsEn: parsed.data.dimensionsEn || null,
         finish: parsed.data.finish || null,
+        finishEn: parsed.data.finishEn || null,
         featured: parsed.data.featured,
         active: parsed.data.active,
         sortOrder: parsed.data.sortOrder,
@@ -92,8 +106,11 @@ export async function createProductAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/products");
+    revalidatePath("/en/products");
     revalidatePath(`/products/${created.slug}`);
+    revalidatePath(`/en/products/${created.slug}`);
     revalidatePath("/admin/products");
 
     return {
@@ -120,14 +137,21 @@ export async function updateProductAction(
 
     const payload = normalizeProductPayload({
       name: formData.get("name"),
+      nameEn: formData.get("nameEn"),
       slug: formData.get("slug"),
       shortDescription: formData.get("shortDescription"),
+      shortDescriptionEn: formData.get("shortDescriptionEn"),
       description: formData.get("description"),
+      descriptionEn: formData.get("descriptionEn"),
       thumbnailUrl: formData.get("thumbnailUrl"),
       woodType: formData.get("woodType"),
+      woodTypeEn: formData.get("woodTypeEn"),
       material: formData.get("material"),
+      materialEn: formData.get("materialEn"),
       dimensions: formData.get("dimensions"),
+      dimensionsEn: formData.get("dimensionsEn"),
       finish: formData.get("finish"),
+      finishEn: formData.get("finishEn"),
       featured: parseBoolean(formData.get("featured")),
       active: parseBoolean(formData.get("active")),
       sortOrder: parseNumber(formData.get("sortOrder"), 0),
@@ -162,14 +186,21 @@ export async function updateProductAction(
       where: { id: productId },
       data: {
         name: parsed.data.name,
+        nameEn: parsed.data.nameEn || null,
         slug: parsed.data.slug,
         shortDescription: parsed.data.shortDescription || null,
+        shortDescriptionEn: parsed.data.shortDescriptionEn || null,
         description: parsed.data.description || null,
+        descriptionEn: parsed.data.descriptionEn || null,
         thumbnailUrl: parsed.data.thumbnailUrl || parsed.data.galleryUrls[0] || null,
         woodType: parsed.data.woodType || null,
+        woodTypeEn: parsed.data.woodTypeEn || null,
         material: parsed.data.material || null,
+        materialEn: parsed.data.materialEn || null,
         dimensions: parsed.data.dimensions || null,
+        dimensionsEn: parsed.data.dimensionsEn || null,
         finish: parsed.data.finish || null,
+        finishEn: parsed.data.finishEn || null,
         featured: parsed.data.featured,
         active: parsed.data.active,
         sortOrder: parsed.data.sortOrder,
@@ -189,9 +220,13 @@ export async function updateProductAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/products");
+    revalidatePath("/en/products");
     revalidatePath(`/products/${existing.slug}`);
+    revalidatePath(`/en/products/${existing.slug}`);
     revalidatePath(`/products/${updated.slug}`);
+    revalidatePath(`/en/products/${updated.slug}`);
     revalidatePath("/admin/products");
 
     return {
@@ -227,8 +262,11 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/products");
+    revalidatePath("/en/products");
     revalidatePath(`/products/${existing.slug}`);
+    revalidatePath(`/en/products/${existing.slug}`);
     revalidatePath("/admin/products");
 
     return {
@@ -259,7 +297,9 @@ export async function toggleProductActiveAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/en");
     revalidatePath("/products");
+    revalidatePath("/en/products");
     revalidatePath("/admin/products");
 
     return {

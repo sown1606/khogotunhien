@@ -10,8 +10,32 @@ export function getOptionalEnv(name: string) {
   return readEnvValue(name);
 }
 
+const DEFAULT_SITE_URL = "http://localhost:3000";
+
+function normalizeSiteUrl(rawValue?: string) {
+  if (!rawValue) return undefined;
+
+  const withProtocol = /^https?:\/\//i.test(rawValue)
+    ? rawValue
+    : `https://${rawValue}`;
+
+  try {
+    return new URL(withProtocol).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 export function getSiteUrl() {
-  return readEnvValue("SITE_URL") || readEnvValue("NEXTAUTH_URL") || "http://localhost:3000";
+  return (
+    normalizeSiteUrl(readEnvValue("SITE_URL")) ||
+    normalizeSiteUrl(readEnvValue("NEXTAUTH_URL")) ||
+    DEFAULT_SITE_URL
+  );
+}
+
+export function getSiteMetadataBase() {
+  return new URL(getSiteUrl());
 }
 
 export function validateAuthEnvironment() {

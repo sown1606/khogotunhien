@@ -29,8 +29,10 @@ export default async function EditCategoryPage({ params }: EditCategoryPageProps
         action={action}
         initialValues={{
           name: category.name,
+          nameEn: category.nameEn,
           slug: category.slug,
           shortDescription: category.shortDescription,
+          shortDescriptionEn: category.shortDescriptionEn,
           imageUrl: category.imageUrl,
           featured: category.featured,
           active: category.active,

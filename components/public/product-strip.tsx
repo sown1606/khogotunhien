@@ -1,5 +1,6 @@
 import { ProductCard } from "@/components/public/product-card";
 import { SectionHeading } from "@/components/public/section-heading";
+import { type Locale, t } from "@/lib/i18n";
 
 type Product = {
   id: string;
@@ -19,6 +20,7 @@ type ProductStripProps = {
   phoneNumber?: string | null;
   zaloLink?: string | null;
   href?: string;
+  locale?: Locale;
 };
 
 export function ProductStrip({
@@ -28,28 +30,32 @@ export function ProductStrip({
   phoneNumber,
   zaloLink,
   href,
+  locale = "vi",
 }: ProductStripProps) {
   if (!products.length) return null;
 
   return (
     <section>
       <SectionHeading
-        eyebrow="Wood showcase"
+        eyebrow={t(locale, "Bộ sưu tập gỗ", "Wood showcase")}
         title={title}
         description={description}
         href={href}
-        hrefLabel="Browse all products"
+        hrefLabel={t(locale, "Xem tất cả sản phẩm", "Browse all products")}
+        locale={locale}
       />
       <div className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-2">
-        <div className="grid min-w-max grid-flow-col auto-cols-[78%] gap-4 sm:auto-cols-[45%] lg:auto-cols-[29%]">
+        <div className="grid min-w-max snap-x snap-mandatory grid-flow-col auto-cols-[70%] gap-3.5 sm:auto-cols-[42%] lg:auto-cols-[24%]">
           {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              phoneNumber={phoneNumber}
-              zaloLink={zaloLink}
-              compact
-            />
+            <div key={product.id} className="snap-start">
+              <ProductCard
+                product={product}
+                phoneNumber={phoneNumber}
+                zaloLink={zaloLink}
+                compact
+                locale={locale}
+              />
+            </div>
           ))}
         </div>
       </div>

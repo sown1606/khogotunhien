@@ -5,6 +5,7 @@ import { MessageCircle, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
+import { type Locale, t } from "@/lib/i18n";
 import { normalizePhoneLink } from "@/lib/utils";
 
 type FloatingContactProps = {
@@ -12,6 +13,7 @@ type FloatingContactProps = {
   zaloLink?: string | null;
   primaryLabel?: string | null;
   secondaryLabel?: string | null;
+  locale?: Locale;
 };
 
 export function FloatingContact({
@@ -19,6 +21,7 @@ export function FloatingContact({
   zaloLink,
   primaryLabel,
   secondaryLabel,
+  locale = "vi",
 }: FloatingContactProps) {
   if (!zaloLink && !phoneNumber) return null;
 
@@ -34,7 +37,7 @@ export function FloatingContact({
           <Button asChild className="h-10 text-xs sm:text-sm">
             <Link href={zaloLink} target="_blank" rel="noreferrer">
               <MessageCircle className="size-4" />
-              {primaryLabel || "Contact via Zalo"}
+              {primaryLabel || t(locale, "Nhắn Zalo", "Contact via Zalo")}
             </Link>
           </Button>
         ) : (
@@ -44,7 +47,7 @@ export function FloatingContact({
           <Button asChild variant="secondary" className="h-10 text-xs sm:text-sm">
             <a href={normalizePhoneLink(phoneNumber)}>
               <Phone className="size-4" />
-              {secondaryLabel || "Call now"}
+              {secondaryLabel || t(locale, "Gọi ngay", "Call now")}
             </a>
           </Button>
         ) : (

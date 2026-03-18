@@ -1,0 +1,73 @@
+import { HomepageDynamicSections } from "@/components/public/homepage-dynamic-sections";
+import { HeroSection } from "@/components/public/hero-section";
+import { CategoryStrip } from "@/components/public/category-strip";
+import { ProductStrip } from "@/components/public/product-strip";
+import { DiscoveryToolbar } from "@/components/public/discovery-toolbar";
+import { withLocalePath } from "@/lib/i18n";
+import {
+  getFeaturedCategories,
+  getFeaturedProducts,
+  getHomepageSections,
+  getSiteSettings,
+} from "@/lib/queries";
+
+export default async function EnglishHomePage() {
+  const locale = "en";
+  const [settings, featuredCategories, featuredProducts, sections] = await Promise.all([
+    getSiteSettings(locale),
+    getFeaturedCategories(8, locale),
+    getFeaturedProducts(10, locale),
+    getHomepageSections(locale),
+  ]);
+  const hasDynamicSections = sections.length > 0;
+  const hasFallbackContent = featuredCategories.length > 0 || featuredProducts.length > 0;
+
+  return (
+    <div className="space-y-14 pb-6">
+      <HeroSection
+        companyName={settings.companyName}
+        companyDescription={settings.companyDescription}
+        phoneNumber={settings.phoneNumber}
+        zaloLink={settings.zaloLink}
+        locale={locale}
+      />
+      <DiscoveryToolbar categories={featuredCategories} locale={locale} />
+
+      {hasDynamicSections ? (
+        <HomepageDynamicSections
+          sections={sections}
+          phoneNumber={settings.phoneNumber}
+          zaloLink={settings.zaloLink}
+          locale={locale}
+        />
+      ) : hasFallbackContent ? (
+        <>
+          <CategoryStrip
+            title="Featured Categories"
+            description="Explore curated material families for custom furniture and interior projects."
+            categories={featuredCategories}
+            href={withLocalePath(locale, "/categories")}
+            locale={locale}
+          />
+
+          <ProductStrip
+            title="Featured Products"
+            description="Crafted products and ready-to-order materials from our workshop."
+            products={featuredProducts}
+            phoneNumber={settings.phoneNumber}
+            zaloLink={settings.zaloLink}
+            href={withLocalePath(locale, "/products")}
+            locale={locale}
+          />
+        </>
+      ) : (
+        <section className="rounded-3xl border border-dashed border-stone-300 bg-white p-8 text-center">
+          <h2 className="text-2xl text-stone-900">Fresh catalog in progress</h2>
+          <p className="mt-2 text-sm text-stone-600">
+            Add categories and products from admin to publish your live showroom sections.
+          </p>
+        </section>
+      )}
+    </div>
+  );
+}

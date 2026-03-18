@@ -21,7 +21,9 @@ type SectionItemValue = {
   productId?: string;
   categoryId?: string;
   customTitle?: string;
+  customTitleEn?: string;
   customDescription?: string;
+  customDescriptionEn?: string;
   imageUrl?: string;
   linkUrl?: string;
   active: boolean;
@@ -34,8 +36,10 @@ type HomepageSectionFormProps = {
   categories: Array<{ id: string; name: string }>;
   initialValues?: {
     title?: string;
+    titleEn?: string | null;
     slug?: string;
     description?: string | null;
+    descriptionEn?: string | null;
     type?: HomepageSectionType;
     visible?: boolean;
     sortOrder?: number;
@@ -54,7 +58,9 @@ function SubmitButton() {
 
 const DEFAULT_ITEM: SectionItemValue = {
   customTitle: "",
+  customTitleEn: "",
   customDescription: "",
+  customDescriptionEn: "",
   imageUrl: "",
   linkUrl: "",
   productId: "",
@@ -103,19 +109,32 @@ export function HomepageSectionForm({
       <Card>
         <CardContent className="grid gap-4 p-5 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="title">Section title</Label>
+            <Label htmlFor="title">Section title (Vietnamese)</Label>
             <Input id="title" name="title" defaultValue={initialValues?.title || ""} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="titleEn">Section title (English)</Label>
+            <Input id="titleEn" name="titleEn" defaultValue={initialValues?.titleEn || ""} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="slug">Slug</Label>
             <Input id="slug" name="slug" defaultValue={initialValues?.slug || ""} required />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description (Vietnamese)</Label>
             <Textarea
               id="description"
               name="description"
               defaultValue={initialValues?.description || ""}
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="descriptionEn">Description (English)</Label>
+            <Textarea
+              id="descriptionEn"
+              name="descriptionEn"
+              defaultValue={initialValues?.descriptionEn || ""}
               rows={3}
             />
           </div>
@@ -239,7 +258,7 @@ export function HomepageSectionForm({
                     </div>
 
                     <div className="space-y-1">
-                      <Label>Custom title</Label>
+                      <Label>Custom title (Vietnamese)</Label>
                       <Input
                         value={item.customTitle || ""}
                         onChange={(event) =>
@@ -247,6 +266,22 @@ export function HomepageSectionForm({
                             previous.map((currentItem, itemIndex) =>
                               itemIndex === index
                                 ? { ...currentItem, customTitle: event.target.value }
+                                : currentItem,
+                            ),
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label>Custom title (English)</Label>
+                      <Input
+                        value={item.customTitleEn || ""}
+                        onChange={(event) =>
+                          setItems((previous) =>
+                            previous.map((currentItem, itemIndex) =>
+                              itemIndex === index
+                                ? { ...currentItem, customTitleEn: event.target.value }
                                 : currentItem,
                             ),
                           )
@@ -271,7 +306,7 @@ export function HomepageSectionForm({
                     </div>
 
                     <div className="space-y-1 md:col-span-2">
-                      <Label>Custom description</Label>
+                      <Label>Custom description (Vietnamese)</Label>
                       <Textarea
                         value={item.customDescription || ""}
                         onChange={(event) =>
@@ -279,6 +314,23 @@ export function HomepageSectionForm({
                             previous.map((currentItem, itemIndex) =>
                               itemIndex === index
                                 ? { ...currentItem, customDescription: event.target.value }
+                                : currentItem,
+                            ),
+                          )
+                        }
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="space-y-1 md:col-span-2">
+                      <Label>Custom description (English)</Label>
+                      <Textarea
+                        value={item.customDescriptionEn || ""}
+                        onChange={(event) =>
+                          setItems((previous) =>
+                            previous.map((currentItem, itemIndex) =>
+                              itemIndex === index
+                                ? { ...currentItem, customDescriptionEn: event.target.value }
                                 : currentItem,
                             ),
                           )
