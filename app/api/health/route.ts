@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { resolveDatabaseUrlFromEnvironment } from "@/lib/database-url";
 import { checkDatabaseConnection } from "@/lib/db";
+import { getOptionalEnv } from "@/lib/env";
 import { logError, logInfo } from "@/lib/logger";
 
 function shouldCheckDatabase(request: Request) {
@@ -8,9 +10,28 @@ function shouldCheckDatabase(request: Request) {
   return dbParam === "1" || dbParam === "true";
 }
 
+function getEnvironmentReadiness() {
+  let databaseConfig = "missing";
+  try {
+    resolveDatabaseUrlFromEnvironment();
+    databaseConfig = "ok";
+  } catch {
+    databaseConfig = "missing";
+  }
+
+  const authConfig =
+    getOptionalEnv("NEXTAUTH_URL") && getOptionalEnv("NEXTAUTH_SECRET") ? "ok" : "missing";
+
+  return {
+    databaseConfig,
+    authConfig,
+  };
+}
+
 export async function GET(request: Request) {
   const startedAt = Date.now();
   const checkDatabase = shouldCheckDatabase(request);
+  const readiness = getEnvironmentReadiness();
   const checks: Record<string, string> = {
     app: "ok",
     database: checkDatabase ? "unknown" : "skipped",
@@ -27,6 +48,7 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
       uptimeSeconds: Math.floor(process.uptime()),
       environment: process.env.NODE_ENV || "development",
+      readiness,
       checks,
       durationMs: Date.now() - startedAt,
     };
@@ -52,6 +74,7 @@ export async function GET(request: Request) {
         timestamp: new Date().toISOString(),
         uptimeSeconds: Math.floor(process.uptime()),
         environment: process.env.NODE_ENV || "development",
+        readiness,
         checks,
         durationMs: Date.now() - startedAt,
       },

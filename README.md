@@ -12,11 +12,11 @@ This repository is configured as a Next.js full-stack app with:
 - Framework: `Next.js`
 - Node.js version: `24.x`
 - Root directory: `./`
-- Build command:
-
-```bash
-npm install && npx prisma generate && npx prisma migrate deploy && npm run build
-```
+- Build and output settings: `Default` (Hostinger preset)
+- Hostinger preset runs `npm run build`, so this repository's `build` script includes:
+  - `prisma generate`
+  - `prisma migrate deploy`
+  - `next build`
 
 - Start command:
 
@@ -52,6 +52,7 @@ Notes:
 - Preferred production value is `DATABASE_URL`.
 - If `DATABASE_URL` is not set, runtime and Prisma config can construct it from `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`.
 - Production format: `mysql://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME`
+- If credentials contain special characters (`@`, `#`, `!`, `:`, `/`, `?`, `&`) and you set `DATABASE_URL` manually, URL-encode `DB_USER` and `DB_PASSWORD`.
 - For Hostinger Node.js apps, use the remote MySQL host (`srvXXXX.hstgr.io`) instead of `localhost`.
 
 ## 3. GitHub auto deploy flow

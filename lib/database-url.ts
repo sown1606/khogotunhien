@@ -19,6 +19,19 @@ function hasAnyDatabaseParts() {
   return DATABASE_ENV_KEYS.some((key) => readEnvValue(key));
 }
 
+function isValidMysqlDatabaseUrl(value: string) {
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol !== "mysql:") return false;
+    if (!parsed.hostname) return false;
+    if (!parsed.pathname || parsed.pathname === "/") return false;
+    if (parsed.hash) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function parseDatabasePort(rawPort: string | undefined) {
   if (!rawPort) return 3306;
 
@@ -62,10 +75,23 @@ function resolveDatabaseUrlFromParts() {
 export function resolveDatabaseUrlFromEnvironment(): DatabaseUrlResolution {
   const existingDatabaseUrl = readEnvValue("DATABASE_URL");
   if (existingDatabaseUrl) {
-    return {
-      databaseUrl: existingDatabaseUrl,
-      source: "DATABASE_URL",
-    };
+    if (isValidMysqlDatabaseUrl(existingDatabaseUrl)) {
+      return {
+        databaseUrl: existingDatabaseUrl,
+        source: "DATABASE_URL",
+      };
+    }
+
+    if (hasAnyDatabaseParts()) {
+      return {
+        databaseUrl: resolveDatabaseUrlFromParts(),
+        source: "DB_PARTS",
+      };
+    }
+
+    throw new Error(
+      "DATABASE_URL is invalid. Use mysql://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME and URL-encode special characters in credentials, or provide full DB_* variables.",
+    );
   }
 
   if (hasAnyDatabaseParts()) {
@@ -83,7 +109,7 @@ export function resolveDatabaseUrlFromEnvironment(): DatabaseUrlResolution {
 export function ensureDatabaseUrlInProcessEnv(): DatabaseUrlResolution {
   const resolved = resolveDatabaseUrlFromEnvironment();
 
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.DATABASE_URL || resolved.source === "DB_PARTS") {
     process.env.DATABASE_URL = resolved.databaseUrl;
   }
 
