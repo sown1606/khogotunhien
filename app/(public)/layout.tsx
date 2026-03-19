@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/public/site-footer";
 import { SiteHeader } from "@/components/public/site-header";
 import { getNavigationCategories, getSiteSettings } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 180;
 
 export default async function PublicLayout({
   children,

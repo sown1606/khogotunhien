@@ -64,7 +64,7 @@ async function ProductsPageContent({
     <div className="space-y-8">
       <SectionHeading
         eyebrow={t(locale, "Wood marketplace", "Wood marketplace")}
-        title={t(locale, "Khám phá sản phẩm gỗ kiểu Etsy", "Browse Etsy-like wood listings")}
+        title={t(locale, "Khám phá sản phẩm gỗ", "Browse wood listings")}
         description={t(
           locale,
           "Tìm nhanh theo danh mục, xem ảnh gỗ thật và liên hệ trực tiếp để nhận báo giá.",

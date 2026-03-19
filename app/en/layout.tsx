@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/public/site-header";
 import { getSiteMetadataBase } from "@/lib/env";
 import { getNavigationCategories, getSiteSettings } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 180;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {

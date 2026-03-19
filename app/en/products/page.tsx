@@ -61,7 +61,7 @@ export default async function EnglishProductsPage({ searchParams }: EnglishProdu
     <div className="space-y-8">
       <SectionHeading
         eyebrow="Wood marketplace"
-        title="Browse Etsy-like wood listings"
+        title="Browse wood listings"
         description="Use quick filters, browse real wood imagery, and request quotes directly."
         locale={locale}
       />

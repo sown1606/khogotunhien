@@ -75,6 +75,7 @@ export function ProductCard({ product, phoneNumber, zaloLink, compact, locale = 
             src={product.thumbnailUrl || "/demo/brand/texture.webp"}
             alt={product.name}
             fill
+            unoptimized
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes={compact ? "(max-width: 768px) 78vw, 24vw" : "(max-width: 768px) 94vw, 24vw"}
           />

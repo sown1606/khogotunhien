@@ -29,7 +29,7 @@ export function DiscoveryToolbar({ categories, locale = "vi" }: DiscoveryToolbar
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
         <p className="inline-flex items-center gap-1.5 font-semibold">
           <Sparkles className="size-3.5" />
-          {t(locale, "Nhịp duyệt kiểu Etsy", "Etsy-like browsing rhythm")}
+          {t(locale, "Khám phá nhanh sản phẩm gỗ", "Quick wood browsing")}
         </p>
         <p>{t(locale, "Hơn 1.000 sản phẩm ảnh gỗ", "1,000+ wood listings")}</p>
       </div>

@@ -1,4 +1,5 @@
 import { Prisma, type HomepageSectionType, type SiteSetting } from "@prisma/client";
+import { cache } from "react";
 
 import { db } from "@/lib/db";
 import {
@@ -227,8 +228,7 @@ function shouldUseDemoFallback() {
   return isDemoCatalogFallbackEnabled();
 }
 
-export async function getSiteSettings(inputLocale: Locale = "vi") {
-  const locale = normalizeLocale(inputLocale);
+const getSiteSettingsCached = cache(async (locale: Locale) => {
   const fallbackSettings = getFallbackSiteSetting();
 
   const settings = await withDatabaseFallback("getSiteSettings", fallbackSettings, async () => {
@@ -268,6 +268,11 @@ export async function getSiteSettings(inputLocale: Locale = "vi") {
   });
 
   return localizeSiteSetting(locale, settings);
+});
+
+export async function getSiteSettings(inputLocale: Locale = "vi") {
+  const locale = normalizeLocale(inputLocale);
+  return getSiteSettingsCached(locale);
 }
 
 export async function getSiteSettingsForAdmin() {

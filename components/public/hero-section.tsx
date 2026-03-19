@@ -29,6 +29,24 @@ export function HeroSection({
     <section className="relative overflow-hidden rounded-[28px] border border-stone-200 bg-[#fffaf4]">
       <div className="absolute inset-0 bg-[url('/demo/hero/hero-texture.webp')] bg-cover bg-center opacity-[0.1]" />
       <div className="absolute inset-0 bg-[radial-gradient(900px_circle_at_0%_0%,rgba(255,239,214,0.9),transparent_46%),radial-gradient(780px_circle_at_100%_30%,rgba(228,200,165,0.5),transparent_44%)]" />
+      <div className="absolute right-4 top-4 z-10 hidden items-center gap-2 md:flex">
+        {zaloLink ? (
+          <Button asChild size="sm">
+            <Link href={zaloLink} target="_blank" rel="noreferrer">
+              <MessageCircle className="size-4" />
+              {t(locale, "Nhắn tin", "Message")}
+            </Link>
+          </Button>
+        ) : null}
+        {phoneNumber ? (
+          <Button asChild size="sm" variant="secondary">
+            <a href={normalizePhoneLink(phoneNumber)}>
+              <Phone className="size-4" />
+              {t(locale, "Gọi ngay", "Call now")}
+            </a>
+          </Button>
+        ) : null}
+      </div>
       <div className="relative grid items-center gap-8 px-5 py-8 md:px-8 md:py-10 lg:grid-cols-12 lg:gap-8 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -38,13 +56,13 @@ export function HeroSection({
         >
           <p className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/70 bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--wood-800)]">
             <Sparkles className="size-3.5" />
-            {t(locale, "Phong cách marketplace gỗ", "Wood marketplace style")}
+            {t(locale, "Bộ sưu tập gỗ tự nhiên", "Natural wood collection")}
           </p>
           <h1 className="max-w-2xl text-4xl leading-[1.04] text-[var(--wood-900)] sm:text-5xl lg:text-[3.5rem]">
             {t(
               locale,
-              `Chất gỗ đẹp kiểu Etsy từ ${companyName}`,
-              `Etsy-inspired wood marketplace by ${companyName}`,
+              `Không gian gỗ thủ công từ ${companyName}`,
+              `Handcrafted wood showcase by ${companyName}`,
             )}
           </h1>
           <p className="max-w-xl text-base text-stone-700 sm:text-lg">
@@ -69,7 +87,7 @@ export function HeroSection({
           <div className="flex flex-wrap gap-2">
             {[
               t(locale, "1.000+ mẫu ảnh gỗ", "1,000+ wood visuals"),
-              t(locale, "Xu hướng Etsy", "Etsy-like discovery"),
+              t(locale, "Hình ảnh thực tế", "Real product imagery"),
               t(locale, "Tư vấn nhanh trong ngày", "Fast same-day consult"),
             ].map((item) => (
               <span
@@ -80,25 +98,13 @@ export function HeroSection({
               </span>
             ))}
           </div>
-
-          <div className="flex flex-wrap gap-3">
-            {zaloLink ? (
-              <Button asChild size="lg">
-                <Link href={zaloLink} target="_blank" rel="noreferrer">
-                  <MessageCircle className="size-4" />
-                  {t(locale, "Nhắn Zalo ngay", "Contact via Zalo")}
-                </Link>
-              </Button>
-            ) : null}
-            {phoneNumber ? (
-              <Button asChild variant="secondary" size="lg">
-                <a href={normalizePhoneLink(phoneNumber)}>
-                  <Phone className="size-4" />
-                  {t(locale, "Yêu cầu tư vấn", "Request consultation")}
-                </a>
-              </Button>
-            ) : null}
-          </div>
+          <p className="text-sm text-stone-600">
+            {t(
+              locale,
+              "Liên hệ nhanh bằng nút góc phải để nhận báo giá và mẫu phù hợp.",
+              "Use the top-right quick actions for instant quote support.",
+            )}
+          </p>
         </motion.div>
 
         <motion.div
@@ -110,32 +116,36 @@ export function HeroSection({
           <div className="grid grid-cols-2 gap-3">
             <div className="relative col-span-2 aspect-[6/4] overflow-hidden rounded-3xl border border-amber-200/60 shadow-[0_24px_60px_-36px_rgba(77,50,31,0.6)]">
               <Image
-                src="/demo/products/product-024.webp"
-                alt={t(locale, "Bàn gỗ slab tự nhiên", "Natural wood slab table")}
+                src="/demo/hero/wood-hero-main.jpg"
+                alt={t(locale, "Không gian gỗ thủ công", "Handcrafted wood space")}
                 fill
                 priority
+                unoptimized
+                loading="eager"
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 34vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
               <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
-                {t(locale, "Phổ biến", "Popular now")}
+                {t(locale, "Nổi bật", "Featured")}
               </span>
             </div>
             <div className="relative aspect-square overflow-hidden rounded-2xl border border-stone-200/80">
               <Image
-                src="/demo/products/product-009.webp"
-                alt={t(locale, "Mặt bàn gỗ", "Wood top")}
+                src="/demo/hero/wood-hero-side-1.jpg"
+                alt={t(locale, "Bàn gỗ nguyên tấm", "Natural slab table")}
                 fill
+                unoptimized
                 className="object-cover"
                 sizes="(max-width: 1024px) 40vw, 18vw"
               />
             </div>
             <div className="relative aspect-square overflow-hidden rounded-2xl border border-stone-200/80">
               <Image
-                src="/demo/products/product-017.webp"
-                alt={t(locale, "Kệ gỗ thủ công", "Handcrafted wood shelf")}
+                src="/demo/hero/wood-hero-side-2.jpg"
+                alt={t(locale, "Gia công gỗ thủ công", "Woodworking process")}
                 fill
+                unoptimized
                 className="object-cover"
                 sizes="(max-width: 1024px) 40vw, 18vw"
               />

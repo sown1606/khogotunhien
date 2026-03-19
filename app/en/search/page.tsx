@@ -26,7 +26,7 @@ export default async function EnglishSearchPage({ searchParams }: EnglishSearchP
     <div className="space-y-8">
       <SectionHeading
         eyebrow="Wood marketplace"
-        title="Etsy-style search results"
+        title="Wood search results"
         description="Search by product name, category, or wood material to browse real-image listings."
         locale={locale}
       />

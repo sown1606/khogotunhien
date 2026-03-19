@@ -32,7 +32,7 @@ async function SearchPageContent({
     <div className="space-y-8">
       <SectionHeading
         eyebrow={t(locale, "Wood marketplace", "Wood marketplace")}
-        title={t(locale, "Kết quả tìm kiếm kiểu Etsy", "Etsy-style search results")}
+        title={t(locale, "Kết quả tìm kiếm sản phẩm gỗ", "Wood search results")}
         description={t(
           locale,
           "Tìm theo tên sản phẩm, danh mục hoặc chất liệu gỗ để xem danh sách ảnh thật.",
