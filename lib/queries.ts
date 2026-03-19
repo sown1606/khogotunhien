@@ -21,6 +21,24 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
+let prismaPanicUntilTimestamp = 0;
+
+function isPrismaPanicActive() {
+  return Date.now() < prismaPanicUntilTimestamp;
+}
+
+function markPrismaPanicCooldown() {
+  prismaPanicUntilTimestamp = Date.now() + 2 * 60 * 1000;
+}
+
+function isPrismaPanicError(error: unknown) {
+  const message = getErrorMessage(error);
+  return (
+    message.includes("PrismaClientRustPanicError") ||
+    message.includes("PANIC: timer has gone away")
+  );
+}
+
 function readStringField(record: Record<string, unknown>, key: string) {
   const value = record[key];
   return typeof value === "string" ? value : undefined;
@@ -54,6 +72,11 @@ function localizeSiteSetting(locale: Locale, setting: SiteSetting): SiteSetting 
     contactSecondaryLabel:
       localizeRecordField(locale, source, "contactSecondaryLabel", "contactSecondaryLabelEn") ||
       setting.contactSecondaryLabel,
+    leadPopupTitle:
+      localizeRecordField(locale, source, "leadPopupTitle", "leadPopupTitleEn") ||
+      setting.leadPopupTitle,
+    leadPopupDescription:
+      localizeRecordField(locale, source, "leadPopupDescription", "leadPopupDescriptionEn") || null,
     seoTitle: localizeRecordField(locale, source, "seoTitle", "seoTitleEn") || null,
     seoDescription: localizeRecordField(locale, source, "seoDescription", "seoDescriptionEn") || null,
   };
@@ -204,6 +227,14 @@ function getFallbackSiteSetting(): SiteSetting {
     contactPrimaryLabelEn: "Chat on Zalo",
     contactSecondaryLabel: "Gọi ngay",
     contactSecondaryLabelEn: "Call now",
+    leadPopupEnabled: true,
+    leadPopupDelaySeconds: 25,
+    leadPopupTitle: "Cần hỗ trợ nhanh?",
+    leadPopupTitleEn: "Need quick support?",
+    leadPopupDescription:
+      "Để lại số điện thoại hoặc email, đội ngũ sẽ liên hệ tư vấn trong thời gian sớm nhất.",
+    leadPopupDescriptionEn:
+      "Leave your phone or email and our team will contact you shortly.",
     createdAt: now,
     updatedAt: now,
   };
@@ -214,9 +245,17 @@ async function withDatabaseFallback<T>(
   fallbackValue: T,
   execute: () => Promise<T>,
 ) {
+  if (isPrismaPanicActive()) {
+    return fallbackValue;
+  }
+
   try {
     return await execute();
   } catch (error) {
+    if (isPrismaPanicError(error)) {
+      markPrismaPanicCooldown();
+    }
+
     logError(`Database query failed: ${queryName}`, {
       error: getErrorMessage(error),
     });
@@ -253,6 +292,12 @@ const getSiteSettingsCached = cache(async (locale: Locale) => {
         contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
         contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
         contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
+        leadPopupEnabled: fallbackSettings.leadPopupEnabled,
+        leadPopupDelaySeconds: fallbackSettings.leadPopupDelaySeconds,
+        leadPopupTitle: fallbackSettings.leadPopupTitle,
+        leadPopupTitleEn: fallbackSettings.leadPopupTitleEn,
+        leadPopupDescription: fallbackSettings.leadPopupDescription,
+        leadPopupDescriptionEn: fallbackSettings.leadPopupDescriptionEn,
         logoUrl: fallbackSettings.logoUrl,
         faviconUrl: fallbackSettings.faviconUrl,
         seoTitle: fallbackSettings.seoTitle,
@@ -300,6 +345,12 @@ export async function getSiteSettingsForAdmin() {
         contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
         contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
         contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
+        leadPopupEnabled: fallbackSettings.leadPopupEnabled,
+        leadPopupDelaySeconds: fallbackSettings.leadPopupDelaySeconds,
+        leadPopupTitle: fallbackSettings.leadPopupTitle,
+        leadPopupTitleEn: fallbackSettings.leadPopupTitleEn,
+        leadPopupDescription: fallbackSettings.leadPopupDescription,
+        leadPopupDescriptionEn: fallbackSettings.leadPopupDescriptionEn,
       },
     });
   });

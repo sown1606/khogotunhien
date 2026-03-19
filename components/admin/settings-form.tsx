@@ -38,6 +38,12 @@ type SettingsValues = {
   contactPrimaryLabelEn: string | null;
   contactSecondaryLabel: string;
   contactSecondaryLabelEn: string | null;
+  leadPopupEnabled: boolean;
+  leadPopupDelaySeconds: number;
+  leadPopupTitle: string | null;
+  leadPopupTitleEn: string | null;
+  leadPopupDescription: string | null;
+  leadPopupDescriptionEn: string | null;
 };
 
 type SettingsFormProps = {
@@ -218,6 +224,68 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
             value={faviconUrl}
             onChange={setFaviconUrl}
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Lead popup</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <label className="inline-flex items-center gap-2 text-sm font-medium text-stone-800 md:col-span-2">
+            <input
+              type="checkbox"
+              name="leadPopupEnabled"
+              defaultChecked={initialValues.leadPopupEnabled}
+              className="size-4 rounded border-stone-300"
+            />
+            Enable popup for phone/email capture
+          </label>
+          <div className="space-y-2">
+            <Label htmlFor="leadPopupDelaySeconds">Popup delay (seconds)</Label>
+            <Input
+              id="leadPopupDelaySeconds"
+              name="leadPopupDelaySeconds"
+              type="number"
+              min={5}
+              max={300}
+              defaultValue={initialValues.leadPopupDelaySeconds || 25}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="leadPopupTitle">Popup title (Vietnamese)</Label>
+            <Input
+              id="leadPopupTitle"
+              name="leadPopupTitle"
+              defaultValue={initialValues.leadPopupTitle || ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="leadPopupTitleEn">Popup title (English)</Label>
+            <Input
+              id="leadPopupTitleEn"
+              name="leadPopupTitleEn"
+              defaultValue={initialValues.leadPopupTitleEn || ""}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="leadPopupDescription">Popup description (Vietnamese)</Label>
+            <Textarea
+              id="leadPopupDescription"
+              name="leadPopupDescription"
+              rows={3}
+              defaultValue={initialValues.leadPopupDescription || ""}
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="leadPopupDescriptionEn">Popup description (English)</Label>
+            <Textarea
+              id="leadPopupDescriptionEn"
+              name="leadPopupDescriptionEn"
+              rows={3}
+              defaultValue={initialValues.leadPopupDescriptionEn || ""}
+            />
+          </div>
         </CardContent>
       </Card>
 

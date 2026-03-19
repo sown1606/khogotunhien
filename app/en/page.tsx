@@ -21,6 +21,15 @@ export default async function EnglishHomePage() {
   ]);
   const hasDynamicSections = sections.length > 0;
   const hasFallbackContent = featuredCategories.length > 0 || featuredProducts.length > 0;
+  const orderedSections = [...sections].sort((sectionA, sectionB) => {
+    const sectionPriority = (value: string) => {
+      if (value === "FEATURED_PRODUCTS") return 0;
+      if (value === "FEATURED_CATEGORIES") return 1;
+      return 2;
+    };
+
+    return sectionPriority(sectionA.type) - sectionPriority(sectionB.type);
+  });
 
   return (
     <div className="space-y-14 pb-6">
@@ -35,21 +44,13 @@ export default async function EnglishHomePage() {
 
       {hasDynamicSections ? (
         <HomepageDynamicSections
-          sections={sections}
+          sections={orderedSections}
           phoneNumber={settings.phoneNumber}
           zaloLink={settings.zaloLink}
           locale={locale}
         />
       ) : hasFallbackContent ? (
         <>
-          <CategoryStrip
-            title="Featured Categories"
-            description="Explore curated material families for custom furniture and interior projects."
-            categories={featuredCategories}
-            href={withLocalePath(locale, "/categories")}
-            locale={locale}
-          />
-
           <ProductStrip
             title="Featured Products"
             description="Crafted products and ready-to-order materials from our workshop."
@@ -57,6 +58,14 @@ export default async function EnglishHomePage() {
             phoneNumber={settings.phoneNumber}
             zaloLink={settings.zaloLink}
             href={withLocalePath(locale, "/products")}
+            locale={locale}
+          />
+
+          <CategoryStrip
+            title="Featured Categories"
+            description="Explore curated material families for custom furniture and interior projects."
+            categories={featuredCategories}
+            href={withLocalePath(locale, "/categories")}
             locale={locale}
           />
         </>

@@ -19,6 +19,10 @@ function getDatabaseUrlForRuntime() {
 }
 
 function createPrismaClient() {
+  if (!process.env.PRISMA_CLIENT_ENGINE_TYPE) {
+    process.env.PRISMA_CLIENT_ENGINE_TYPE = "binary";
+  }
+
   const databaseUrl = getDatabaseUrlForRuntime();
 
   try {

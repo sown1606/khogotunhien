@@ -10,7 +10,7 @@ This project is a Next.js full-stack website with:
 ## 1. Hostinger deploy settings (exact)
 
 - Framework: `Next.js`
-- Node.js version: `24.x`
+- Node.js version: `20.x`
 - Root directory: `./`
 - Build and output settings: `Default` (locked Hostinger Next.js preset)
 - Start command:

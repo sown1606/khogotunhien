@@ -50,6 +50,12 @@ export async function updateSettingsAction(
       contactPrimaryLabelEn: formData.get("contactPrimaryLabelEn"),
       contactSecondaryLabel: formData.get("contactSecondaryLabel"),
       contactSecondaryLabelEn: formData.get("contactSecondaryLabelEn"),
+      leadPopupEnabled: formData.get("leadPopupEnabled"),
+      leadPopupDelaySeconds: formData.get("leadPopupDelaySeconds"),
+      leadPopupTitle: formData.get("leadPopupTitle"),
+      leadPopupTitleEn: formData.get("leadPopupTitleEn"),
+      leadPopupDescription: formData.get("leadPopupDescription"),
+      leadPopupDescriptionEn: formData.get("leadPopupDescriptionEn"),
     });
 
     const parsed = settingsSchema.safeParse(payload);
@@ -89,6 +95,12 @@ export async function updateSettingsAction(
         contactPrimaryLabelEn: parsed.data.contactPrimaryLabelEn || null,
         contactSecondaryLabel: parsed.data.contactSecondaryLabel || "Call now",
         contactSecondaryLabelEn: parsed.data.contactSecondaryLabelEn || null,
+        leadPopupEnabled: parsed.data.leadPopupEnabled,
+        leadPopupDelaySeconds: parsed.data.leadPopupDelaySeconds,
+        leadPopupTitle: parsed.data.leadPopupTitle || null,
+        leadPopupTitleEn: parsed.data.leadPopupTitleEn || null,
+        leadPopupDescription: parsed.data.leadPopupDescription || null,
+        leadPopupDescriptionEn: parsed.data.leadPopupDescriptionEn || null,
       },
       create: {
         id: "default",

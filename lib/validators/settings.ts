@@ -26,9 +26,18 @@ export const settingsSchema = z.object({
   contactPrimaryLabelEn: z.string().max(80).optional().or(z.literal("")),
   contactSecondaryLabel: z.string().max(80).optional().or(z.literal("")),
   contactSecondaryLabelEn: z.string().max(80).optional().or(z.literal("")),
+  leadPopupEnabled: z.boolean().default(true),
+  leadPopupDelaySeconds: z.number().int().min(5).max(300).default(25),
+  leadPopupTitle: z.string().max(120).optional().or(z.literal("")),
+  leadPopupTitleEn: z.string().max(120).optional().or(z.literal("")),
+  leadPopupDescription: z.string().max(2000).optional().or(z.literal("")),
+  leadPopupDescriptionEn: z.string().max(2000).optional().or(z.literal("")),
 });
 
 export function normalizeSettingsPayload(payload: Partial<Record<string, unknown>>) {
+  const popupDelayRaw = Number(payload.leadPopupDelaySeconds ?? 25);
+  const popupDelay = Number.isFinite(popupDelayRaw) ? popupDelayRaw : 25;
+
   return {
     companyName: String(payload.companyName ?? "").trim(),
     companyDescription: String(payload.companyDescription ?? "").trim(),
@@ -55,5 +64,14 @@ export function normalizeSettingsPayload(payload: Partial<Record<string, unknown
     contactPrimaryLabelEn: String(payload.contactPrimaryLabelEn ?? "").trim(),
     contactSecondaryLabel: String(payload.contactSecondaryLabel ?? "").trim(),
     contactSecondaryLabelEn: String(payload.contactSecondaryLabelEn ?? "").trim(),
+    leadPopupEnabled:
+      payload.leadPopupEnabled === true ||
+      payload.leadPopupEnabled === "true" ||
+      payload.leadPopupEnabled === "on",
+    leadPopupDelaySeconds: popupDelay,
+    leadPopupTitle: String(payload.leadPopupTitle ?? "").trim(),
+    leadPopupTitleEn: String(payload.leadPopupTitleEn ?? "").trim(),
+    leadPopupDescription: String(payload.leadPopupDescription ?? "").trim(),
+    leadPopupDescriptionEn: String(payload.leadPopupDescriptionEn ?? "").trim(),
   };
 }

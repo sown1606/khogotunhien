@@ -1,4 +1,6 @@
 import { FloatingContact } from "@/components/public/floating-contact";
+import { LeadCapturePopup } from "@/components/public/lead-capture-popup";
+import { VisitTracker } from "@/components/public/visit-tracker";
 import { HtmlLang } from "@/components/public/html-lang";
 import { SiteFooter } from "@/components/public/site-footer";
 import { SiteHeader } from "@/components/public/site-header";
@@ -46,6 +48,14 @@ export default async function PublicLayout({
         zaloLink={settings.zaloLink}
         primaryLabel={settings.contactPrimaryLabel}
         secondaryLabel={settings.contactSecondaryLabel}
+        locale={locale}
+      />
+      <VisitTracker locale={locale} />
+      <LeadCapturePopup
+        enabled={settings.leadPopupEnabled}
+        delaySeconds={settings.leadPopupDelaySeconds}
+        title={settings.leadPopupTitle}
+        description={settings.leadPopupDescription}
         locale={locale}
       />
     </div>

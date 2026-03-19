@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 
-import { cn } from "@/lib/utils";
+import { cn, resolveWoodDemoImage } from "@/lib/utils";
 
 type ProductGalleryProps = {
   images: string[];
@@ -12,7 +12,8 @@ type ProductGalleryProps = {
 };
 
 export function ProductGallery({ images, alt }: ProductGalleryProps) {
-  const gallery = images.length ? images : ["/window.svg"];
+  const gallerySource = images.length ? images : ["/demo/brand/texture.webp"];
+  const gallery = gallerySource.map((image, index) => resolveWoodDemoImage(image, `${alt}-${index}`));
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
@@ -31,6 +32,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
               src={gallery[activeIndex]}
               alt={alt}
               fill
+              unoptimized
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 55vw"
             />
@@ -53,6 +55,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
               src={image}
               alt={`${alt} ${index + 1}`}
               fill
+              unoptimized
               className="object-cover"
               sizes="120px"
             />

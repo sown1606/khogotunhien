@@ -1,5 +1,7 @@
 generator client {
   provider = "prisma-client-js"
+  engineType = "binary"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -166,6 +168,41 @@ model SiteSetting {
   contactPrimaryLabelEn String?
   contactSecondaryLabel String @default("Call now")
   contactSecondaryLabelEn String?
+  leadPopupEnabled    Boolean  @default(true)
+  leadPopupDelaySeconds Int    @default(25)
+  leadPopupTitle      String?  @default("Cần hỗ trợ nhanh?")
+  leadPopupTitleEn    String?
+  leadPopupDescription String? @db.Text
+  leadPopupDescriptionEn String? @db.Text
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+model LeadCapture {
+  id         String   @id @default(cuid())
+  name       String?
+  email      String?
+  phone      String?
+  message    String?  @db.Text
+  sourcePath String?
+  locale     String?  @default("vi")
+  status     String   @default("NEW")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model VisitLog {
+  id         String   @id @default(cuid())
+  path       String
+  locale     String?  @default("vi")
+  referrer   String?
+  userAgent  String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([path, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
 }

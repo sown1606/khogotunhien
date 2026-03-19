@@ -47,7 +47,7 @@ export function HeroSection({
           </Button>
         ) : null}
       </div>
-      <div className="relative grid items-center gap-8 px-5 py-8 md:px-8 md:py-10 lg:grid-cols-12 lg:gap-8 lg:px-10">
+      <div className="relative grid items-center gap-8 px-5 py-8 md:px-8 md:py-10 lg:grid-cols-12 lg:gap-10 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -58,7 +58,7 @@ export function HeroSection({
             <Sparkles className="size-3.5" />
             {t(locale, "Bộ sưu tập gỗ tự nhiên", "Natural wood collection")}
           </p>
-          <h1 className="max-w-2xl text-4xl leading-[1.04] text-[var(--wood-900)] sm:text-5xl lg:text-[3.5rem]">
+          <h1 className="max-w-2xl text-4xl leading-[1.06] text-[var(--wood-900)] sm:text-5xl lg:text-[3.4rem]">
             {t(
               locale,
               `Không gian gỗ thủ công từ ${companyName}`,
@@ -76,7 +76,7 @@ export function HeroSection({
 
           <SearchInput
             locale={locale}
-            className="max-w-xl"
+            className="max-w-2xl"
             placeholder={t(
               locale,
               "Tìm mẫu gỗ, slab, bàn console, panel trang trí...",
@@ -84,24 +84,10 @@ export function HeroSection({
             )}
           />
 
-          <div className="flex flex-wrap gap-2">
-            {[
-              t(locale, "1.000+ mẫu ảnh gỗ", "1,000+ wood visuals"),
-              t(locale, "Hình ảnh thực tế", "Real product imagery"),
-              t(locale, "Tư vấn nhanh trong ngày", "Fast same-day consult"),
-            ].map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-stone-300/80 bg-white/90 px-3 py-1.5 text-xs font-medium text-stone-700"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-          <p className="text-sm text-stone-600">
+          <p className="max-w-xl text-sm text-stone-600">
             {t(
               locale,
-              "Liên hệ nhanh bằng nút góc phải để nhận báo giá và mẫu phù hợp.",
+              "Ảnh và dữ liệu sản phẩm được tối ưu để duyệt nhanh, liên hệ báo giá bằng nút góc phải.",
               "Use the top-right quick actions for instant quote support.",
             )}
           </p>
@@ -113,41 +99,31 @@ export function HeroSection({
           transition={{ duration: 0.6, delay: 0.1 }}
           className="relative lg:col-span-5"
         >
-          <div className="grid grid-cols-2 gap-3">
-            <div className="relative col-span-2 aspect-[6/4] overflow-hidden rounded-3xl border border-amber-200/60 shadow-[0_24px_60px_-36px_rgba(77,50,31,0.6)]">
-              <Image
-                src="/demo/hero/wood-hero-main.jpg"
-                alt={t(locale, "Không gian gỗ thủ công", "Handcrafted wood space")}
-                fill
-                priority
-                unoptimized
-                loading="eager"
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 34vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-              <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
-                {t(locale, "Nổi bật", "Featured")}
-              </span>
-            </div>
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-stone-200/80">
+          <div className="relative aspect-[5/4] overflow-hidden rounded-3xl border border-amber-200/60 shadow-[0_24px_60px_-36px_rgba(77,50,31,0.6)]">
+            <Image
+              src="/demo/hero/wood-hero-main.jpg"
+              alt={t(locale, "Không gian gỗ thủ công", "Handcrafted wood space")}
+              fill
+              priority
+              unoptimized
+              loading="eager"
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 36vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+            <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
+              {t(locale, "Nổi bật", "Featured")}
+            </span>
+          </div>
+          <div className="absolute -bottom-5 right-4 hidden w-40 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl md:block">
+            <div className="relative aspect-square">
               <Image
                 src="/demo/hero/wood-hero-side-1.jpg"
                 alt={t(locale, "Bàn gỗ nguyên tấm", "Natural slab table")}
                 fill
                 unoptimized
                 className="object-cover"
-                sizes="(max-width: 1024px) 40vw, 18vw"
-              />
-            </div>
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-stone-200/80">
-              <Image
-                src="/demo/hero/wood-hero-side-2.jpg"
-                alt={t(locale, "Gia công gỗ thủ công", "Woodworking process")}
-                fill
-                unoptimized
-                className="object-cover"
-                sizes="(max-width: 1024px) 40vw, 18vw"
+                sizes="180px"
               />
             </div>
           </div>

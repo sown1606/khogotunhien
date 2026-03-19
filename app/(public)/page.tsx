@@ -20,6 +20,15 @@ async function HomePageContent({ locale }: { locale: Locale }) {
   ]);
   const hasDynamicSections = sections.length > 0;
   const hasFallbackContent = featuredCategories.length > 0 || featuredProducts.length > 0;
+  const orderedSections = [...sections].sort((sectionA, sectionB) => {
+    const sectionPriority = (value: string) => {
+      if (value === "FEATURED_PRODUCTS") return 0;
+      if (value === "FEATURED_CATEGORIES") return 1;
+      return 2;
+    };
+
+    return sectionPriority(sectionA.type) - sectionPriority(sectionB.type);
+  });
 
   return (
     <div className="space-y-14 pb-6">
@@ -34,24 +43,12 @@ async function HomePageContent({ locale }: { locale: Locale }) {
 
       {hasDynamicSections ? (
         <HomepageDynamicSections
-          sections={sections}
+          sections={orderedSections}
           phoneNumber={settings.phoneNumber}
           zaloLink={settings.zaloLink}
         />
       ) : hasFallbackContent ? (
         <>
-          <CategoryStrip
-            title={t(locale, "Danh mục nổi bật", "Featured Categories")}
-            description={t(
-              locale,
-              "Khám phá các nhóm vật liệu được chọn lọc cho nội thất và dự án thi công.",
-              "Explore curated material families for custom furniture and interior projects.",
-            )}
-            categories={featuredCategories}
-            href={withLocalePath(locale, "/categories")}
-            locale={locale}
-          />
-
           <ProductStrip
             title={t(locale, "Sản phẩm nổi bật", "Featured Products")}
             description={t(
@@ -63,6 +60,18 @@ async function HomePageContent({ locale }: { locale: Locale }) {
             phoneNumber={settings.phoneNumber}
             zaloLink={settings.zaloLink}
             href={withLocalePath(locale, "/products")}
+            locale={locale}
+          />
+
+          <CategoryStrip
+            title={t(locale, "Danh mục nổi bật", "Featured Categories")}
+            description={t(
+              locale,
+              "Khám phá các nhóm vật liệu được chọn lọc cho nội thất và dự án thi công.",
+              "Explore curated material families for custom furniture and interior projects.",
+            )}
+            categories={featuredCategories}
+            href={withLocalePath(locale, "/categories")}
             locale={locale}
           />
         </>

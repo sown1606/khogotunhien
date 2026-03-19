@@ -17,7 +17,7 @@ const cormorant = Cormorant_Garamond({
   weight: ["500", "600", "700"],
 });
 
-export const dynamic = "force-dynamic";
+export const revalidate = 180;
 
 export async function generateMetadata(): Promise<Metadata> {
   try {

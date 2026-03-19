@@ -39,12 +39,13 @@ export function fileUrlFromPath(path: string) {
   return path.startsWith("/") ? path : `/${path}`;
 }
 
-const demoWoodImagePool = [
-  "/demo/hero/wood-hero-main.jpg",
-  "/demo/hero/wood-hero-side-1.jpg",
-  "/demo/hero/wood-hero-side-2.jpg",
-  "/demo/brand/texture.webp",
-];
+const demoWoodProductImagePool = Array.from({ length: 28 }, (_, index) => {
+  return `/demo/products/product-${String(index + 1).padStart(3, "0")}.webp`;
+});
+
+const demoWoodCategoryImagePool = Array.from({ length: 12 }, (_, index) => {
+  return `/demo/categories/category-${String(index + 1).padStart(2, "0")}.webp`;
+});
 
 function hashSeed(seed: string) {
   return Array.from(seed).reduce((hash, char, index) => {
@@ -53,9 +54,24 @@ function hashSeed(seed: string) {
 }
 
 export function resolveWoodDemoImage(source: string | null | undefined, seed: string) {
-  if (source?.startsWith("/demo/products/") || source?.startsWith("/demo/categories/")) {
-    return demoWoodImagePool[hashSeed(seed) % demoWoodImagePool.length];
+  if (!source) {
+    return demoWoodProductImagePool[hashSeed(seed) % demoWoodProductImagePool.length];
   }
 
-  return source || demoWoodImagePool[hashSeed(seed) % demoWoodImagePool.length];
+  if (
+    source.startsWith("/demo/products/") ||
+    source.startsWith("/demo/categories/") ||
+    source.startsWith("/demo/hero/wood-")
+  ) {
+    return source;
+  }
+
+  if (source.startsWith("/demo/")) {
+    const pool = source.includes("/categories/")
+      ? demoWoodCategoryImagePool
+      : demoWoodProductImagePool;
+    return pool[hashSeed(seed) % pool.length];
+  }
+
+  return source;
 }

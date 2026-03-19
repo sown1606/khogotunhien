@@ -6,6 +6,7 @@ import { ProductStrip } from "@/components/public/product-strip";
 import { SectionHeading } from "@/components/public/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
+import { resolveWoodDemoImage } from "@/lib/utils";
 
 type HomepageSectionWithItems = {
   id: string;
@@ -113,10 +114,13 @@ export function HomepageDynamicSections({
                   (item.category ? withLocalePath(locale, `/categories/${item.category.slug}`) : null) ||
                   "#";
                 const image =
-                  item.imageUrl ||
+                  resolveWoodDemoImage(
+                    item.imageUrl ||
                   item.product?.thumbnailUrl ||
                   item.category?.imageUrl ||
-                  "/demo/brand/texture.webp";
+                    "/demo/brand/texture.webp",
+                    item.id,
+                  );
                 const title =
                   item.customTitle ||
                   item.product?.name ||

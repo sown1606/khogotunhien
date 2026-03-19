@@ -81,11 +81,11 @@ export function SiteHeader({
             </Link>
 
             <div className="hidden flex-1 lg:block">
-              <SearchInput locale={locale} />
+              <SearchInput locale={locale} className="mx-auto w-full max-w-4xl" />
             </div>
 
-            <nav className="hidden items-center gap-1 lg:flex">
-              {navigationItems.map((item) => (
+            <nav className="hidden items-center gap-1 xl:flex">
+              {navigationItems.slice(0, 2).map((item) => (
                 <Button key={item.href} asChild variant="ghost" size="sm" className="text-stone-700">
                   <Link href={item.href}>{item.label}</Link>
                 </Button>
@@ -129,6 +129,21 @@ export function SiteHeader({
 
           <div className="no-scrollbar -mx-1 mt-3 hidden overflow-x-auto lg:block">
             <div className="flex min-w-max items-center gap-2 px-1">
+              {navigationItems.map((item, index) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
+                    index === 0
+                      ? "border-stone-900 bg-stone-900 text-white"
+                      : "border-stone-300/80 bg-white text-stone-700 hover:border-stone-500 hover:text-stone-900",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <span className="mx-1 h-6 w-px bg-stone-200" />
               {categories.map((category) => (
                 <Link
                   key={category.id}
