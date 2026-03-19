@@ -1,26 +1,26 @@
 "use client";
 
 import { useEffect, useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { type Locale, getLocaleFromPathname, stripLocalePrefix, withLocalePath } from "@/lib/i18n";
 
-function getLocalizedHref(pathname: string, searchParams: Pick<URLSearchParams, "toString">, targetLocale: Locale) {
+function getLocalizedHref(pathname: string, queryString: string, targetLocale: Locale) {
   const basePath = stripLocalePrefix(pathname || "/");
   const localizedPath = withLocalePath(targetLocale, basePath);
-  const query = searchParams.toString();
-  return query ? `${localizedPath}?${query}` : localizedPath;
+  return queryString ? `${localizedPath}?${queryString}` : localizedPath;
 }
 
 export function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname() || "/";
-  const searchParams = useSearchParams();
   const currentLocale = getLocaleFromPathname(pathname);
   const [isPending, startLocaleTransition] = useTransition();
+  const currentQuery =
+    typeof window === "undefined" ? "" : window.location.search.replace(/^\?/, "");
 
-  const viHref = getLocalizedHref(pathname, searchParams, "vi");
-  const enHref = getLocalizedHref(pathname, searchParams, "en");
+  const viHref = getLocalizedHref(pathname, currentQuery, "vi");
+  const enHref = getLocalizedHref(pathname, currentQuery, "en");
 
   useEffect(() => {
     router.prefetch(viHref);
@@ -29,7 +29,8 @@ export function LanguageSwitcher() {
 
   const onSwitchLocale = (targetLocale: Locale) => {
     if (targetLocale === currentLocale) return;
-    const targetHref = targetLocale === "vi" ? viHref : enHref;
+    const liveQuery = typeof window === "undefined" ? currentQuery : window.location.search.replace(/^\?/, "");
+    const targetHref = getLocalizedHref(pathname, liveQuery, targetLocale);
 
     startLocaleTransition(() => {
       router.replace(targetHref, { scroll: false });

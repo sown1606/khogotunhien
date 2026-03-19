@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 import { type Locale } from "@/lib/i18n";
@@ -11,10 +11,9 @@ type VisitTrackerProps = {
 
 export function VisitTracker({ locale }: VisitTrackerProps) {
   const pathname = usePathname() || "/";
-  const searchParams = useSearchParams();
-  const query = searchParams.toString();
 
   useEffect(() => {
+    const query = typeof window === "undefined" ? "" : window.location.search.replace(/^\?/, "");
     const fullPath = query ? `${pathname}?${query}` : pathname;
     const dedupeKey = `visit:${fullPath}`;
 
@@ -43,7 +42,7 @@ export function VisitTracker({ locale }: VisitTrackerProps) {
       body: payload,
       keepalive: true,
     });
-  }, [locale, pathname, query]);
+  }, [locale, pathname]);
 
   return null;
 }
