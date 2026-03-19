@@ -7,6 +7,13 @@ export type DatabaseUrlResolution = {
   source: DatabaseUrlSource;
 };
 
+export type DatabaseConnectionDebug = {
+  source: DatabaseUrlSource | "missing";
+  host: string | null;
+  port: number | null;
+  database: string | null;
+};
+
 function readEnvValue(name: string) {
   const value = process.env[name];
   if (typeof value !== "string") return undefined;
@@ -131,4 +138,26 @@ export function ensureDatabaseUrlInProcessEnv(): DatabaseUrlResolution {
   }
 
   return resolved;
+}
+
+export function getDatabaseConnectionDebugInfo(): DatabaseConnectionDebug {
+  try {
+    const resolved = resolveDatabaseUrlFromEnvironment();
+    const parsed = new URL(resolved.databaseUrl);
+    const databasePath = parsed.pathname.replace(/^\//, "");
+
+    return {
+      source: resolved.source,
+      host: parsed.hostname || null,
+      port: parsed.port ? Number(parsed.port) : 3306,
+      database: databasePath || null,
+    };
+  } catch {
+    return {
+      source: "missing",
+      host: null,
+      port: null,
+      database: null,
+    };
+  }
 }

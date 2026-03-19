@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { resolveDatabaseUrlFromEnvironment } from "@/lib/database-url";
+import { getDatabaseConnectionDebugInfo, resolveDatabaseUrlFromEnvironment } from "@/lib/database-url";
 import { checkDatabaseConnection } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
 import { logError, logInfo } from "@/lib/logger";
@@ -11,6 +11,7 @@ function shouldCheckDatabase(request: Request) {
 }
 
 function getEnvironmentReadiness() {
+  const dbDebug = getDatabaseConnectionDebugInfo();
   let databaseConfig = "missing";
   try {
     resolveDatabaseUrlFromEnvironment();
@@ -25,6 +26,10 @@ function getEnvironmentReadiness() {
 
   return {
     databaseConfig,
+    databaseSource: dbDebug.source,
+    databaseHost: dbDebug.host,
+    databasePort: dbDebug.port,
+    databaseName: dbDebug.database,
     authConfig,
     demoCatalogFallback,
   };
@@ -58,6 +63,8 @@ export async function GET(request: Request) {
     logInfo("Health check succeeded.", {
       durationMs: response.durationMs,
       dbCheckRequested: checkDatabase,
+      databaseHost: readiness.databaseHost,
+      databaseSource: readiness.databaseSource,
     });
 
     return NextResponse.json(response, { status: 200 });
@@ -68,6 +75,8 @@ export async function GET(request: Request) {
       durationMs: Date.now() - startedAt,
       error: error instanceof Error ? error.message : "Unknown error",
       dbCheckRequested: checkDatabase,
+      databaseHost: readiness.databaseHost,
+      databaseSource: readiness.databaseSource,
     });
 
     return NextResponse.json(
