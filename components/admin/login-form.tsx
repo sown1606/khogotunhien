@@ -71,11 +71,26 @@ export function LoginForm() {
     const normalizedPassword = password.trim();
 
     startTransition(async () => {
-      const result = await signIn("credentials", {
-        email: normalizedEmail,
-        password: normalizedPassword,
-        redirect: false,
-      });
+      let result:
+        | {
+            error?: string | null;
+            ok?: boolean;
+            status?: number;
+            url?: string | null;
+          }
+        | undefined;
+
+      try {
+        result = await signIn("credentials", {
+          email: normalizedEmail,
+          password: normalizedPassword,
+          redirect: false,
+          callbackUrl: "/admin",
+        });
+      } catch {
+        setError("Máy chủ xác thực đang lỗi. Vui lòng thử lại sau vài giây.");
+        return;
+      }
 
       if (result?.ok) {
         if (rememberMe) {
@@ -88,6 +103,11 @@ export function LoginForm() {
         }
         router.push("/admin");
         router.refresh();
+        return;
+      }
+
+      if (result?.error === "AuthServerError") {
+        setError("Máy chủ xác thực đang lỗi. Kiểm tra NEXTAUTH_URL/NEXTAUTH_SECRET và xem log runtime.");
         return;
       }
 

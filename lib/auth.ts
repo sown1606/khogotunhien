@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
-import { logWarn } from "@/lib/logger";
+import { logError, logWarn } from "@/lib/logger";
 
 const nextAuthSecret = getOptionalEnv("NEXTAUTH_SECRET");
 
@@ -32,6 +32,27 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 60 * 60 * 24 * 30,
+  },
+  debug: process.env.NEXTAUTH_DEBUG === "true",
+  logger: {
+    error(code, metadata) {
+      const safeMetadata =
+        typeof metadata === "string"
+          ? metadata
+          : metadata instanceof Error
+            ? metadata.message
+            : metadata
+              ? Object.prototype.toString.call(metadata)
+              : undefined;
+
+      logError("NextAuth error event.", {
+        code,
+        ...(safeMetadata ? { metadata: safeMetadata } : {}),
+      });
+    },
+    warn(code) {
+      logWarn("NextAuth warning event.", { code });
+    },
   },
   providers: [
     CredentialsProvider({
