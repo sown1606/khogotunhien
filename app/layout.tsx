@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Be_Vietnam_Pro, Noto_Serif } from "next/font/google";
 import "./globals.css";
 
 import { AppProviders } from "@/components/layout/providers";
 import { getSiteMetadataBase } from "@/lib/env";
 import { getSiteSettings } from "@/lib/queries";
 
-const manrope = Manrope({
+const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-manrope",
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin", "latin-ext", "vietnamese"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
-const cormorant = Cormorant_Garamond({
+const notoSerif = Noto_Serif({
   variable: "--font-cormorant",
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin", "latin-ext", "vietnamese"],
+  display: "swap",
   weight: ["500", "600", "700"],
 });
 
@@ -83,7 +86,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${manrope.variable} ${cormorant.variable} antialiased`}>
+      <body className={`${beVietnamPro.variable} ${notoSerif.variable} antialiased`}>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

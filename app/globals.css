@@ -30,6 +30,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-manrope), sans-serif;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1,

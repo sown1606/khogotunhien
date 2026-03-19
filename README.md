@@ -55,6 +55,10 @@ ZALO_URL="https://zalo.me/your-zalo-number"
 
 # Optional storefront fallback. Keep true to show local demo catalog when DB is empty/unreachable.
 DEMO_CATALOG_FALLBACK="true"
+
+# Optional AI copy assistant in admin visual editor
+OPENAI_API_KEY="your-openai-api-key"
+OPENAI_MODEL="gpt-4.1-mini"
 ```
 
 ## 3. GitHub auto deploy workflow (exact)
@@ -64,6 +68,13 @@ DEMO_CATALOG_FALLBACK="true"
 3. Push to `main`
 4. Hostinger auto deploys
 5. Verify website and admin
+
+Rollback quickly if needed:
+
+```bash
+git revert --no-edit HEAD
+git push origin main
+```
 
 ## 4. Prisma production migration flow
 
@@ -116,6 +127,8 @@ After login at `/admin/login`, admin can update:
 - Zalo link
 - social links
 - logo and favicon URLs
+- visual editor with live preview (`/admin/visual-editor`)
+- AI-assisted copy suggestion for key content fields (requires `OPENAI_API_KEY`)
 
 Changes are saved to MySQL and revalidated on public pages.
 
