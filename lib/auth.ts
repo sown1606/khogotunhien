@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
+import { logWarn } from "@/lib/logger";
 
 const nextAuthSecret = getOptionalEnv("NEXTAUTH_SECRET");
 
@@ -13,6 +14,19 @@ const credentialsSchema = z.object({
   email: z.email().min(1),
   password: z.string().min(6),
 });
+
+let nextAuthDbFailureLogTimestamp = 0;
+const AUTH_DB_LOG_THROTTLE_MS = 60 * 1000;
+
+function logAuthDatabaseFailureThrottled(error: unknown) {
+  const now = Date.now();
+  if (now < nextAuthDbFailureLogTimestamp) return;
+
+  nextAuthDbFailureLogTimestamp = now + AUTH_DB_LOG_THROTTLE_MS;
+  logWarn("Admin authentication check could not reach database.", {
+    error: error instanceof Error ? error.message : "Unknown error",
+  });
+}
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -32,27 +46,31 @@ export const authOptions: NextAuthOptions = {
         if (!parsed.success) {
           return null;
         }
+        try {
+          const user = await db.adminUser.findUnique({
+            where: { email: parsed.data.email },
+          });
 
-        const user = await db.adminUser.findUnique({
-          where: { email: parsed.data.email },
-        });
+          if (!user || !user.active) {
+            return null;
+          }
 
-        if (!user || !user.active) {
+          const validPassword = await bcrypt.compare(parsed.data.password, user.passwordHash);
+
+          if (!validPassword) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          logAuthDatabaseFailureThrottled(error);
           return null;
         }
-
-        const validPassword = await bcrypt.compare(parsed.data.password, user.passwordHash);
-
-        if (!validPassword) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
     }),
   ],

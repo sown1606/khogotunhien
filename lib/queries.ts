@@ -15,13 +15,18 @@ import {
   isDemoCatalogFallbackEnabled,
 } from "@/lib/demo-catalog";
 import { type Locale, localizeValue, normalizeLocale } from "@/lib/i18n";
-import { logError } from "@/lib/logger";
+import { logError, logWarn } from "@/lib/logger";
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
 let prismaPanicUntilTimestamp = 0;
+let databaseAuthFailureUntilTimestamp = 0;
+let nextAuthFailureLogTimestamp = 0;
+
+const DB_AUTH_COOLDOWN_MS = 5 * 60 * 1000;
+const DB_AUTH_LOG_THROTTLE_MS = 60 * 1000;
 
 function isPrismaPanicActive() {
   return Date.now() < prismaPanicUntilTimestamp;
@@ -31,12 +36,47 @@ function markPrismaPanicCooldown() {
   prismaPanicUntilTimestamp = Date.now() + 2 * 60 * 1000;
 }
 
+function isDatabaseAuthFailureActive() {
+  return Date.now() < databaseAuthFailureUntilTimestamp;
+}
+
+function markDatabaseAuthFailureCooldown() {
+  databaseAuthFailureUntilTimestamp = Date.now() + DB_AUTH_COOLDOWN_MS;
+}
+
 function isPrismaPanicError(error: unknown) {
   const message = getErrorMessage(error);
   return (
     message.includes("PrismaClientRustPanicError") ||
     message.includes("PANIC: timer has gone away")
   );
+}
+
+function isDatabaseAuthenticationError(error: unknown) {
+  const message = getErrorMessage(error);
+
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    return message.includes("P1000") || message.includes("Authentication failed");
+  }
+
+  return (
+    message.includes("P1000") ||
+    message.includes("Authentication failed against database server") ||
+    message.includes("provided database credentials") ||
+    message.includes("Unknown authentication plugin")
+  );
+}
+
+function logDatabaseAuthFailureThrottled(queryName: string, error: unknown) {
+  const now = Date.now();
+  if (now < nextAuthFailureLogTimestamp) return;
+
+  nextAuthFailureLogTimestamp = now + DB_AUTH_LOG_THROTTLE_MS;
+  logWarn("Database authentication failed. Falling back to demo/default data for public queries.", {
+    query: queryName,
+    cooldownSeconds: Math.floor(DB_AUTH_COOLDOWN_MS / 1000),
+    error: getErrorMessage(error),
+  });
 }
 
 function readStringField(record: Record<string, unknown>, key: string) {
@@ -245,7 +285,7 @@ async function withDatabaseFallback<T>(
   fallbackValue: T,
   execute: () => Promise<T>,
 ) {
-  if (isPrismaPanicActive()) {
+  if (isPrismaPanicActive() || isDatabaseAuthFailureActive()) {
     return fallbackValue;
   }
 
@@ -254,6 +294,12 @@ async function withDatabaseFallback<T>(
   } catch (error) {
     if (isPrismaPanicError(error)) {
       markPrismaPanicCooldown();
+    }
+
+    if (isDatabaseAuthenticationError(error)) {
+      markDatabaseAuthFailureCooldown();
+      logDatabaseAuthFailureThrottled(queryName, error);
+      return fallbackValue;
     }
 
     logError(`Database query failed: ${queryName}`, {
