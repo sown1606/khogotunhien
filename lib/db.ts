@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 import { ensureDatabaseUrlInProcessEnv } from "@/lib/database-url";
-import { logError } from "@/lib/logger";
+import { logError, logWarn } from "@/lib/logger";
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -50,6 +50,7 @@ function createPrismaClient() {
 }
 
 let productionPrisma: PrismaClient | undefined;
+let prismaResetPromise: Promise<void> | null = null;
 
 function getPrismaClient() {
   if (process.env.NODE_ENV !== "production") {
@@ -66,15 +67,116 @@ function getPrismaClient() {
   return productionPrisma;
 }
 
-export const db = new Proxy({} as PrismaClient, {
-  get(_target, property, receiver) {
-    const prisma = getPrismaClient();
-    const value = Reflect.get(prisma, property, receiver);
+function getPrismaErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message.toLowerCase() : "";
+}
 
-    return typeof value === "function" ? value.bind(prisma) : value;
-  },
-});
+function isRecoverablePrismaEngineError(error: unknown) {
+  const message = getPrismaErrorMessage(error);
+  const name = error instanceof Error ? error.name : "";
+
+  return (
+    name === "PrismaClientRustPanicError" ||
+    message.includes("timer has gone away") ||
+    message.includes("query engine exited with code") ||
+    message.includes("main task panicked") ||
+    message.includes("joinerror::panic") ||
+    message.includes("engine is not yet connected")
+  );
+}
+
+async function disconnectSilently(client: PrismaClient | undefined) {
+  if (!client) return;
+
+  try {
+    await client.$disconnect();
+  } catch {
+    // Ignore disconnect errors during recovery.
+  }
+}
+
+async function resetPrismaClient() {
+  if (!prismaResetPromise) {
+    prismaResetPromise = (async () => {
+      if (process.env.NODE_ENV !== "production") {
+        const existing = global.prisma;
+        global.prisma = undefined;
+        await disconnectSilently(existing);
+        return;
+      }
+
+      const existing = productionPrisma;
+      productionPrisma = undefined;
+      await disconnectSilently(existing);
+    })().finally(() => {
+      prismaResetPromise = null;
+    });
+  }
+
+  await prismaResetPromise;
+}
+
+function resolvePath(path: PropertyKey[]) {
+  let value: unknown = getPrismaClient();
+
+  for (const segment of path) {
+    value = Reflect.get(value as object, segment);
+  }
+
+  return value;
+}
+
+function resolveParent(path: PropertyKey[]) {
+  if (path.length === 0) return getPrismaClient();
+  return resolvePath(path.slice(0, -1));
+}
+
+function createPrismaProxy(path: PropertyKey[] = []): unknown {
+  return new Proxy(
+    {},
+    {
+      get(_target, property) {
+        if (property === Symbol.toStringTag) return "PrismaProxy";
+        const nextPath = [...path, property];
+        const value = resolvePath(nextPath);
+
+        if (typeof value === "function") {
+          return async (...args: unknown[]) => {
+            try {
+              const fn = resolvePath(nextPath) as (...innerArgs: unknown[]) => unknown;
+              const parent = resolveParent(nextPath);
+              return await fn.apply(parent, args);
+            } catch (error) {
+              if (!isRecoverablePrismaEngineError(error)) {
+                throw error;
+              }
+
+              logWarn("Recovering Prisma client after engine failure.", {
+                operation: nextPath.map(String).join("."),
+                error: error instanceof Error ? error.message : "Unknown error",
+              });
+
+              await resetPrismaClient();
+
+              const fn = resolvePath(nextPath) as (...innerArgs: unknown[]) => unknown;
+              const parent = resolveParent(nextPath);
+              return await fn.apply(parent, args);
+            }
+          };
+        }
+
+        if (value && typeof value === "object") {
+          return createPrismaProxy(nextPath);
+        }
+
+        return value;
+      },
+    },
+  );
+}
+
+export const db = createPrismaProxy() as PrismaClient;
 
 export async function checkDatabaseConnection() {
-  await getPrismaClient().$queryRaw`SELECT 1`;
+  await db.$queryRaw`SELECT 1`;
 }

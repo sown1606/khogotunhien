@@ -5,6 +5,11 @@ import { checkDatabaseConnection } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
 import { logError, logInfo } from "@/lib/logger";
 
+function getSafeErrorMessage(error: unknown) {
+  const raw = error instanceof Error ? error.message : "Unknown error";
+  return raw.length > 280 ? `${raw.slice(0, 280)}…` : raw;
+}
+
 function shouldCheckDatabase(request: Request) {
   const dbParam = new URL(request.url).searchParams.get("db");
   return dbParam === "1" || dbParam === "true";
@@ -70,10 +75,11 @@ export async function GET(request: Request) {
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
     checks.database = "error";
+    const safeErrorMessage = getSafeErrorMessage(error);
 
     logError("Health check failed.", {
       durationMs: Date.now() - startedAt,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: safeErrorMessage,
       dbCheckRequested: checkDatabase,
       databaseHost: readiness.databaseHost,
       databaseSource: readiness.databaseSource,
@@ -87,6 +93,7 @@ export async function GET(request: Request) {
         environment: process.env.NODE_ENV || "development",
         readiness,
         checks,
+        ...(checkDatabase ? { databaseError: safeErrorMessage } : {}),
         durationMs: Date.now() - startedAt,
       },
       { status: 200 },
