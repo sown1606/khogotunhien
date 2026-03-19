@@ -21,12 +21,27 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
+function getCompactErrorMessage(error: unknown) {
+  const message = getErrorMessage(error);
+  const limit = 1200;
+
+  if (message.length <= limit) {
+    return message;
+  }
+
+  return `${message.slice(0, limit)}… [truncated ${message.length - limit} chars]`;
+}
+
 let prismaPanicUntilTimestamp = 0;
 let databaseAuthFailureUntilTimestamp = 0;
+let databaseOutageUntilTimestamp = 0;
 let nextAuthFailureLogTimestamp = 0;
+let nextOutageLogTimestamp = 0;
 
 const DB_AUTH_COOLDOWN_MS = 5 * 60 * 1000;
 const DB_AUTH_LOG_THROTTLE_MS = 60 * 1000;
+const DB_OUTAGE_COOLDOWN_MS = 90 * 1000;
+const DB_OUTAGE_LOG_THROTTLE_MS = 45 * 1000;
 
 function isPrismaPanicActive() {
   return Date.now() < prismaPanicUntilTimestamp;
@@ -44,26 +59,71 @@ function markDatabaseAuthFailureCooldown() {
   databaseAuthFailureUntilTimestamp = Date.now() + DB_AUTH_COOLDOWN_MS;
 }
 
+function isDatabaseOutageActive() {
+  return Date.now() < databaseOutageUntilTimestamp;
+}
+
+function markDatabaseOutageCooldown() {
+  databaseOutageUntilTimestamp = Date.now() + DB_OUTAGE_COOLDOWN_MS;
+}
+
 function isPrismaPanicError(error: unknown) {
-  const message = getErrorMessage(error);
+  const message = getErrorMessage(error).toLowerCase();
+  const errorName = error instanceof Error ? error.name : "";
+
+  if (error instanceof Prisma.PrismaClientRustPanicError || errorName === "PrismaClientRustPanicError") {
+    return true;
+  }
+
   return (
-    message.includes("PrismaClientRustPanicError") ||
-    message.includes("PANIC: timer has gone away")
+    message.includes("panic: timer has gone away") ||
+    message.includes("timer has gone away") ||
+    message.includes("query engine exited with code 101") ||
+    message.includes("main task panicked") ||
+    message.includes("joinerror::panic")
   );
 }
 
 function isDatabaseAuthenticationError(error: unknown) {
-  const message = getErrorMessage(error);
+  const message = getErrorMessage(error).toLowerCase();
 
   if (error instanceof Prisma.PrismaClientInitializationError) {
-    return message.includes("P1000") || message.includes("Authentication failed");
+    return message.includes("p1000") || message.includes("authentication failed");
   }
 
   return (
-    message.includes("P1000") ||
-    message.includes("Authentication failed against database server") ||
+    message.includes("p1000") ||
+    message.includes("authentication failed against database server") ||
     message.includes("provided database credentials") ||
-    message.includes("Unknown authentication plugin")
+    message.includes("unknown authentication plugin")
+  );
+}
+
+function isDatabaseOutageError(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase();
+
+  if (isPrismaPanicError(error)) {
+    return true;
+  }
+
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    return (
+      message.includes("p1001") ||
+      message.includes("p1002") ||
+      message.includes("can't reach database server")
+    );
+  }
+
+  return (
+    message.includes("p1001") ||
+    message.includes("p1002") ||
+    message.includes("p1017") ||
+    message.includes("can't reach database server") ||
+    message.includes("query engine exited with code") ||
+    message.includes("connection refused") ||
+    message.includes("connection reset") ||
+    message.includes("timed out") ||
+    message.includes("server has gone away")
   );
 }
 
@@ -75,7 +135,21 @@ function logDatabaseAuthFailureThrottled(queryName: string, error: unknown) {
   logWarn("Database authentication failed. Falling back to demo/default data for public queries.", {
     query: queryName,
     cooldownSeconds: Math.floor(DB_AUTH_COOLDOWN_MS / 1000),
-    error: getErrorMessage(error),
+    error: getCompactErrorMessage(error),
+  });
+}
+
+function logDatabaseOutageThrottled(queryName: string, error: unknown, reason: "panic" | "outage") {
+  const now = Date.now();
+  if (now < nextOutageLogTimestamp) return;
+
+  nextOutageLogTimestamp = now + DB_OUTAGE_LOG_THROTTLE_MS;
+  logWarn("Database unavailable. Serving fallback data for public queries.", {
+    query: queryName,
+    reason,
+    cooldownSeconds:
+      reason === "panic" ? Math.floor((2 * 60 * 1000) / 1000) : Math.floor(DB_OUTAGE_COOLDOWN_MS / 1000),
+    error: getCompactErrorMessage(error),
   });
 }
 
@@ -285,7 +359,7 @@ async function withDatabaseFallback<T>(
   fallbackValue: T,
   execute: () => Promise<T>,
 ) {
-  if (isPrismaPanicActive() || isDatabaseAuthFailureActive()) {
+  if (isPrismaPanicActive() || isDatabaseAuthFailureActive() || isDatabaseOutageActive()) {
     return fallbackValue;
   }
 
@@ -294,6 +368,8 @@ async function withDatabaseFallback<T>(
   } catch (error) {
     if (isPrismaPanicError(error)) {
       markPrismaPanicCooldown();
+      logDatabaseOutageThrottled(queryName, error, "panic");
+      return fallbackValue;
     }
 
     if (isDatabaseAuthenticationError(error)) {
@@ -302,8 +378,14 @@ async function withDatabaseFallback<T>(
       return fallbackValue;
     }
 
+    if (isDatabaseOutageError(error)) {
+      markDatabaseOutageCooldown();
+      logDatabaseOutageThrottled(queryName, error, "outage");
+      return fallbackValue;
+    }
+
     logError(`Database query failed: ${queryName}`, {
-      error: getErrorMessage(error),
+      error: getCompactErrorMessage(error),
     });
     return fallbackValue;
   }
