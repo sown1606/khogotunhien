@@ -19,6 +19,15 @@ function hasAnyDatabaseParts() {
   return DATABASE_ENV_KEYS.some((key) => readEnvValue(key));
 }
 
+function hasCompleteDatabaseParts() {
+  return Boolean(
+    readEnvValue("DB_HOST") &&
+      readEnvValue("DB_NAME") &&
+      readEnvValue("DB_USER") &&
+      readEnvValue("DB_PASSWORD"),
+  );
+}
+
 function isValidMysqlDatabaseUrl(value: string) {
   try {
     const parsed = new URL(value);
@@ -73,6 +82,14 @@ function resolveDatabaseUrlFromParts() {
 }
 
 export function resolveDatabaseUrlFromEnvironment(): DatabaseUrlResolution {
+  // Prefer DB_* when fully configured to avoid stale DATABASE_URL overriding runtime config.
+  if (hasCompleteDatabaseParts()) {
+    return {
+      databaseUrl: resolveDatabaseUrlFromParts(),
+      source: "DB_PARTS",
+    };
+  }
+
   const existingDatabaseUrl = readEnvValue("DATABASE_URL");
   if (existingDatabaseUrl) {
     if (isValidMysqlDatabaseUrl(existingDatabaseUrl)) {
