@@ -25,13 +25,26 @@ export default async function EnglishSearchPage({ searchParams }: EnglishSearchP
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow="Search"
-        title="Find products and categories"
-        description="Search by product name, category, or material type."
+        eyebrow="Wood marketplace"
+        title="Etsy-style search results"
+        description="Search by product name, category, or wood material to browse real-image listings."
         locale={locale}
       />
 
       <SearchInput initialValue={keyword} className="max-w-3xl" locale={locale} />
+
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-600">
+        <p>
+          About{" "}
+          <span className="font-semibold text-stone-900">
+            {(results.products.length + results.categories.length).toLocaleString("en-US")}
+          </span>{" "}
+          results
+        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+          Sort: Most relevant
+        </p>
+      </div>
 
       {keyword ? (
         <p className="text-sm text-stone-600">

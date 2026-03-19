@@ -63,24 +63,44 @@ async function ProductsPageContent({
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow={t(locale, "Danh mục sản phẩm", "Product catalog")}
-        title={t(locale, "Khám phá sản phẩm gỗ", "Browse wood products")}
+        eyebrow={t(locale, "Wood marketplace", "Wood marketplace")}
+        title={t(locale, "Khám phá sản phẩm gỗ kiểu Etsy", "Browse Etsy-like wood listings")}
         description={t(
           locale,
-          "Tìm kiếm và lọc sản phẩm gỗ cao cấp. Liên hệ trực tiếp để nhận tư vấn phù hợp.",
-          "Search and filter premium wood products without checkout distractions. Reach out directly for consultation.",
+          "Tìm nhanh theo danh mục, xem ảnh gỗ thật và liên hệ trực tiếp để nhận báo giá.",
+          "Use quick filters, browse real wood imagery, and request quotes directly.",
         )}
         locale={locale}
       />
 
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-600">
+        <p>
+          {t(locale, "Khoảng", "About")}{" "}
+          <span className="font-semibold text-stone-900">{products.length.toLocaleString("vi-VN")}</span>{" "}
+          {t(locale, "sản phẩm", "items")}
+        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+          {t(locale, "Sắp xếp: Phù hợp nhất", "Sort: Most relevant")}
+        </p>
+      </div>
+
       <div className="no-scrollbar -mx-1 overflow-x-auto px-1">
         <div className="flex min-w-max items-center gap-2">
+          <span className="rounded-full border border-stone-400 bg-white px-3 py-1.5 text-xs font-semibold text-stone-800">
+            {t(locale, "Hiện bộ lọc", "Show filters")}
+          </span>
+          <span className="rounded-full border border-stone-300 bg-[#faf7f3] px-3 py-1.5 text-xs font-semibold text-stone-700">
+            {t(locale, "Giao từ VN", "Ships from VN")}
+          </span>
+          <span className="rounded-full border border-stone-300 bg-[#faf7f3] px-3 py-1.5 text-xs font-semibold text-stone-700">
+            {t(locale, "Nhà bán uy tín", "Star Seller")}
+          </span>
           <Link
             href={buildFilterHref({ category: undefined, featured: undefined })}
             className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
               !params.category && params.featured !== "true"
                 ? "border-stone-900 bg-stone-900 text-white"
-                : "border-stone-300 bg-white text-stone-700 hover:border-amber-500 hover:text-amber-900"
+                : "border-stone-300 bg-white text-stone-700 hover:border-stone-500 hover:text-stone-900"
             }`}
           >
             {t(locale, "Tất cả", "All")}
@@ -90,7 +110,7 @@ async function ProductsPageContent({
             className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
               params.featured === "true"
                 ? "border-stone-900 bg-stone-900 text-white"
-                : "border-stone-300 bg-white text-stone-700 hover:border-amber-500 hover:text-amber-900"
+                : "border-stone-300 bg-white text-stone-700 hover:border-stone-500 hover:text-stone-900"
             }`}
           >
             {t(locale, "Nổi bật", "Popular now")}
@@ -102,7 +122,7 @@ async function ProductsPageContent({
               className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                 params.category === category.slug
                   ? "border-stone-900 bg-stone-900 text-white"
-                  : "border-stone-300 bg-white text-stone-700 hover:border-amber-500 hover:text-amber-900"
+                  : "border-stone-300 bg-white text-stone-700 hover:border-stone-500 hover:text-stone-900"
               }`}
             >
               {category.name}
@@ -111,7 +131,7 @@ async function ProductsPageContent({
         </div>
       </div>
 
-      <form className="grid gap-3 rounded-2xl border border-stone-200 bg-white p-4 md:grid-cols-12">
+      <form className="grid gap-3 rounded-2xl border border-stone-200 bg-[#fffdf9] p-4 shadow-[0_14px_34px_-28px_rgba(77,50,31,0.5)] md:grid-cols-12">
         <div className="md:col-span-5">
           <Input
             name="q"
@@ -168,7 +188,7 @@ async function ProductsPageContent({
       </div>
 
       {products.length ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard
               key={product.id}

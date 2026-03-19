@@ -44,20 +44,17 @@ export function ProductStrip({
         hrefLabel={t(locale, "Xem tất cả sản phẩm", "Browse all products")}
         locale={locale}
       />
-      <div className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-2">
-        <div className="grid min-w-max snap-x snap-mandatory grid-flow-col auto-cols-[64%] gap-3 sm:auto-cols-[39%] lg:auto-cols-[22%]">
-          {products.map((product) => (
-            <div key={product.id} className="snap-start">
-              <ProductCard
-                product={product}
-                phoneNumber={phoneNumber}
-                zaloLink={zaloLink}
-                compact
-                locale={locale}
-              />
-            </div>
-          ))}
-        </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            phoneNumber={phoneNumber}
+            zaloLink={zaloLink}
+            compact
+            locale={locale}
+          />
+        ))}
       </div>
     </section>
   );

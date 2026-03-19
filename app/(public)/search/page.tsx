@@ -31,17 +31,32 @@ async function SearchPageContent({
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow={t(locale, "Tìm kiếm", "Search")}
-        title={t(locale, "Tìm sản phẩm và danh mục", "Find products and categories")}
+        eyebrow={t(locale, "Wood marketplace", "Wood marketplace")}
+        title={t(locale, "Kết quả tìm kiếm kiểu Etsy", "Etsy-style search results")}
         description={t(
           locale,
-          "Tìm theo tên sản phẩm, danh mục hoặc loại vật liệu.",
-          "Search by product name, category, or material type.",
+          "Tìm theo tên sản phẩm, danh mục hoặc chất liệu gỗ để xem danh sách ảnh thật.",
+          "Search by product name, category, or wood material to browse real-image listings.",
         )}
         locale={locale}
       />
 
       <SearchInput initialValue={keyword} className="max-w-3xl" locale={locale} />
+
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-600">
+        <p>
+          {t(locale, "Khoảng", "About")}{" "}
+          <span className="font-semibold text-stone-900">
+            {(results.products.length + results.categories.length).toLocaleString(
+              locale === "en" ? "en-US" : "vi-VN",
+            )}
+          </span>{" "}
+          {t(locale, "kết quả", "results")}
+        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+          {t(locale, "Sắp xếp: Phù hợp nhất", "Sort: Most relevant")}
+        </p>
+      </div>
 
       {keyword ? (
         <p className="text-sm text-stone-600">

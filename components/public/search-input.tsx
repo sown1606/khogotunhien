@@ -46,15 +46,18 @@ export function SearchInput({
   return (
     <form onSubmit={onSubmit} className={className}>
       <div className="relative flex items-center">
-        <Search className="pointer-events-none absolute left-3 size-4 text-stone-400" />
+        <Search className="pointer-events-none absolute left-4 size-4 text-stone-500" />
         <Input
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder={effectivePlaceholder}
-          className="h-11 rounded-full border-stone-300 pl-9 pr-28 text-sm"
+          className="h-12 rounded-full border-stone-400 bg-white pl-10 pr-28 text-sm shadow-[0_8px_16px_-12px_rgba(43,30,20,0.35)]"
           aria-label={t(locale, "Tìm kiếm", "Search")}
         />
-        <Button type="submit" className="absolute right-1.5 h-8 px-4 text-xs">
+        <Button
+          type="submit"
+          className="absolute right-1.5 h-9 rounded-full bg-stone-900 px-4 text-xs text-white hover:bg-stone-800"
+        >
           {t(locale, "Tìm", "Search")}
         </Button>
       </div>

@@ -30,7 +30,7 @@ export function CategoryCard({ category, locale = "vi" }: CategoryCardProps) {
       <Link href={withLocalePath(locale, `/categories/${category.slug}`)} className="block">
         <div className="relative aspect-[5/3] overflow-hidden">
           <Image
-            src={category.imageUrl || "/window.svg"}
+            src={category.imageUrl || "/demo/brand/texture.webp"}
             alt={category.name}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
