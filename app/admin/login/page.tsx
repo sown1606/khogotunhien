@@ -17,12 +17,13 @@ export default async function AdminLoginPage() {
       <div className="space-y-5">
         <div className="space-y-2 text-center">
           <Image
-            src="/brand/logo-primary.svg"
+            src="/brand/logo-horizontal.svg"
             alt="ĐẠI THIÊN PHÚ WOOD"
-            width={520}
-            height={640}
-            className="mx-auto h-28 w-auto"
+            width={920}
+            height={260}
+            className="mx-auto h-14 w-auto max-w-[340px] sm:h-16 sm:max-w-[420px]"
             priority
+            unoptimized
           />
           <p className="text-sm text-stone-600">Admin portal for live content management</p>
         </div>
