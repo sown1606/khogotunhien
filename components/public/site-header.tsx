@@ -66,7 +66,7 @@ export function SiteHeader({
           scrolled && "border-stone-200 bg-[#f6f3ef]/95 shadow-[0_10px_32px_-24px_rgba(53,34,20,0.6)]",
         )}
       >
-        <div className="mx-auto max-w-7xl px-4 py-3 lg:px-8">
+        <div className="mx-auto max-w-[1520px] px-4 py-3 lg:px-8">
           <div className="flex items-center gap-3 lg:gap-6">
             <Link href={withLocalePath(locale, "/")} className="flex shrink-0 items-center gap-2">
               <Image
@@ -74,8 +74,9 @@ export function SiteHeader({
                 alt={companyName}
                 width={920}
                 height={260}
-                className="h-8 w-auto max-w-[190px] object-contain sm:h-9 sm:max-w-[230px]"
+                className="h-9 w-auto max-w-[230px] object-contain sm:h-10 sm:max-w-[280px]"
                 priority
+                unoptimized
               />
             </Link>
 
@@ -165,7 +166,8 @@ export function SiteHeader({
                   alt={companyName}
                   width={920}
                   height={260}
-                  className="h-8 w-auto max-w-[170px] object-contain"
+                  className="h-9 w-auto max-w-[210px] object-contain"
+                  unoptimized
                 />
                 <div className="flex items-center gap-1">
                   <LanguageSwitcher />

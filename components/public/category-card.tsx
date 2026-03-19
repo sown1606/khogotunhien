@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
+import { resolveWoodDemoImage } from "@/lib/utils";
 
 type CategoryCardProps = {
   category: {
@@ -21,6 +22,8 @@ type CategoryCardProps = {
 };
 
 export function CategoryCard({ category, locale = "vi" }: CategoryCardProps) {
+  const imageSrc = resolveWoodDemoImage(category.imageUrl, category.slug || category.id);
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -30,7 +33,7 @@ export function CategoryCard({ category, locale = "vi" }: CategoryCardProps) {
       <Link href={withLocalePath(locale, `/categories/${category.slug}`)} className="block">
         <div className="relative aspect-[5/3] overflow-hidden">
           <Image
-            src={category.imageUrl || "/demo/brand/texture.webp"}
+            src={imageSrc}
             alt={category.name}
             fill
             unoptimized

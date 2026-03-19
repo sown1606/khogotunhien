@@ -70,7 +70,7 @@ export default async function EnglishSearchPage({ searchParams }: EnglishSearchP
           {results.products.length ? (
             <section className="space-y-4">
               <h2 className="text-3xl text-stone-900">Matching products</h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {results.products.map((product) => (
                   <ProductCard
                     key={product.id}

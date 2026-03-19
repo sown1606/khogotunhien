@@ -38,3 +38,24 @@ export function parseNumber(value: FormDataEntryValue | null, fallback = 0) {
 export function fileUrlFromPath(path: string) {
   return path.startsWith("/") ? path : `/${path}`;
 }
+
+const demoWoodImagePool = [
+  "/demo/hero/wood-hero-main.jpg",
+  "/demo/hero/wood-hero-side-1.jpg",
+  "/demo/hero/wood-hero-side-2.jpg",
+  "/demo/brand/texture.webp",
+];
+
+function hashSeed(seed: string) {
+  return Array.from(seed).reduce((hash, char, index) => {
+    return (hash + char.charCodeAt(0) * (index + 17)) % 100_000;
+  }, 0);
+}
+
+export function resolveWoodDemoImage(source: string | null | undefined, seed: string) {
+  if (source?.startsWith("/demo/products/") || source?.startsWith("/demo/categories/")) {
+    return demoWoodImagePool[hashSeed(seed) % demoWoodImagePool.length];
+  }
+
+  return source || demoWoodImagePool[hashSeed(seed) % demoWoodImagePool.length];
+}

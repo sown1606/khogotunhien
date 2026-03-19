@@ -36,7 +36,7 @@ export function SiteFooter({
 }: SiteFooterProps) {
   return (
     <footer className="mt-24 border-t border-stone-300 bg-[#f1ebe3]">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 lg:grid-cols-12 lg:px-8">
+      <div className="mx-auto grid max-w-[1520px] gap-8 px-4 py-12 lg:grid-cols-12 lg:px-8">
         <div className="space-y-3 lg:col-span-5">
           <Image
             src={logoUrl || "/brand/logo-horizontal.svg"}

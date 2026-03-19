@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
-import { normalizePhoneLink } from "@/lib/utils";
+import { normalizePhoneLink, resolveWoodDemoImage } from "@/lib/utils";
 
 type ProductCardProps = {
   product: {
@@ -52,6 +52,7 @@ function getListingMeta(seed: string) {
 
 export function ProductCard({ product, phoneNumber, zaloLink, compact, locale = "vi" }: ProductCardProps) {
   const meta = getListingMeta(product.slug || product.id);
+  const imageSrc = resolveWoodDemoImage(product.thumbnailUrl, product.slug || product.id);
   const localizedPrice =
     locale === "en"
       ? `$${Math.round(meta.basePrice / 25_000).toLocaleString("en-US")}`
@@ -72,7 +73,7 @@ export function ProductCard({ product, phoneNumber, zaloLink, compact, locale = 
       <Link href={withLocalePath(locale, `/products/${product.slug}`)} className="block">
         <div className="relative aspect-[4/5] overflow-hidden">
           <Image
-            src={product.thumbnailUrl || "/demo/brand/texture.webp"}
+            src={imageSrc}
             alt={product.name}
             fill
             unoptimized

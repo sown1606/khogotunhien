@@ -64,7 +64,7 @@ export default async function EnglishPublicLayout({
         categories={categories}
         locale={locale}
       />
-      <main className="mx-auto min-h-[60vh] max-w-7xl px-4 pb-32 pt-6 lg:px-8">{children}</main>
+      <main className="mx-auto min-h-[60vh] max-w-[1520px] px-4 pb-32 pt-6 lg:px-8">{children}</main>
       <SiteFooter
         companyName={settings.companyName}
         companyDescription={settings.companyDescription}
