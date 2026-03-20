@@ -180,6 +180,7 @@ Vietnamese fields are primary. English fields are optional and can be left empty
 
 ## 10. Hostinger runtime safety notes
 
+- Prisma client runs with `library` engine mode in production for better runtime stability on Hostinger Node.js environments.
 - `SITE_URL` and `NEXTAUTH_URL` are normalized safely. If you set `khogotunhien.com`, the app normalizes to `https://khogotunhien.com`.
 - Database config supports:
   - `DATABASE_URL`
