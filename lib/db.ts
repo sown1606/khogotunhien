@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 import { ensureDatabaseUrlInProcessEnv } from "@/lib/database-url";
+import { getOptionalEnv } from "@/lib/env";
 import { logError, logWarn } from "@/lib/logger";
 
 declare global {
@@ -51,6 +52,7 @@ function createPrismaClient() {
 
 let productionPrisma: PrismaClient | undefined;
 let prismaResetPromise: Promise<void> | null = null;
+let hasAppliedHostingerLocalDbFallback = false;
 
 function getPrismaClient() {
   if (process.env.NODE_ENV !== "production") {
@@ -83,6 +85,59 @@ function isRecoverablePrismaEngineError(error: unknown) {
     message.includes("joinerror::panic") ||
     message.includes("engine is not yet connected")
   );
+}
+
+function isDatabaseConnectivityError(error: unknown) {
+  const message = getPrismaErrorMessage(error);
+
+  return (
+    message.includes("p1001") ||
+    message.includes("p1002") ||
+    message.includes("can't reach database server") ||
+    message.includes("connection refused") ||
+    message.includes("connect econnrefused") ||
+    message.includes("connect ehostunreach") ||
+    message.includes("connect etimedout") ||
+    message.includes("timed out")
+  );
+}
+
+function isHostingerRemoteHostname(hostname: string) {
+  return /(^|\.)hstgr\.io$/i.test(hostname);
+}
+
+function maybeApplyHostingerLocalDbFallback(error: unknown) {
+  if (hasAppliedHostingerLocalDbFallback) {
+    return false;
+  }
+
+  if (!isDatabaseConnectivityError(error)) {
+    return false;
+  }
+
+  const configuredHost = getOptionalEnv("DB_HOST");
+  if (!configuredHost) {
+    return false;
+  }
+
+  const normalizedHost = configuredHost.trim().toLowerCase();
+  if (normalizedHost === "localhost" || normalizedHost === "127.0.0.1") {
+    return false;
+  }
+
+  if (!isHostingerRemoteHostname(normalizedHost)) {
+    return false;
+  }
+
+  hasAppliedHostingerLocalDbFallback = true;
+  process.env.DB_HOST = "localhost";
+  delete process.env.DATABASE_URL;
+
+  logWarn("Switching DB host fallback from Hostinger remote host to localhost.", {
+    previousHost: configuredHost,
+  });
+
+  return true;
 }
 
 async function disconnectSilently(client: PrismaClient | undefined) {
@@ -147,6 +202,14 @@ function createPrismaProxy(path: PropertyKey[] = []): unknown {
               const parent = resolveParent(nextPath);
               return await fn.apply(parent, args);
             } catch (error) {
+              if (maybeApplyHostingerLocalDbFallback(error)) {
+                await resetPrismaClient();
+
+                const fn = resolvePath(nextPath) as (...innerArgs: unknown[]) => unknown;
+                const parent = resolveParent(nextPath);
+                return await fn.apply(parent, args);
+              }
+
               if (!isRecoverablePrismaEngineError(error)) {
                 throw error;
               }
