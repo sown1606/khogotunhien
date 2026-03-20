@@ -15,6 +15,65 @@ function shouldCheckDatabase(request: Request) {
   return dbParam === "1" || dbParam === "true";
 }
 
+function shouldIncludeDebugDetails(request: Request) {
+  if (process.env.HEALTH_DEBUG_ALWAYS === "true") {
+    return true;
+  }
+
+  const debugParam = new URL(request.url).searchParams.get("debug");
+  return debugParam === "1" || debugParam === "true";
+}
+
+function truncate(value: string, maxLength: number) {
+  return value.length > maxLength ? `${value.slice(0, maxLength)}…` : value;
+}
+
+function getErrorDebugPayload(error: unknown) {
+  if (error instanceof Error) {
+    const extended = error as Error & {
+      code?: string;
+      clientVersion?: string;
+      meta?: unknown;
+      cause?: unknown;
+    };
+
+    const debugPayload: Record<string, unknown> = {
+      errorName: error.name,
+      errorMessage: error.message,
+      errorStack: error.stack ? truncate(error.stack, 8000) : null,
+    };
+
+    if (extended.code) debugPayload.errorCode = extended.code;
+    if (extended.clientVersion) debugPayload.clientVersion = extended.clientVersion;
+    if (extended.meta) debugPayload.errorMeta = extended.meta;
+    if (extended.cause instanceof Error) {
+      debugPayload.errorCause = {
+        name: extended.cause.name,
+        message: extended.cause.message,
+        stack: extended.cause.stack ? truncate(extended.cause.stack, 4000) : null,
+      };
+    }
+
+    return debugPayload;
+  }
+
+  if (typeof error === "object" && error !== null) {
+    try {
+      return {
+        errorRaw: truncate(JSON.stringify(error), 8000),
+      };
+    } catch {
+      return {
+        errorRaw: "Unserializable object error",
+      };
+    }
+  }
+
+  return {
+    errorRaw: String(error),
+  };
+}
+
 function getEnvironmentReadiness() {
   const dbDebug = getDatabaseConnectionDebugInfo();
   let databaseConfig = "missing";
@@ -43,6 +102,7 @@ function getEnvironmentReadiness() {
 export async function GET(request: Request) {
   const startedAt = Date.now();
   const checkDatabase = shouldCheckDatabase(request);
+  const includeDebugDetails = shouldIncludeDebugDetails(request);
   const readiness = getEnvironmentReadiness();
   const checks: Record<string, string> = {
     app: "ok",
@@ -94,6 +154,7 @@ export async function GET(request: Request) {
         readiness,
         checks,
         ...(checkDatabase ? { databaseError: safeErrorMessage } : {}),
+        ...(includeDebugDetails ? getErrorDebugPayload(error) : {}),
         durationMs: Date.now() - startedAt,
       },
       { status: 200 },
