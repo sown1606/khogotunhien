@@ -4,6 +4,10 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import {
+  ensureConfiguredAdminAccount,
+  isConfiguredAdminCredentials,
+} from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
 import { logError, logWarn } from "@/lib/logger";
@@ -11,7 +15,7 @@ import { logError, logWarn } from "@/lib/logger";
 const nextAuthSecret = getOptionalEnv("NEXTAUTH_SECRET");
 
 const credentialsSchema = z.object({
-  email: z.email().min(1),
+  email: z.string().trim().email(),
   password: z.string().min(6),
 });
 
@@ -26,6 +30,20 @@ function logAuthDatabaseFailureThrottled(error: unknown) {
   logWarn("Admin authentication check could not reach database.", {
     error: error instanceof Error ? error.message : "Unknown error",
   });
+}
+
+function mapAdminSessionUser(user: {
+  id: string;
+  email: string;
+  name: string;
+  role?: string;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  };
 }
 
 export const authOptions: NextAuthOptions = {
@@ -67,27 +85,40 @@ export const authOptions: NextAuthOptions = {
         if (!parsed.success) {
           return null;
         }
+
+        const normalizedEmail = parsed.data.email.trim().toLowerCase();
+        const normalizedPassword = parsed.data.password.trim();
+
+        if (!normalizedEmail || !normalizedPassword) {
+          return null;
+        }
+
         try {
           const user = await db.adminUser.findUnique({
-            where: { email: parsed.data.email },
+            where: { email: normalizedEmail },
           });
 
-          if (!user || !user.active) {
-            return null;
+          if (user && user.active) {
+            const validPassword = await bcrypt.compare(normalizedPassword, user.passwordHash);
+            if (validPassword) {
+              return mapAdminSessionUser({
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+              });
+            }
           }
 
-          const validPassword = await bcrypt.compare(parsed.data.password, user.passwordHash);
+          if (isConfiguredAdminCredentials(normalizedEmail, normalizedPassword)) {
+            const syncedAdmin = await ensureConfiguredAdminAccount(true);
 
-          if (!validPassword) {
-            return null;
+            if (syncedAdmin && syncedAdmin.active && syncedAdmin.email === normalizedEmail) {
+              return mapAdminSessionUser(syncedAdmin);
+            }
           }
 
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          };
+          return null;
         } catch (error) {
           logAuthDatabaseFailureThrottled(error);
           return null;

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build --webpack",
+    "build": "prisma generate && prisma migrate deploy && npm run admin:bootstrap:optional && next build --webpack",
     "start": "node scripts/start.mjs",
     "lint": "eslint",
     "db:generate": "prisma generate",
@@ -17,7 +17,8 @@
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts"
+    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts",
+    "admin:bootstrap:optional": "tsx scripts/bootstrap-admin.ts --optional"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -22,7 +22,7 @@ npm run start
 Hostinger preset runs `npm run build`, so the repository `build` script already includes:
 
 ```bash
-prisma generate && prisma migrate deploy && next build --webpack
+prisma generate && prisma migrate deploy && npm run admin:bootstrap:optional && next build --webpack
 ```
 
 ## 2. Required environment variables
@@ -49,6 +49,7 @@ SITE_URL="https://your-domain.com"
 
 ADMIN_EMAIL="admin@your-domain.com"
 ADMIN_PASSWORD="your-strong-admin-password"
+# Used by deploy bootstrap and login fallback to auto-create/sync admin account if missing.
 
 COMPANY_PHONE="your-company-phone"
 ZALO_URL="https://zalo.me/your-zalo-number"
