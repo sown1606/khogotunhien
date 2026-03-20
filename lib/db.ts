@@ -102,6 +102,21 @@ function isDatabaseConnectivityError(error: unknown) {
   );
 }
 
+function isDatabaseAuthenticationError(error: unknown) {
+  const message = getPrismaErrorMessage(error);
+
+  return (
+    message.includes("p1000") ||
+    message.includes("authentication failed against database server") ||
+    message.includes("provided database credentials") ||
+    message.includes("are not valid")
+  );
+}
+
+function shouldRetryWithHostingerLocalhost(error: unknown) {
+  return isDatabaseConnectivityError(error) || isDatabaseAuthenticationError(error);
+}
+
 function isHostingerRemoteHostname(hostname: string) {
   return /(^|\.)hstgr\.io$/i.test(hostname);
 }
@@ -111,7 +126,7 @@ function maybeApplyHostingerLocalDbFallback(error: unknown) {
     return false;
   }
 
-  if (!isDatabaseConnectivityError(error)) {
+  if (!shouldRetryWithHostingerLocalhost(error)) {
     return false;
   }
 
