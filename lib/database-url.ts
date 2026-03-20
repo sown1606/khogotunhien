@@ -89,14 +89,6 @@ function resolveDatabaseUrlFromParts() {
 }
 
 export function resolveDatabaseUrlFromEnvironment(): DatabaseUrlResolution {
-  // Prefer DB_* when fully configured to avoid stale DATABASE_URL overriding runtime config.
-  if (hasCompleteDatabaseParts()) {
-    return {
-      databaseUrl: resolveDatabaseUrlFromParts(),
-      source: "DB_PARTS",
-    };
-  }
-
   const existingDatabaseUrl = readEnvValue("DATABASE_URL");
   if (existingDatabaseUrl) {
     if (isValidMysqlDatabaseUrl(existingDatabaseUrl)) {
@@ -116,6 +108,13 @@ export function resolveDatabaseUrlFromEnvironment(): DatabaseUrlResolution {
     throw new Error(
       "DATABASE_URL is invalid. Use mysql://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME and URL-encode special characters in credentials, or provide full DB_* variables.",
     );
+  }
+
+  if (hasCompleteDatabaseParts()) {
+    return {
+      databaseUrl: resolveDatabaseUrlFromParts(),
+      source: "DB_PARTS",
+    };
   }
 
   if (hasAnyDatabaseParts()) {

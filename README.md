@@ -32,6 +32,7 @@ Set these in Hostinger Environment Variables (do not commit real secrets):
 ```bash
 # Preferred single Prisma connection string.
 # If DB_USER or DB_PASSWORD contains special chars (@ # ! : / ? &), URL-encode credentials.
+# DATABASE_URL is prioritized when provided.
 DATABASE_URL="mysql://DB_USER:DB_PASSWORD@DB_HOST:3306/DB_NAME"
 
 # Optional split variables (used when DATABASE_URL is missing/invalid).
