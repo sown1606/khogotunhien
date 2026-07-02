@@ -30,6 +30,14 @@ type ProductFormProps = {
     description?: string | null;
     descriptionEn?: string | null;
     thumbnailUrl?: string | null;
+    price?: number | null;
+    comparePrice?: number | null;
+    discountPercent?: number | null;
+    shippingLabel?: string | null;
+    badgeLabel?: string | null;
+    tags?: string[] | null;
+    rating?: number | null;
+    reviewCount?: number | null;
     woodType?: string | null;
     woodTypeEn?: string | null;
     material?: string | null;
@@ -51,9 +59,15 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending}>
-      {pending ? "Saving..." : "Save product"}
+      {pending ? "Đang lưu..." : "Lưu sản phẩm"}
     </Button>
   );
+}
+
+function FieldError({ messages }: { messages?: string[] }) {
+  if (!messages?.length) return null;
+
+  return <p className="text-xs text-red-600">{messages[0]}</p>;
 }
 
 export function ProductForm({
@@ -210,6 +224,109 @@ export function ProductForm({
               min={0}
               defaultValue={initialValues?.sortOrder ?? 0}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price">Giá hiện tại (VND)</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              defaultValue={initialValues?.price ?? ""}
+              placeholder="2630000"
+            />
+            <FieldError messages={state.fieldErrors?.price} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="comparePrice">Giá cũ / giá so sánh (VND)</Label>
+            <Input
+              id="comparePrice"
+              name="comparePrice"
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              defaultValue={initialValues?.comparePrice ?? ""}
+              placeholder="3030000"
+            />
+            <FieldError messages={state.fieldErrors?.comparePrice} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="discountPercent">Giảm giá thủ công (%)</Label>
+            <Input
+              id="discountPercent"
+              name="discountPercent"
+              type="number"
+              min={0}
+              max={100}
+              step={1}
+              inputMode="numeric"
+              defaultValue={initialValues?.discountPercent ?? ""}
+              placeholder="Tự tính nếu bỏ trống"
+            />
+            <FieldError messages={state.fieldErrors?.discountPercent} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shippingLabel">Nhãn vận chuyển</Label>
+            <Input
+              id="shippingLabel"
+              name="shippingLabel"
+              defaultValue={initialValues?.shippingLabel || ""}
+              placeholder="Miễn phí vận chuyển"
+            />
+            <FieldError messages={state.fieldErrors?.shippingLabel} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="badgeLabel">Nhãn nổi bật</Label>
+            <Input
+              id="badgeLabel"
+              name="badgeLabel"
+              defaultValue={initialValues?.badgeLabel || ""}
+              placeholder="Phổ biến"
+            />
+            <FieldError messages={state.fieldErrors?.badgeLabel} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags / chips</Label>
+            <Input
+              id="tags"
+              name="tags"
+              defaultValue={initialValues?.tags?.join(", ") || ""}
+              placeholder="Gỗ Thông Tự Nhiên, Gỗ Thông Mỹ, Thông Mỹ"
+            />
+            <FieldError messages={state.fieldErrors?.tags} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="rating">Đánh giá</Label>
+            <Input
+              id="rating"
+              name="rating"
+              type="number"
+              min={0}
+              max={5}
+              step={0.1}
+              inputMode="decimal"
+              defaultValue={initialValues?.rating ?? ""}
+              placeholder="4.8"
+            />
+            <FieldError messages={state.fieldErrors?.rating} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reviewCount">Số lượt đánh giá</Label>
+            <Input
+              id="reviewCount"
+              name="reviewCount"
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              defaultValue={initialValues?.reviewCount ?? ""}
+              placeholder="128"
+            />
+            <FieldError messages={state.fieldErrors?.reviewCount} />
           </div>
 
           <div className="space-y-2">

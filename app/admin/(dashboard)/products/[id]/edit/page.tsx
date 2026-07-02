@@ -9,6 +9,12 @@ type EditProductPageProps = {
   params: Promise<{ id: string }>;
 };
 
+function readProductTags(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value.map((item) => String(item).trim()).filter(Boolean);
+}
+
 export default async function EditProductPage({ params }: EditProductPageProps) {
   const { id } = await params;
 
@@ -64,6 +70,14 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
           description: product.description,
           descriptionEn: product.descriptionEn,
           thumbnailUrl: product.thumbnailUrl,
+          price: product.price,
+          comparePrice: product.comparePrice,
+          discountPercent: product.discountPercent,
+          shippingLabel: product.shippingLabel,
+          badgeLabel: product.badgeLabel,
+          tags: readProductTags(product.tags),
+          rating: product.rating,
+          reviewCount: product.reviewCount,
           woodType: product.woodType,
           woodTypeEn: product.woodTypeEn,
           material: product.material,

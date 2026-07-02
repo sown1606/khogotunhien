@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
+import { Prisma } from "@prisma/client";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -29,6 +30,28 @@ function parseJsonArray(value: FormDataEntryValue | null) {
   }
 }
 
+function revalidateProductCatalogPaths(productSlug?: string | null, categorySlug?: string | null) {
+  revalidatePath("/");
+  revalidatePath("/en");
+  revalidatePath("/products");
+  revalidatePath("/en/products");
+  revalidatePath("/categories");
+  revalidatePath("/en/categories");
+  revalidatePath("/search");
+  revalidatePath("/en/search");
+  revalidatePath("/admin/products");
+
+  if (productSlug) {
+    revalidatePath(`/products/${productSlug}`);
+    revalidatePath(`/en/products/${productSlug}`);
+  }
+
+  if (categorySlug) {
+    revalidatePath(`/categories/${categorySlug}`);
+    revalidatePath(`/en/categories/${categorySlug}`);
+  }
+}
+
 export async function createProductAction(
   _previousState: ActionResult,
   formData: FormData,
@@ -45,6 +68,14 @@ export async function createProductAction(
       description: formData.get("description"),
       descriptionEn: formData.get("descriptionEn"),
       thumbnailUrl: formData.get("thumbnailUrl"),
+      price: formData.get("price"),
+      comparePrice: formData.get("comparePrice"),
+      discountPercent: formData.get("discountPercent"),
+      shippingLabel: formData.get("shippingLabel"),
+      badgeLabel: formData.get("badgeLabel"),
+      tags: formData.get("tags"),
+      rating: formData.get("rating"),
+      reviewCount: formData.get("reviewCount"),
       woodType: formData.get("woodType"),
       woodTypeEn: formData.get("woodTypeEn"),
       material: formData.get("material"),
@@ -80,6 +111,14 @@ export async function createProductAction(
         description: parsed.data.description || null,
         descriptionEn: parsed.data.descriptionEn || null,
         thumbnailUrl: parsed.data.thumbnailUrl || parsed.data.galleryUrls[0] || null,
+        price: parsed.data.price,
+        comparePrice: parsed.data.comparePrice,
+        discountPercent: parsed.data.discountPercent,
+        shippingLabel: parsed.data.shippingLabel || null,
+        badgeLabel: parsed.data.badgeLabel || null,
+        tags: parsed.data.tags.length ? parsed.data.tags : Prisma.DbNull,
+        rating: parsed.data.rating,
+        reviewCount: parsed.data.reviewCount,
         woodType: parsed.data.woodType || null,
         woodTypeEn: parsed.data.woodTypeEn || null,
         material: parsed.data.material || null,
@@ -102,16 +141,16 @@ export async function createProductAction(
           connect: parsed.data.relatedProductIds.map((id) => ({ id })),
         },
       },
-      select: { id: true, slug: true },
+      select: {
+        id: true,
+        slug: true,
+        category: {
+          select: { slug: true },
+        },
+      },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/products");
-    revalidatePath("/en/products");
-    revalidatePath(`/products/${created.slug}`);
-    revalidatePath(`/en/products/${created.slug}`);
-    revalidatePath("/admin/products");
+    revalidateProductCatalogPaths(created.slug, created.category?.slug);
 
     return {
       success: true,
@@ -144,6 +183,14 @@ export async function updateProductAction(
       description: formData.get("description"),
       descriptionEn: formData.get("descriptionEn"),
       thumbnailUrl: formData.get("thumbnailUrl"),
+      price: formData.get("price"),
+      comparePrice: formData.get("comparePrice"),
+      discountPercent: formData.get("discountPercent"),
+      shippingLabel: formData.get("shippingLabel"),
+      badgeLabel: formData.get("badgeLabel"),
+      tags: formData.get("tags"),
+      rating: formData.get("rating"),
+      reviewCount: formData.get("reviewCount"),
       woodType: formData.get("woodType"),
       woodTypeEn: formData.get("woodTypeEn"),
       material: formData.get("material"),
@@ -171,7 +218,12 @@ export async function updateProductAction(
 
     const existing = await db.product.findUnique({
       where: { id: productId },
-      select: { slug: true },
+      select: {
+        slug: true,
+        category: {
+          select: { slug: true },
+        },
+      },
     });
 
     if (!existing) {
@@ -193,6 +245,14 @@ export async function updateProductAction(
         description: parsed.data.description || null,
         descriptionEn: parsed.data.descriptionEn || null,
         thumbnailUrl: parsed.data.thumbnailUrl || parsed.data.galleryUrls[0] || null,
+        price: parsed.data.price,
+        comparePrice: parsed.data.comparePrice,
+        discountPercent: parsed.data.discountPercent,
+        shippingLabel: parsed.data.shippingLabel || null,
+        badgeLabel: parsed.data.badgeLabel || null,
+        tags: parsed.data.tags.length ? parsed.data.tags : Prisma.DbNull,
+        rating: parsed.data.rating,
+        reviewCount: parsed.data.reviewCount,
         woodType: parsed.data.woodType || null,
         woodTypeEn: parsed.data.woodTypeEn || null,
         material: parsed.data.material || null,
@@ -216,18 +276,16 @@ export async function updateProductAction(
           set: relatedIds.map((id) => ({ id })),
         },
       },
-      select: { slug: true },
+      select: {
+        slug: true,
+        category: {
+          select: { slug: true },
+        },
+      },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/products");
-    revalidatePath("/en/products");
-    revalidatePath(`/products/${existing.slug}`);
-    revalidatePath(`/en/products/${existing.slug}`);
-    revalidatePath(`/products/${updated.slug}`);
-    revalidatePath(`/en/products/${updated.slug}`);
-    revalidatePath("/admin/products");
+    revalidateProductCatalogPaths(existing.slug, existing.category?.slug);
+    revalidateProductCatalogPaths(updated.slug, updated.category?.slug);
 
     return {
       success: true,
@@ -250,7 +308,12 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
 
     const existing = await db.product.findUnique({
       where: { id: productId },
-      select: { slug: true },
+      select: {
+        slug: true,
+        category: {
+          select: { slug: true },
+        },
+      },
     });
 
     if (!existing) {
@@ -261,13 +324,7 @@ export async function deleteProductAction(productId: string): Promise<ActionResu
       where: { id: productId },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/products");
-    revalidatePath("/en/products");
-    revalidatePath(`/products/${existing.slug}`);
-    revalidatePath(`/en/products/${existing.slug}`);
-    revalidatePath("/admin/products");
+    revalidateProductCatalogPaths(existing.slug, existing.category?.slug);
 
     return {
       success: true,
@@ -291,16 +348,18 @@ export async function toggleProductActiveAction(
   try {
     await ensureAdmin();
 
-    await db.product.update({
+    const updated = await db.product.update({
       where: { id: productId },
       data: { active },
+      select: {
+        slug: true,
+        category: {
+          select: { slug: true },
+        },
+      },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/products");
-    revalidatePath("/en/products");
-    revalidatePath("/admin/products");
+    revalidateProductCatalogPaths(updated.slug, updated.category?.slug);
 
     return {
       success: true,

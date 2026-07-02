@@ -6,15 +6,24 @@ import { useState } from "react";
 
 import { cn, resolveWoodDemoImage } from "@/lib/utils";
 
+const PRODUCT_IMAGE_PLACEHOLDER = "/brand/icon.svg";
+
 type ProductGalleryProps = {
   images: string[];
   alt: string;
 };
 
 export function ProductGallery({ images, alt }: ProductGalleryProps) {
-  const gallerySource = images.length ? images : ["/demo/brand/texture.webp"];
-  const gallery = gallerySource.map((image, index) => resolveWoodDemoImage(image, `${alt}-${index}`));
+  const gallerySource = images.length ? images : [PRODUCT_IMAGE_PLACEHOLDER];
+  const gallery = gallerySource.map((image, index) =>
+    image ? resolveWoodDemoImage(image, `${alt}-${index}`) : PRODUCT_IMAGE_PLACEHOLDER,
+  );
   const [activeIndex, setActiveIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+
+  function resolveRenderedImage(image: string) {
+    return failedImages.includes(image) ? PRODUCT_IMAGE_PLACEHOLDER : image;
+  }
 
   return (
     <div className="space-y-3">
@@ -29,12 +38,15 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
             className="absolute inset-0"
           >
             <Image
-              src={gallery[activeIndex]}
+              src={resolveRenderedImage(gallery[activeIndex])}
               alt={alt}
               fill
               unoptimized
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 55vw"
+              onError={() =>
+                setFailedImages((previous) => [...new Set([...previous, gallery[activeIndex]])])
+              }
             />
           </motion.div>
         </AnimatePresence>
@@ -52,12 +64,13 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
             )}
           >
             <Image
-              src={image}
+              src={resolveRenderedImage(image)}
               alt={`${alt} ${index + 1}`}
               fill
               unoptimized
               className="object-cover"
               sizes="120px"
+              onError={() => setFailedImages((previous) => [...new Set([...previous, image])])}
             />
           </button>
         ))}

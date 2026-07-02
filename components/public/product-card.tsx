@@ -4,10 +4,13 @@ import { motion } from "framer-motion";
 import { ArrowRight, MessageCircle, Phone, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import { normalizePhoneLink, resolveWoodDemoImage } from "@/lib/utils";
+
+const PRODUCT_IMAGE_PLACEHOLDER = "/brand/icon.svg";
 
 type ProductCardProps = {
   product: {
@@ -16,6 +19,14 @@ type ProductCardProps = {
     slug: string;
     shortDescription: string | null;
     thumbnailUrl: string | null;
+    price?: unknown;
+    comparePrice?: unknown;
+    discountPercent?: unknown;
+    shippingLabel?: unknown;
+    badgeLabel?: unknown;
+    tags?: unknown;
+    rating?: unknown;
+    reviewCount?: unknown;
     woodType: string | null;
     material: string | null;
     featured?: boolean;
@@ -30,39 +41,58 @@ type ProductCardProps = {
   locale?: Locale;
 };
 
-function getListingMeta(seed: string) {
-  const hash = Array.from(seed).reduce((accumulator, char, index) => {
-    return (accumulator + char.charCodeAt(0) * (index + 11)) % 100_000;
-  }, 0);
-  const rating = Number((4.3 + (hash % 7) * 0.1).toFixed(1));
-  const reviews = 28 + (hash % 960);
-  const discount = hash % 3 === 0 ? 8 + (hash % 14) : 0;
-  const basePrice = 1_190_000 + (hash % 12) * 180_000;
-  const comparePrice = discount ? Math.round((basePrice * 100) / (100 - discount)) : 0;
+function formatVndPrice(value: number) {
+  return `${value.toLocaleString("vi-VN")}đ`;
+}
 
-  return {
-    rating,
-    reviews,
-    discount,
-    basePrice,
-    comparePrice,
-    fastShip: hash % 2 === 0,
-  };
+function calculateDiscountPercent(price?: number | null, comparePrice?: number | null) {
+  if (!price || !comparePrice || comparePrice <= price) {
+    return null;
+  }
+
+  return Math.round(((comparePrice - price) / comparePrice) * 100);
+}
+
+function normalizeTags(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value.map((item) => String(item).trim()).filter(Boolean);
+}
+
+function readOptionalNumber(value: unknown) {
+  return typeof value === "number" ? value : null;
+}
+
+function readOptionalString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function resolveProductImage(source: string | null | undefined, seed: string) {
+  if (!source) return PRODUCT_IMAGE_PLACEHOLDER;
+
+  return resolveWoodDemoImage(source, seed);
 }
 
 export function ProductCard({ product, phoneNumber, zaloLink, compact, locale = "vi" }: ProductCardProps) {
-  const meta = getListingMeta(product.slug || product.id);
-  const imageSrc = resolveWoodDemoImage(product.thumbnailUrl, product.slug || product.id);
-  const localizedPrice =
-    locale === "en"
-      ? `$${Math.round(meta.basePrice / 25_000).toLocaleString("en-US")}`
-      : `${meta.basePrice.toLocaleString("vi-VN")}đ`;
-  const localizedComparePrice =
-    meta.comparePrice > 0
-      ? locale === "en"
-        ? `$${Math.round(meta.comparePrice / 25_000).toLocaleString("en-US")}`
-        : `${meta.comparePrice.toLocaleString("vi-VN")}đ`
-      : null;
+  const [imageSrc, setImageSrc] = useState(() =>
+    resolveProductImage(product.thumbnailUrl, product.slug || product.id),
+  );
+  const price = readOptionalNumber(product.price);
+  const comparePrice = readOptionalNumber(product.comparePrice);
+  const explicitDiscountPercent = readOptionalNumber(product.discountPercent);
+  const rating = readOptionalNumber(product.rating);
+  const reviewCount = readOptionalNumber(product.reviewCount);
+  const shippingLabel = readOptionalString(product.shippingLabel);
+  const hasPrice = typeof price === "number";
+  const hasComparePrice = hasPrice && typeof comparePrice === "number" && comparePrice > price;
+  const discountPercent =
+    hasComparePrice && typeof explicitDiscountPercent === "number" && explicitDiscountPercent > 0
+      ? explicitDiscountPercent
+      : calculateDiscountPercent(price, comparePrice);
+  const productTags = normalizeTags(product.tags);
+  const badgeLabel =
+    readOptionalString(product.badgeLabel) ||
+    (product.featured ? t(locale, "Phổ biến", "Popular now") : null);
 
   return (
     <motion.article
@@ -79,42 +109,69 @@ export function ProductCard({ product, phoneNumber, zaloLink, compact, locale = 
             unoptimized
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes={compact ? "(max-width: 768px) 78vw, 24vw" : "(max-width: 768px) 94vw, 24vw"}
+            onError={() => setImageSrc(PRODUCT_IMAGE_PLACEHOLDER)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/0 to-black/5" />
-          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
-            {product.featured ? t(locale, "Phổ biến", "Popular now") : t(locale, "Gợi ý", "Top pick")}
-          </span>
+          {badgeLabel ? (
+            <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
+              {badgeLabel}
+            </span>
+          ) : null}
         </div>
       </Link>
 
       <div className="space-y-2 p-3.5">
         <h3 className="line-clamp-2 text-[15px] leading-snug text-stone-900">{product.name}</h3>
         <p className="text-xs text-stone-500">{t(locale, "By DaithienphuWood", "By DaithienphuWood")}</p>
-        <div className="flex items-center gap-1 text-xs text-stone-600">
-          <Star className="size-3.5 fill-amber-400 text-amber-500" />
-          <span className="font-semibold text-stone-800">{meta.rating}</span>
-          <span>({meta.reviews.toLocaleString(locale === "en" ? "en-US" : "vi-VN")})</span>
-        </div>
+        {typeof rating === "number" || typeof reviewCount === "number" ? (
+          <div className="flex items-center gap-1 text-xs text-stone-600">
+            <Star className="size-3.5 fill-amber-400 text-amber-500" />
+            {typeof rating === "number" ? (
+              <span className="font-semibold text-stone-800">{rating.toFixed(1)}</span>
+            ) : null}
+            {typeof reviewCount === "number" ? (
+              <span>({reviewCount.toLocaleString(locale === "en" ? "en-US" : "vi-VN")})</span>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="space-y-0.5">
-          <p className="text-[22px] font-bold leading-none text-emerald-700">{localizedPrice}</p>
-          {meta.discount > 0 ? (
+          {hasPrice ? (
+            <p className="text-[22px] font-bold leading-none text-emerald-700">
+              {formatVndPrice(price as number)}
+            </p>
+          ) : (
+            <p className="text-[18px] font-semibold leading-none text-emerald-700">
+              {t(locale, "Liên hệ báo giá", "Contact for price")}
+            </p>
+          )}
+          {hasComparePrice ? (
             <p className="text-xs text-stone-500">
-              <span className="line-through">{localizedComparePrice}</span>
-              {" · "}
-              <span className="font-semibold text-emerald-700">
-                {t(locale, `${meta.discount}% giảm`, `${meta.discount}% off`)}
-              </span>
+              <span className="line-through">{formatVndPrice(comparePrice as number)}</span>
+              {discountPercent ? (
+                <>
+                  {" · "}
+                  <span className="font-semibold text-emerald-700">
+                    {t(locale, `${discountPercent}% giảm`, `${discountPercent}% off`)}
+                  </span>
+                </>
+              ) : null}
             </p>
           ) : null}
-          <p className="text-xs text-stone-500">
-            {meta.fastShip
-              ? t(locale, "Miễn phí vận chuyển", "Free shipping")
-              : t(locale, "Giao hàng 2-4 ngày", "Delivery in 2-4 days")}
-          </p>
+          {shippingLabel ? (
+            <p className="text-xs text-stone-500">{shippingLabel}</p>
+          ) : null}
         </div>
 
         <div className="flex flex-wrap gap-1.5 pb-1">
+          {productTags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full border border-stone-300 bg-[#faf7f3] px-2.5 py-1 text-[11px] font-semibold text-stone-700"
+            >
+              {tag}
+            </span>
+          ))}
           {product.category ? (
             <span className="rounded-full border border-stone-300 bg-[#faf7f3] px-2.5 py-1 text-[11px] font-semibold text-stone-700">
               {product.category.name}

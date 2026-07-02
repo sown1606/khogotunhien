@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -11,6 +12,21 @@ const bulkSchema = z.object({
   ids: z.array(z.string().min(1)).min(1).max(100),
   action: z.enum(["activate", "deactivate", "delete", "feature", "unfeature"]),
 });
+
+function revalidateProductCatalogPaths(categorySlugs: string[]) {
+  revalidatePath("/");
+  revalidatePath("/en");
+  revalidatePath("/products");
+  revalidatePath("/en/products");
+  revalidatePath("/categories");
+  revalidatePath("/en/categories");
+  revalidatePath("/admin/products");
+
+  for (const slug of categorySlugs) {
+    revalidatePath(`/categories/${slug}`);
+    revalidatePath(`/en/categories/${slug}`);
+  }
+}
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -27,6 +43,15 @@ export async function POST(request: Request) {
   }
 
   try {
+    const affectedProducts = await db.product.findMany({
+      where: { id: { in: parsed.data.ids } },
+      select: {
+        category: {
+          select: { slug: true },
+        },
+      },
+    });
+
     switch (parsed.data.action) {
       case "activate":
         await db.product.updateMany({
@@ -58,6 +83,12 @@ export async function POST(request: Request) {
         });
         break;
     }
+
+    revalidateProductCatalogPaths(
+      affectedProducts
+        .map((product) => product.category?.slug)
+        .filter((slug): slug is string => Boolean(slug)),
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

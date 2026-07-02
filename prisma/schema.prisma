@@ -63,6 +63,14 @@ model Product {
   description      String?               @db.Text
   descriptionEn    String?               @db.Text
   thumbnailUrl     String?
+  price            Int?
+  comparePrice     Int?
+  discountPercent  Int?
+  shippingLabel    String?
+  badgeLabel       String?
+  tags             Json?
+  rating           Float?
+  reviewCount      Int?
   woodType         String?
   woodTypeEn       String?
   material         String?

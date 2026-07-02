@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Star } from "lucide-react";
 
 import { ContactActions } from "@/components/public/contact-actions";
 import { ProductGallery } from "@/components/public/product-gallery";
@@ -14,6 +14,32 @@ import { getProductBySlug, getSiteSettings } from "@/lib/queries";
 type ProductDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+function formatVndPrice(value: number) {
+  return `${value.toLocaleString("vi-VN")}đ`;
+}
+
+function calculateDiscountPercent(price?: number | null, comparePrice?: number | null) {
+  if (!price || !comparePrice || comparePrice <= price) {
+    return null;
+  }
+
+  return Math.round(((comparePrice - price) / comparePrice) * 100);
+}
+
+function normalizeProductTags(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value.map((item) => String(item).trim()).filter(Boolean);
+}
+
+function readOptionalNumber(value: unknown) {
+  return typeof value === "number" ? value : null;
+}
+
+function readOptionalString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
 
 async function generateProductDetailMetadata(
   { params }: ProductDetailPageProps,
@@ -64,6 +90,19 @@ async function ProductDetailPageContent({
     ...(product.thumbnailUrl ? [product.thumbnailUrl] : []),
     ...product.images.map((image) => image.url),
   ];
+  const price = readOptionalNumber(product.price);
+  const comparePrice = readOptionalNumber(product.comparePrice);
+  const explicitDiscountPercent = readOptionalNumber(product.discountPercent);
+  const rating = readOptionalNumber(product.rating);
+  const reviewCount = readOptionalNumber(product.reviewCount);
+  const shippingLabel = readOptionalString(product.shippingLabel);
+  const hasPrice = typeof price === "number";
+  const hasComparePrice = hasPrice && typeof comparePrice === "number" && comparePrice > price;
+  const discountPercent =
+    hasComparePrice && typeof explicitDiscountPercent === "number" && explicitDiscountPercent > 0
+      ? explicitDiscountPercent
+      : calculateDiscountPercent(price, comparePrice);
+  const productTags = normalizeProductTags(product.tags);
 
   return (
     <div className="space-y-8">
@@ -96,6 +135,63 @@ async function ProductDetailPageContent({
             {product.shortDescription ? <p className="text-stone-700">{product.shortDescription}</p> : null}
             {product.description ? <p className="text-sm leading-relaxed text-stone-600">{product.description}</p> : null}
           </div>
+
+          <Card>
+            <CardContent className="space-y-3 p-5">
+              <div className="space-y-1">
+                {hasPrice ? (
+                  <p className="text-3xl font-bold leading-none text-emerald-700">
+                    {formatVndPrice(price as number)}
+                  </p>
+                ) : (
+                  <p className="text-xl font-semibold text-emerald-700">
+                    {t(locale, "Liên hệ báo giá", "Contact for price")}
+                  </p>
+                )}
+                {hasComparePrice ? (
+                  <p className="text-sm text-stone-500">
+                    <span className="line-through">{formatVndPrice(comparePrice as number)}</span>
+                    {discountPercent ? (
+                      <>
+                        {" · "}
+                        <span className="font-semibold text-emerald-700">
+                          {t(locale, `${discountPercent}% giảm`, `${discountPercent}% off`)}
+                        </span>
+                      </>
+                    ) : null}
+                  </p>
+                ) : null}
+                {shippingLabel ? (
+                  <p className="text-sm text-stone-600">{shippingLabel}</p>
+                ) : null}
+              </div>
+
+              {typeof rating === "number" || typeof reviewCount === "number" ? (
+                <div className="flex items-center gap-1 text-sm text-stone-600">
+                  <Star className="size-4 fill-amber-400 text-amber-500" />
+                  {typeof rating === "number" ? (
+                    <span className="font-semibold text-stone-800">{rating.toFixed(1)}</span>
+                  ) : null}
+                  {typeof reviewCount === "number" ? (
+                    <span>({reviewCount.toLocaleString(locale === "en" ? "en-US" : "vi-VN")})</span>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {productTags.length ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {productTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-stone-300 bg-[#faf7f3] px-2.5 py-1 text-xs font-semibold text-stone-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
 
           <Card>
             <CardContent className="p-5">

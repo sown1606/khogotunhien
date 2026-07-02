@@ -23,6 +23,7 @@ type ProductRow = {
   name: string;
   slug: string;
   sortOrder: number;
+  price?: number | null;
   featured: boolean;
   active: boolean;
   updatedAt: Date;
@@ -40,6 +41,12 @@ const bulkActions = [
   { value: "unfeature", label: "Unmark featured" },
   { value: "delete", label: "Delete" },
 ] as const;
+
+function formatVndPrice(value?: number | null) {
+  if (typeof value !== "number") return "-";
+
+  return `${value.toLocaleString("vi-VN")}đ`;
+}
 
 export function ProductsTable({ products }: ProductsTableProps) {
   const router = useRouter();
@@ -174,6 +181,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
               </TableHead>
               <TableHead>Product</TableHead>
               <TableHead>Category</TableHead>
+              <TableHead>Price</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Sort</TableHead>
               <TableHead>Updated</TableHead>
@@ -196,6 +204,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                   </div>
                 </TableCell>
                 <TableCell>{product.category?.name || "-"}</TableCell>
+                <TableCell>{formatVndPrice(product.price)}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     <Badge variant={product.active ? "success" : "outline"}>

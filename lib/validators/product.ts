@@ -2,6 +2,33 @@ import { z } from "zod";
 
 import { toSlug } from "@/lib/utils";
 
+function parseOptionalInteger(value: unknown) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return null;
+
+  const parsed = Number(normalized);
+  return Number.isInteger(parsed) ? parsed : Number.NaN;
+}
+
+function parseOptionalNumber(value: unknown) {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return null;
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : Number.NaN;
+}
+
+function normalizeTags(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  return String(value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export const productSchema = z.object({
   name: z.string().min(2).max(120),
   nameEn: z.string().max(120).optional().or(z.literal("")),
@@ -11,6 +38,14 @@ export const productSchema = z.object({
   description: z.string().max(5000).optional().or(z.literal("")),
   descriptionEn: z.string().max(5000).optional().or(z.literal("")),
   thumbnailUrl: z.string().max(500).optional().or(z.literal("")),
+  price: z.number().int().min(0).max(999_999_999).nullable(),
+  comparePrice: z.number().int().min(0).max(999_999_999).nullable(),
+  discountPercent: z.number().int().min(0).max(100).nullable(),
+  shippingLabel: z.string().max(120).optional().or(z.literal("")),
+  badgeLabel: z.string().max(80).optional().or(z.literal("")),
+  tags: z.array(z.string().min(1).max(60)).max(12).default([]),
+  rating: z.number().min(0).max(5).nullable(),
+  reviewCount: z.number().int().min(0).max(999_999).nullable(),
   woodType: z.string().max(120).optional().or(z.literal("")),
   woodTypeEn: z.string().max(120).optional().or(z.literal("")),
   material: z.string().max(120).optional().or(z.literal("")),
@@ -40,6 +75,14 @@ export function normalizeProductPayload(payload: Partial<Record<string, unknown>
     description: String(payload.description ?? "").trim(),
     descriptionEn: String(payload.descriptionEn ?? "").trim(),
     thumbnailUrl: String(payload.thumbnailUrl ?? "").trim(),
+    price: parseOptionalInteger(payload.price),
+    comparePrice: parseOptionalInteger(payload.comparePrice),
+    discountPercent: parseOptionalInteger(payload.discountPercent),
+    shippingLabel: String(payload.shippingLabel ?? "").trim(),
+    badgeLabel: String(payload.badgeLabel ?? "").trim(),
+    tags: normalizeTags(payload.tags),
+    rating: parseOptionalNumber(payload.rating),
+    reviewCount: parseOptionalInteger(payload.reviewCount),
     woodType: String(payload.woodType ?? "").trim(),
     woodTypeEn: String(payload.woodTypeEn ?? "").trim(),
     material: String(payload.material ?? "").trim(),
