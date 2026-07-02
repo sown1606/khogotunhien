@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 
 import { getDatabaseConnectionDebugInfo, resolveDatabaseUrlFromEnvironment } from "@/lib/database-url";
-import { checkDatabaseConnection } from "@/lib/db";
+import { checkDatabaseConnection, getPrismaErrorLogMetadata } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
 import { logError, logInfo } from "@/lib/logger";
 
 function getSafeErrorMessage(error: unknown) {
   const raw = error instanceof Error ? error.message : "Unknown error";
-  return raw.length > 280 ? `${raw.slice(0, 280)}…` : raw;
+  const withoutDatabaseUrls = raw.replace(/mysql:\/\/[^\s'")]+/gi, "mysql://[REDACTED]");
+  return withoutDatabaseUrls.length > 280
+    ? `${withoutDatabaseUrls.slice(0, 280)}…`
+    : withoutDatabaseUrls;
 }
 
 function shouldCheckDatabase(request: Request) {
@@ -28,6 +31,10 @@ function truncate(value: string, maxLength: number) {
   return value.length > maxLength ? `${value.slice(0, maxLength)}…` : value;
 }
 
+function redactSensitiveText(value: string) {
+  return value.replace(/mysql:\/\/[^\s'")]+/gi, "mysql://[REDACTED]");
+}
+
 function getErrorDebugPayload(error: unknown) {
   if (error instanceof Error) {
     const extended = error as Error & {
@@ -39,8 +46,8 @@ function getErrorDebugPayload(error: unknown) {
 
     const debugPayload: Record<string, unknown> = {
       errorName: error.name,
-      errorMessage: error.message,
-      errorStack: error.stack ? truncate(error.stack, 8000) : null,
+      errorMessage: redactSensitiveText(error.message),
+      errorStack: error.stack ? truncate(redactSensitiveText(error.stack), 8000) : null,
     };
 
     if (extended.code) debugPayload.errorCode = extended.code;
@@ -49,8 +56,8 @@ function getErrorDebugPayload(error: unknown) {
     if (extended.cause instanceof Error) {
       debugPayload.errorCause = {
         name: extended.cause.name,
-        message: extended.cause.message,
-        stack: extended.cause.stack ? truncate(extended.cause.stack, 4000) : null,
+        message: redactSensitiveText(extended.cause.message),
+        stack: extended.cause.stack ? truncate(redactSensitiveText(extended.cause.stack), 4000) : null,
       };
     }
 
@@ -138,11 +145,12 @@ export async function GET(request: Request) {
     const safeErrorMessage = getSafeErrorMessage(error);
 
     logError("Health check failed.", {
+      query: "health.checkDatabaseConnection",
       durationMs: Date.now() - startedAt,
-      error: safeErrorMessage,
       dbCheckRequested: checkDatabase,
       databaseHost: readiness.databaseHost,
       databaseSource: readiness.databaseSource,
+      ...getPrismaErrorLogMetadata(error),
     });
 
     return NextResponse.json(

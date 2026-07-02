@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import bcrypt from "bcryptjs";
 
-import { db } from "@/lib/db";
+import { db, getPrismaErrorLogMetadata } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
 import { logWarn } from "@/lib/logger";
 
@@ -142,7 +142,8 @@ export async function ensureConfiguredAdminAccount(forceSync = false) {
   } catch (error) {
     if (shouldLogAdminSyncFailure()) {
       logWarn("Could not sync configured ADMIN_EMAIL/ADMIN_PASSWORD to database.", {
-        error: error instanceof Error ? error.message : "Unknown error",
+        query: "admin.auth.syncConfiguredAdmin",
+        ...getPrismaErrorLogMetadata(error),
       });
     }
 

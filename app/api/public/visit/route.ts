@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/lib/db";
+import { db, getPrismaErrorLogMetadata } from "@/lib/db";
 import { logError } from "@/lib/logger";
 
 const visitPayloadSchema = z.object({
@@ -41,7 +41,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
     logError("Failed to persist visit tracking event.", {
-      error: error instanceof Error ? error.message : "Unknown error",
+      query: "public.visitLog.create",
+      ...getPrismaErrorLogMetadata(error),
     });
     return NextResponse.json({ ok: false }, { status: 202 });
   }

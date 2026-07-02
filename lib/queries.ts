@@ -1,7 +1,8 @@
 import { Prisma, type HomepageSectionType, type SiteSetting } from "@prisma/client";
 import { cache } from "react";
 
-import { db } from "@/lib/db";
+import { getDatabaseConnectionDebugInfo } from "@/lib/database-url";
+import { db, runPrismaQuery } from "@/lib/db";
 import {
   getDemoCategories,
   getDemoCategoryBySlug,
@@ -61,6 +62,10 @@ function markDatabaseAuthFailureCooldown() {
 
 function isDatabaseOutageActive() {
   return Date.now() < databaseOutageUntilTimestamp;
+}
+
+function isDatabaseConfigurationMissing() {
+  return getDatabaseConnectionDebugInfo().source === "missing";
 }
 
 function markDatabaseOutageCooldown() {
@@ -359,12 +364,19 @@ async function withDatabaseFallback<T>(
   fallbackValue: T,
   execute: () => Promise<T>,
 ) {
+  if (isDatabaseConfigurationMissing()) {
+    return fallbackValue;
+  }
+
   if (isPrismaPanicActive() || isDatabaseAuthFailureActive() || isDatabaseOutageActive()) {
     return fallbackValue;
   }
 
   try {
-    return await execute();
+    return await runPrismaQuery(queryName, execute, {
+      logFailures: false,
+      retryOnPanic: false,
+    });
   } catch (error) {
     if (isPrismaPanicError(error)) {
       markPrismaPanicCooldown();

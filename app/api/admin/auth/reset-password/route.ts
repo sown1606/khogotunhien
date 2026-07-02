@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
-import { db } from "@/lib/db";
+import { db, getPrismaErrorLogMetadata } from "@/lib/db";
 import { logError } from "@/lib/logger";
 
 const resetPasswordSchema = z.object({
@@ -52,7 +52,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
     logError("Admin password reset failed.", {
-      error: error instanceof Error ? error.message : "Unknown error",
+      query: "admin.auth.resetPassword",
+      ...getPrismaErrorLogMetadata(error),
     });
 
     return NextResponse.json(
@@ -64,4 +65,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

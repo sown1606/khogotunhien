@@ -14,7 +14,7 @@ const PRISMA_ERROR_MESSAGES: MessageMap = {
 
 export function getSafeErrorMessage(error: unknown) {
   if (error instanceof Error) {
-    return error.message;
+    return error.message.replace(/mysql:\/\/[^\s'")]+/gi, "mysql://[REDACTED]");
   }
 
   return "Unknown error";

@@ -8,7 +8,7 @@ import {
   ensureConfiguredAdminAccount,
   isConfiguredAdminCredentials,
 } from "@/lib/admin-auth";
-import { db } from "@/lib/db";
+import { db, getPrismaErrorLogMetadata } from "@/lib/db";
 import { getOptionalEnv } from "@/lib/env";
 import { logError, logWarn } from "@/lib/logger";
 
@@ -28,7 +28,8 @@ function logAuthDatabaseFailureThrottled(error: unknown) {
 
   nextAuthDbFailureLogTimestamp = now + AUTH_DB_LOG_THROTTLE_MS;
   logWarn("Admin authentication check could not reach database.", {
-    error: error instanceof Error ? error.message : "Unknown error",
+    query: "admin.auth.authorize",
+    ...getPrismaErrorLogMetadata(error),
   });
 }
 
