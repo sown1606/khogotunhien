@@ -4,16 +4,11 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductForm } from "@/components/admin/product-form";
 import { updateProductAction } from "@/lib/actions/product-actions";
 import { db } from "@/lib/db";
+import { normalizeProductTags } from "@/lib/product-tags";
 
 type EditProductPageProps = {
   params: Promise<{ id: string }>;
 };
-
-function readProductTags(value: unknown) {
-  if (!Array.isArray(value)) return [];
-
-  return value.map((item) => String(item).trim()).filter(Boolean);
-}
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
   const { id } = await params;
@@ -75,7 +70,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
           discountPercent: product.discountPercent,
           shippingLabel: product.shippingLabel,
           badgeLabel: product.badgeLabel,
-          tags: readProductTags(product.tags),
+          tags: normalizeProductTags(product.tags),
           rating: product.rating,
           reviewCount: product.reviewCount,
           woodType: product.woodType,

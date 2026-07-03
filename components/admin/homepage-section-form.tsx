@@ -78,6 +78,7 @@ export function HomepageSectionForm({
   const [state, formAction] = useActionState(action, {});
   const router = useRouter();
   const [items, setItems] = useState<SectionItemValue[]>(initialValues?.items?.length ? initialValues.items : []);
+  const [visible, setVisible] = useState(initialValues?.visible ?? true);
   const fieldErrorMessages = Object.values(state.fieldErrors || {}).flat();
 
   useEffect(() => {
@@ -103,8 +104,14 @@ export function HomepageSectionForm({
           </ul>
         </div>
       ) : null}
+      {state.error && !fieldErrorMessages.length ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {state.error}
+        </div>
+      ) : null}
 
       <input type="hidden" name="items" value={JSON.stringify(items)} />
+      <input type="hidden" name="visible" value={String(visible)} />
 
       <Card>
         <CardContent className="grid gap-4 p-5 md:grid-cols-2">
@@ -164,7 +171,11 @@ export function HomepageSectionForm({
             />
           </div>
           <div className="flex items-center gap-2">
-            <Checkbox id="visible" name="visible" defaultChecked={initialValues?.visible ?? true} />
+            <Checkbox
+              id="visible"
+              checked={visible}
+              onCheckedChange={(checked) => setVisible(checked === true)}
+            />
             <Label htmlFor="visible">Visible on homepage</Label>
           </div>
         </CardContent>

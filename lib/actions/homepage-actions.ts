@@ -22,14 +22,16 @@ async function ensureAdmin() {
   }
 }
 
-function parseItems(value: FormDataEntryValue | null) {
-  if (typeof value !== "string" || !value) return [];
+function parseItems(value: FormDataEntryValue | null): { items: unknown[]; error?: string } {
+  if (typeof value !== "string" || !value) return { items: [] };
 
   try {
     const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed)
+      ? { items: parsed }
+      : { items: [], error: "Section items must be a valid list." };
   } catch {
-    return [];
+    return { items: [], error: "Section items could not be read. Please refresh and try again." };
   }
 }
 
@@ -43,12 +45,46 @@ function parseType(value: FormDataEntryValue | null): HomepageSectionType {
     : HomepageSectionType.CUSTOM;
 }
 
+function getLastFormValue(formData: FormData, key: string) {
+  const values = formData.getAll(key);
+  return values.length ? values[values.length - 1] : null;
+}
+
+function revalidateHomepageSectionPaths(
+  productSlugs: Array<string | null | undefined> = [],
+  categorySlugs: Array<string | null | undefined> = [],
+) {
+  revalidatePath("/");
+  revalidatePath("/en");
+  revalidatePath("/admin/homepage");
+
+  for (const slug of productSlugs) {
+    if (!slug) continue;
+    revalidatePath(`/products/${slug}`);
+    revalidatePath(`/en/products/${slug}`);
+  }
+
+  for (const slug of categorySlugs) {
+    if (!slug) continue;
+    revalidatePath(`/categories/${slug}`);
+    revalidatePath(`/en/categories/${slug}`);
+  }
+}
+
 export async function createHomepageSectionAction(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
   try {
     await ensureAdmin();
+    const parsedItems = parseItems(formData.get("items"));
+
+    if (parsedItems.error) {
+      return {
+        error: "Please review section fields.",
+        fieldErrors: { items: [parsedItems.error] },
+      };
+    }
 
     const payload = normalizeHomepageSectionPayload({
       title: formData.get("title"),
@@ -57,9 +93,9 @@ export async function createHomepageSectionAction(
       description: formData.get("description"),
       descriptionEn: formData.get("descriptionEn"),
       type: parseType(formData.get("type")),
-      visible: parseBoolean(formData.get("visible")),
+      visible: parseBoolean(getLastFormValue(formData, "visible")),
       sortOrder: parseNumber(formData.get("sortOrder"), 0),
-      items: parseItems(formData.get("items")),
+      items: parsedItems.items,
     });
 
     const parsed = homepageSectionSchema.safeParse(payload);
@@ -68,6 +104,18 @@ export async function createHomepageSectionAction(
       return {
         error: "Please review section fields.",
         fieldErrors: parsed.error.flatten().fieldErrors,
+      };
+    }
+
+    const duplicate = await db.homepageSection.findUnique({
+      where: { slug: parsed.data.slug },
+      select: { id: true },
+    });
+
+    if (duplicate) {
+      return {
+        error: "Please review section fields.",
+        fieldErrors: { slug: ["A homepage section with this slug already exists."] },
       };
     }
 
@@ -98,9 +146,7 @@ export async function createHomepageSectionAction(
       },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/admin/homepage");
+    revalidateHomepageSectionPaths();
 
     return {
       success: true,
@@ -121,6 +167,14 @@ export async function updateHomepageSectionAction(
 ): Promise<ActionResult> {
   try {
     await ensureAdmin();
+    const parsedItems = parseItems(formData.get("items"));
+
+    if (parsedItems.error) {
+      return {
+        error: "Please review section fields.",
+        fieldErrors: { items: [parsedItems.error] },
+      };
+    }
 
     const payload = normalizeHomepageSectionPayload({
       title: formData.get("title"),
@@ -129,9 +183,9 @@ export async function updateHomepageSectionAction(
       description: formData.get("description"),
       descriptionEn: formData.get("descriptionEn"),
       type: parseType(formData.get("type")),
-      visible: parseBoolean(formData.get("visible")),
+      visible: parseBoolean(getLastFormValue(formData, "visible")),
       sortOrder: parseNumber(formData.get("sortOrder"), 0),
-      items: parseItems(formData.get("items")),
+      items: parsedItems.items,
     });
 
     const parsed = homepageSectionSchema.safeParse(payload);
@@ -145,14 +199,37 @@ export async function updateHomepageSectionAction(
 
     const existing = await db.homepageSection.findUnique({
       where: { id: sectionId },
-      select: { id: true },
+      select: {
+        id: true,
+        slug: true,
+        items: {
+          select: {
+            product: { select: { slug: true } },
+            category: { select: { slug: true } },
+          },
+        },
+      },
     });
 
     if (!existing) {
       return { error: "Section not found." };
     }
 
-    await db.homepageSection.update({
+    if (parsed.data.slug !== existing.slug) {
+      const duplicate = await db.homepageSection.findUnique({
+        where: { slug: parsed.data.slug },
+        select: { id: true },
+      });
+
+      if (duplicate && duplicate.id !== sectionId) {
+        return {
+          error: "Please review section fields.",
+          fieldErrors: { slug: ["A homepage section with this slug already exists."] },
+        };
+      }
+    }
+
+    const updated = await db.homepageSection.update({
       where: { id: sectionId },
       data: {
         title: parsed.data.title,
@@ -179,11 +256,26 @@ export async function updateHomepageSectionAction(
           })),
         },
       },
+      select: {
+        items: {
+          select: {
+            product: { select: { slug: true } },
+            category: { select: { slug: true } },
+          },
+        },
+      },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/admin/homepage");
+    revalidateHomepageSectionPaths(
+      [
+        ...existing.items.map((item) => item.product?.slug),
+        ...updated.items.map((item) => item.product?.slug),
+      ],
+      [
+        ...existing.items.map((item) => item.category?.slug),
+        ...updated.items.map((item) => item.category?.slug),
+      ],
+    );
 
     return {
       success: true,
@@ -206,9 +298,7 @@ export async function deleteHomepageSectionAction(sectionId: string): Promise<Ac
       where: { id: sectionId },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/admin/homepage");
+    revalidateHomepageSectionPaths();
 
     return {
       success: true,
@@ -235,9 +325,7 @@ export async function toggleHomepageSectionVisibilityAction(
       data: { visible },
     });
 
-    revalidatePath("/");
-    revalidatePath("/en");
-    revalidatePath("/admin/homepage");
+    revalidateHomepageSectionPaths();
 
     return {
       success: true,

@@ -2,10 +2,10 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import { resolveWoodDemoImage } from "@/lib/utils";
+import { SafeImage } from "@/components/public/safe-image";
 
 type CategoryCardProps = {
   category: {
@@ -32,7 +32,7 @@ export function CategoryCard({ category, locale = "vi" }: CategoryCardProps) {
     >
       <Link href={withLocalePath(locale, `/categories/${category.slug}`)} className="block">
         <div className="relative aspect-[5/3] overflow-hidden">
-          <Image
+          <SafeImage
             src={imageSrc}
             alt={category.name}
             fill

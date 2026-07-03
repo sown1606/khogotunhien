@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/public/product-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
+import { normalizeProductTags } from "@/lib/product-tags";
 import { getProductBySlug, getSiteSettings } from "@/lib/queries";
 
 type ProductDetailPageProps = {
@@ -25,12 +26,6 @@ function calculateDiscountPercent(price?: number | null, comparePrice?: number |
   }
 
   return Math.round(((comparePrice - price) / comparePrice) * 100);
-}
-
-function normalizeProductTags(value: unknown) {
-  if (!Array.isArray(value)) return [];
-
-  return value.map((item) => String(item).trim()).filter(Boolean);
 }
 
 function readOptionalNumber(value: unknown) {

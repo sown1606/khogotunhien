@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { HomepageSectionType } from "@prisma/client";
 
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -15,7 +16,7 @@ import {
 import { db } from "@/lib/db";
 
 type AdminHomepagePageProps = {
-  searchParams: Promise<{ edit?: string }>;
+  searchParams: Promise<{ edit?: string; error?: string; message?: string }>;
 };
 
 const sectionTypeLabel: Record<HomepageSectionType, string> = {
@@ -62,13 +63,25 @@ export default async function AdminHomepagePage({ searchParams }: AdminHomepageP
     "use server";
     const id = String(formData.get("id") || "");
     const visible = String(formData.get("visible") || "") === "true";
-    await toggleHomepageSectionVisibilityAction(id, visible);
+    const result = await toggleHomepageSectionVisibilityAction(id, visible);
+
+    if (result.error) {
+      redirect(`/admin/homepage?error=${encodeURIComponent(result.error)}`);
+    }
+
+    redirect(`/admin/homepage?message=${encodeURIComponent(result.message || "Section updated.")}`);
   }
 
   async function handleDeleteSection(formData: FormData) {
     "use server";
     const id = String(formData.get("id") || "");
-    await deleteHomepageSectionAction(id);
+    const result = await deleteHomepageSectionAction(id);
+
+    if (result.error) {
+      redirect(`/admin/homepage?error=${encodeURIComponent(result.error)}`);
+    }
+
+    redirect(`/admin/homepage?message=${encodeURIComponent(result.message || "Section removed.")}`);
   }
 
   return (
@@ -78,12 +91,24 @@ export default async function AdminHomepagePage({ searchParams }: AdminHomepageP
         description="Manage featured categories, products, and curated homepage blocks."
       />
 
+      {params.error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {params.error}
+        </div>
+      ) : null}
+      {params.message ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+          {params.message}
+        </div>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>{editingSection ? "Edit section" : "Create section"}</CardTitle>
         </CardHeader>
         <CardContent>
           <HomepageSectionForm
+            key={editingSection?.id || "new-homepage-section"}
             action={formAction}
             products={products}
             categories={categories}

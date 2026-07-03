@@ -8,6 +8,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
+import { normalizeProductTags } from "@/lib/product-tags";
 import { normalizePhoneLink, resolveWoodDemoImage } from "@/lib/utils";
 
 const PRODUCT_IMAGE_PLACEHOLDER = "/brand/icon.svg";
@@ -53,12 +54,6 @@ function calculateDiscountPercent(price?: number | null, comparePrice?: number |
   return Math.round(((comparePrice - price) / comparePrice) * 100);
 }
 
-function normalizeTags(value: unknown) {
-  if (!Array.isArray(value)) return [];
-
-  return value.map((item) => String(item).trim()).filter(Boolean);
-}
-
 function readOptionalNumber(value: unknown) {
   return typeof value === "number" ? value : null;
 }
@@ -89,7 +84,7 @@ export function ProductCard({ product, phoneNumber, zaloLink, compact, locale = 
     hasComparePrice && typeof explicitDiscountPercent === "number" && explicitDiscountPercent > 0
       ? explicitDiscountPercent
       : calculateDiscountPercent(price, comparePrice);
-  const productTags = normalizeTags(product.tags);
+  const productTags = normalizeProductTags(product.tags);
   const badgeLabel =
     readOptionalString(product.badgeLabel) ||
     (product.featured ? t(locale, "Phổ biến", "Popular now") : null);

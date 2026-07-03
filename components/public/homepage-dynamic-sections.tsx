@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { CategoryStrip } from "@/components/public/category-strip";
 import { ProductStrip } from "@/components/public/product-strip";
+import { SafeImage } from "@/components/public/safe-image";
 import { SectionHeading } from "@/components/public/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
@@ -139,10 +139,11 @@ export function HomepageDynamicSections({
                     className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_12px_24px_-20px_rgba(77,50,31,0.45)]"
                   >
                     <div className="relative aspect-[5/3] overflow-hidden">
-                      <Image
+                      <SafeImage
                         src={image}
                         alt={title}
                         fill
+                        unoptimized
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
