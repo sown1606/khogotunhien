@@ -307,6 +307,29 @@ function localizeHomepageSection<T extends {
   };
 }
 
+function isWoodProjectGallerySection(section: { title: string; items: unknown[] } & Record<string, unknown>) {
+  const slug = typeof section.slug === "string" ? section.slug.toLowerCase() : "";
+  const title = section.title.toLowerCase();
+
+  return (
+    slug.includes("cong-trinh") ||
+    slug.includes("wood-project") ||
+    title.includes("công trình") ||
+    title.includes("cong trinh") ||
+    title.includes("project gallery")
+  );
+}
+
+function getFallbackWoodProjectGallery(locale: Locale) {
+  const projectGallery = getDemoHomepageSections().find(
+    (section) => section.slug === "wood-project-gallery",
+  );
+
+  return projectGallery
+    ? localizeHomepageSection(locale, projectGallery as typeof projectGallery & Record<string, unknown>)
+    : null;
+}
+
 function getFallbackSiteSetting(): SiteSetting {
   const fallbackCompanyPhone = process.env.COMPANY_PHONE || "0786531966";
   const fallbackZaloUrl = process.env.ZALO_URL || "https://zalo.me/0786531966";
@@ -569,11 +592,23 @@ export async function getHomepageSections(inputLocale: Locale = "vi") {
       ? sections
       : getDemoHomepageSections();
 
-  return sourceSections
+  const visibleSections = sourceSections
     .map((section) =>
       localizeHomepageSection(locale, section as typeof section & Record<string, unknown>),
     )
     .filter((section) => section.items.length > 0);
+
+  if (
+    !shouldUseDemoFallback() ||
+    visibleSections.some((section) =>
+      isWoodProjectGallerySection(section as typeof section & Record<string, unknown>),
+    )
+  ) {
+    return visibleSections;
+  }
+
+  const fallbackProjectGallery = getFallbackWoodProjectGallery(locale);
+  return fallbackProjectGallery ? [...visibleSections, fallbackProjectGallery] : visibleSections;
 }
 
 export async function getFeaturedProducts(limit = 12, inputLocale: Locale = "vi") {
