@@ -63,6 +63,10 @@ export function HomepageDynamicSections({
             .map((item) => item.category)
             .filter((category): category is SectionCategory => Boolean(category));
 
+          if (!categories.length) {
+            return null;
+          }
+
           return (
             <CategoryStrip
               key={section.id}
@@ -80,6 +84,10 @@ export function HomepageDynamicSections({
             .map((item) => item.product)
             .filter((product): product is SectionProduct => Boolean(product));
 
+          if (!products.length) {
+            return null;
+          }
+
           return (
             <ProductStrip
               key={section.id}
@@ -92,6 +100,10 @@ export function HomepageDynamicSections({
               locale={locale}
             />
           );
+        }
+
+        if (!section.items.length) {
+          return null;
         }
 
         return (

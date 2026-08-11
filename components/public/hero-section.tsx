@@ -15,6 +15,8 @@ type HeroSectionProps = {
   companyDescription?: string | null;
   phoneNumber?: string | null;
   zaloLink?: string | null;
+  heroMainImageUrl?: string | null;
+  heroDetailImageUrl?: string | null;
   locale?: Locale;
 };
 
@@ -23,8 +25,13 @@ export function HeroSection({
   companyDescription,
   phoneNumber,
   zaloLink,
+  heroMainImageUrl,
+  heroDetailImageUrl,
   locale = "vi",
 }: HeroSectionProps) {
+  const mainImage = heroMainImageUrl || "/demo/hero/wood-hero-main.jpg";
+  const detailImage = heroDetailImageUrl || "/demo/hero/wood-hero-side-1.jpg";
+
   return (
     <section className="relative overflow-hidden rounded-[28px] border border-stone-200 bg-[#fffaf4]">
       <div className="absolute inset-0 bg-[url('/demo/hero/hero-texture.webp')] bg-cover bg-center opacity-[0.1]" />
@@ -101,7 +108,7 @@ export function HeroSection({
         >
           <div className="relative aspect-[5/4] overflow-hidden rounded-3xl border border-amber-200/60 shadow-[0_24px_60px_-36px_rgba(77,50,31,0.6)]">
             <Image
-              src="/demo/hero/wood-hero-main.jpg"
+              src={mainImage}
               alt={t(locale, "Không gian gỗ thủ công", "Handcrafted wood space")}
               fill
               priority
@@ -118,7 +125,7 @@ export function HeroSection({
           <div className="absolute -bottom-5 right-4 hidden w-40 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl md:block">
             <div className="relative aspect-square">
               <Image
-                src="/demo/hero/wood-hero-side-1.jpg"
+                src={detailImage}
                 alt={t(locale, "Bàn gỗ nguyên tấm", "Natural slab table")}
                 fill
                 unoptimized

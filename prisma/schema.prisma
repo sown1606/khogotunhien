@@ -163,6 +163,8 @@ model SiteSetting {
   tiktokLink          String?
   logoUrl             String?
   faviconUrl          String?
+  heroMainImageUrl    String?  @db.VarChar(500)
+  heroDetailImageUrl  String?  @db.VarChar(500)
   seoTitle            String?
   seoTitleEn          String?
   seoDescription      String?

@@ -328,6 +328,8 @@ function getFallbackSiteSetting(): SiteSetting {
     tiktokLink: null,
     logoUrl: "/brand/logo-horizontal.svg",
     faviconUrl: "/favicon.svg",
+    heroMainImageUrl: "/demo/hero/wood-hero-main.jpg",
+    heroDetailImageUrl: "/demo/hero/wood-hero-side-1.jpg",
     seoTitle: "ĐẠI THIÊN PHÚ WOOD | Tinh hoa của gia đình Việt",
     seoTitleEn: "ĐẠI THIÊN PHÚ WOOD | The essence of Vietnamese family craftsmanship",
     seoDescription:
@@ -428,6 +430,21 @@ const getSiteSettingsCached = cache(async (locale: Locale) => {
         phoneNumber: fallbackSettings.phoneNumber,
         email: fallbackSettings.email,
         zaloLink: fallbackSettings.zaloLink,
+        facebookLink: fallbackSettings.facebookLink,
+        tiktokLink: fallbackSettings.tiktokLink,
+        logoUrl: fallbackSettings.logoUrl,
+        faviconUrl: fallbackSettings.faviconUrl,
+        heroMainImageUrl: fallbackSettings.heroMainImageUrl,
+        heroDetailImageUrl: fallbackSettings.heroDetailImageUrl,
+        seoTitle: fallbackSettings.seoTitle,
+        seoTitleEn: fallbackSettings.seoTitleEn,
+        seoDescription: fallbackSettings.seoDescription,
+        seoDescriptionEn: fallbackSettings.seoDescriptionEn,
+        seoKeywords: fallbackSettings.seoKeywords,
+        footerContent: fallbackSettings.footerContent,
+        footerContentEn: fallbackSettings.footerContentEn,
+        openingHours: fallbackSettings.openingHours,
+        openingHoursEn: fallbackSettings.openingHoursEn,
         contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
         contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
         contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
@@ -438,16 +455,6 @@ const getSiteSettingsCached = cache(async (locale: Locale) => {
         leadPopupTitleEn: fallbackSettings.leadPopupTitleEn,
         leadPopupDescription: fallbackSettings.leadPopupDescription,
         leadPopupDescriptionEn: fallbackSettings.leadPopupDescriptionEn,
-        logoUrl: fallbackSettings.logoUrl,
-        faviconUrl: fallbackSettings.faviconUrl,
-        seoTitle: fallbackSettings.seoTitle,
-        seoTitleEn: fallbackSettings.seoTitleEn,
-        seoDescription: fallbackSettings.seoDescription,
-        seoDescriptionEn: fallbackSettings.seoDescriptionEn,
-        footerContent: fallbackSettings.footerContent,
-        footerContentEn: fallbackSettings.footerContentEn,
-        openingHours: fallbackSettings.openingHours,
-        openingHoursEn: fallbackSettings.openingHoursEn,
       },
     });
   });
@@ -481,6 +488,21 @@ export async function getSiteSettingsForAdmin() {
         phoneNumber: fallbackSettings.phoneNumber,
         email: fallbackSettings.email,
         zaloLink: fallbackSettings.zaloLink,
+        facebookLink: fallbackSettings.facebookLink,
+        tiktokLink: fallbackSettings.tiktokLink,
+        logoUrl: fallbackSettings.logoUrl,
+        faviconUrl: fallbackSettings.faviconUrl,
+        heroMainImageUrl: fallbackSettings.heroMainImageUrl,
+        heroDetailImageUrl: fallbackSettings.heroDetailImageUrl,
+        seoTitle: fallbackSettings.seoTitle,
+        seoTitleEn: fallbackSettings.seoTitleEn,
+        seoDescription: fallbackSettings.seoDescription,
+        seoDescriptionEn: fallbackSettings.seoDescriptionEn,
+        seoKeywords: fallbackSettings.seoKeywords,
+        footerContent: fallbackSettings.footerContent,
+        footerContentEn: fallbackSettings.footerContentEn,
+        openingHours: fallbackSettings.openingHours,
+        openingHoursEn: fallbackSettings.openingHoursEn,
         contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
         contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
         contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
@@ -547,9 +569,11 @@ export async function getHomepageSections(inputLocale: Locale = "vi") {
       ? sections
       : getDemoHomepageSections();
 
-  return sourceSections.map((section) =>
-    localizeHomepageSection(locale, section as typeof section & Record<string, unknown>),
-  );
+  return sourceSections
+    .map((section) =>
+      localizeHomepageSection(locale, section as typeof section & Record<string, unknown>),
+    )
+    .filter((section) => section.items.length > 0);
 }
 
 export async function getFeaturedProducts(limit = 12, inputLocale: Locale = "vi") {

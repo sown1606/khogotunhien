@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import type { HomepageSectionType } from "@prisma/client";
 
 import type { ActionResult } from "@/lib/actions/types";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -301,18 +302,20 @@ export function HomepageSectionForm({
                     </div>
 
                     <div className="space-y-1">
-                      <Label>Image URL</Label>
-                      <Input
+                      <ImageUploadField
+                        label="Item image"
+                        name={`sectionItemImage-${index}`}
                         value={item.imageUrl || ""}
-                        onChange={(event) =>
+                        onChange={(value) =>
                           setItems((previous) =>
                             previous.map((currentItem, itemIndex) =>
                               itemIndex === index
-                                ? { ...currentItem, imageUrl: event.target.value }
+                                ? { ...currentItem, imageUrl: value }
                                 : currentItem,
                             ),
                           )
                         }
+                        helperText="Upload project photos or paste an image URL. This is the image shown on the homepage card."
                       />
                     </div>
 

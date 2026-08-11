@@ -25,6 +25,8 @@ type SettingsValues = {
   tiktokLink: string | null;
   logoUrl: string | null;
   faviconUrl: string | null;
+  heroMainImageUrl: string | null;
+  heroDetailImageUrl: string | null;
   seoTitle: string | null;
   seoTitleEn: string | null;
   seoDescription: string | null;
@@ -64,6 +66,8 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
   const [state, formAction] = useActionState(action, {});
   const [logoUrl, setLogoUrl] = useState(initialValues.logoUrl || "");
   const [faviconUrl, setFaviconUrl] = useState(initialValues.faviconUrl || "");
+  const [heroMainImageUrl, setHeroMainImageUrl] = useState(initialValues.heroMainImageUrl || "");
+  const [heroDetailImageUrl, setHeroDetailImageUrl] = useState(initialValues.heroDetailImageUrl || "");
   const fieldErrorMessages = Object.values(state.fieldErrors || {}).flat();
 
   useEffect(() => {
@@ -223,6 +227,28 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
             name="faviconUrl"
             value={faviconUrl}
             onChange={setFaviconUrl}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Homepage hero images</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-5 md:grid-cols-2">
+          <ImageUploadField
+            label="Main hero image"
+            name="heroMainImageUrl"
+            value={heroMainImageUrl}
+            onChange={setHeroMainImageUrl}
+            helperText="Large image block on the homepage hero."
+          />
+          <ImageUploadField
+            label="Detail hero image"
+            name="heroDetailImageUrl"
+            value={heroDetailImageUrl}
+            onChange={setHeroDetailImageUrl}
+            helperText="Small overlapping hero image on desktop."
           />
         </CardContent>
       </Card>

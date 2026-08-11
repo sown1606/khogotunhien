@@ -969,6 +969,51 @@ async function main() {
     });
   }
 
+  const woodProjectGallerySection = await upsertHomepageSection({
+    titleVi: "Công trình sử dụng gỗ",
+    titleEn: "Wood Project Gallery",
+    slug: "wood-project-gallery",
+    descriptionVi: "Hình ảnh công trình, góc nội thất và hạng mục thực tế có sử dụng gỗ từ xưởng.",
+    descriptionEn: "Completed project images, interior details, and real wood applications from the workshop.",
+    type: "CUSTOM",
+    sortOrder: 3,
+  });
+
+  await prisma.homepageSectionItem.createMany({
+    data: [
+      {
+        sectionId: woodProjectGallerySection.id,
+        customTitle: "Không gian bàn gỗ tự nhiên",
+        customTitleEn: "Solid Wood Table Setting",
+        customDescription: "Ảnh thực tế các hạng mục bàn, mặt gỗ và chi tiết hoàn thiện cho khách tham khảo.",
+        customDescriptionEn: "Real project references for tables, wood surfaces, and finishing details.",
+        imageUrl: "/demo/products/product-014.webp",
+        linkUrl: "/categories/wood-slabs",
+        sortOrder: 1,
+      },
+      {
+        sectionId: woodProjectGallerySection.id,
+        customTitle: "Ốp gỗ và panel nội thất",
+        customTitleEn: "Interior Wood Panels",
+        customDescription: "Các mảng tường, vách và panel trang trí ứng dụng gỗ trong không gian thực tế.",
+        customDescriptionEn: "Wall, partition, and decorative panel applications in real interiors.",
+        imageUrl: "/demo/products/product-019.webp",
+        linkUrl: "/categories/decorative-wood-panels",
+        sortOrder: 2,
+      },
+      {
+        sectionId: woodProjectGallerySection.id,
+        customTitle: "Gỗ cho bếp và quầy",
+        customTitleEn: "Wood for Kitchens and Counters",
+        customDescription: "Mặt bếp, quầy bar và các chi tiết gỗ được gia công theo kích thước công trình.",
+        customDescriptionEn: "Kitchen tops, counters, and custom wood details made to project dimensions.",
+        imageUrl: "/demo/products/product-022.webp",
+        linkUrl: "/categories/interior-wood-materials",
+        sortOrder: 3,
+      },
+    ],
+  });
+
   const premiumWoodSlabsSection = await upsertHomepageSection({
     titleVi: "Slab gỗ cao cấp",
     titleEn: "Premium Wood Slabs",
@@ -976,7 +1021,7 @@ async function main() {
     descriptionVi: "Bộ sưu tập slab live-edge cho bàn ăn, quầy bếp và không gian nội thất cá nhân hóa.",
     descriptionEn: "Live-edge slab selections for statement dining, counters, and bespoke interiors.",
     type: "CURATED_COLLECTION",
-    sortOrder: 3,
+    sortOrder: 4,
   });
 
   for (const [index, slug] of [
@@ -1003,7 +1048,7 @@ async function main() {
     descriptionVi: "Thớt và phụ kiện bếp cao cấp được chế tác cho nhu cầu sử dụng hằng ngày.",
     descriptionEn: "Premium cutting boards and kitchenware crafted for daily use with lasting elegance.",
     type: "CURATED_COLLECTION",
-    sortOrder: 4,
+    sortOrder: 5,
   });
 
   for (const [index, slug] of [
@@ -1031,7 +1076,7 @@ async function main() {
     descriptionVi: "Các mẫu biển gỗ và khắc cá nhân hóa cho nhà ở, cửa hàng và không gian thương hiệu.",
     descriptionEn: "Custom signage and personalized engraving formats for homes and business spaces.",
     type: "CURATED_COLLECTION",
-    sortOrder: 5,
+    sortOrder: 6,
   });
 
   for (const [index, slug] of [
@@ -1059,7 +1104,7 @@ async function main() {
     descriptionVi: "Dịch vụ thiết kế và gia công cho bếp, biển thương hiệu và hạng mục nội thất cao cấp.",
     descriptionEn: "Tailored design-and-build services for kitchens, brand signage, and premium interiors.",
     type: "PROMOTIONAL",
-    sortOrder: 6,
+    sortOrder: 7,
   });
 
   await prisma.homepageSectionItem.createMany({
@@ -1104,7 +1149,7 @@ async function main() {
     descriptionVi: "Những sản phẩm và vật liệu vừa được bổ sung từ xưởng sản xuất.",
     descriptionEn: "Recently added products and materials from our latest workshop releases.",
     type: "FEATURED_PRODUCTS",
-    sortOrder: 7,
+    sortOrder: 8,
   });
 
   for (const [index, product] of [...products].sort((a, b) => b.sortOrder - a.sortOrder).slice(0, 10).entries()) {
@@ -1137,6 +1182,8 @@ async function main() {
       tiktokLink: null,
       logoUrl: "/brand/logo-horizontal.svg",
       faviconUrl: "/favicon.svg",
+      heroMainImageUrl: "/demo/hero/wood-hero-main.jpg",
+      heroDetailImageUrl: "/demo/hero/wood-hero-side-1.jpg",
       seoTitle: "ĐẠI THIÊN PHÚ WOOD | Tinh hoa của gia đình Việt",
       seoTitleEn: "ĐẠI THIÊN PHÚ WOOD | The essence of Vietnamese family craftsmanship",
       seoDescription:
@@ -1172,6 +1219,8 @@ async function main() {
       tiktokLink: null,
       logoUrl: "/brand/logo-horizontal.svg",
       faviconUrl: "/favicon.svg",
+      heroMainImageUrl: "/demo/hero/wood-hero-main.jpg",
+      heroDetailImageUrl: "/demo/hero/wood-hero-side-1.jpg",
       seoTitle: "ĐẠI THIÊN PHÚ WOOD | Tinh hoa của gia đình Việt",
       seoTitleEn: "ĐẠI THIÊN PHÚ WOOD | The essence of Vietnamese family craftsmanship",
       seoDescription:

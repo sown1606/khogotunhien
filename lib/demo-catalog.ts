@@ -741,13 +741,27 @@ const homepageSectionSeeds: SectionSeed[] = [
     productSlugs: builtProducts.filter((product) => product.featured).slice(0, 12).map((product) => product.slug),
   },
   {
+    slug: "wood-project-gallery",
+    title: "Công trình sử dụng gỗ",
+    titleEn: "Wood Project Gallery",
+    description: "Hình ảnh công trình, góc nội thất và hạng mục thực tế có sử dụng gỗ.",
+    descriptionEn: "Completed project images, interior details, and real wood applications.",
+    type: "CUSTOM",
+    sortOrder: 3,
+    productSlugs: [
+      "riverline-walnut-live-edge-slab-wood-slabs",
+      "fluted-oak-decorative-panel-decorative-wood-panels",
+      "walnut-serving-tray-set-wood-kitchenware",
+    ],
+  },
+  {
     slug: "premium-wood-slabs",
     title: "Slab gỗ cao cấp",
     titleEn: "Premium Wood Slabs",
     description: "Slab live-edge dành cho bàn ăn, quầy bar và không gian trưng bày sang trọng.",
     descriptionEn: "Live-edge slabs for luxury dining, counters, and statement displays.",
     type: "CURATED_COLLECTION",
-    sortOrder: 3,
+    sortOrder: 4,
     productSlugs: [
       "riverline-walnut-live-edge-slab-wood-slabs",
       "rustic-suar-conference-slab-wood-slabs",
@@ -761,7 +775,7 @@ const homepageSectionSeeds: SectionSeed[] = [
     description: "Thớt và phụ kiện gỗ tinh gọn cho không gian bếp gia đình hiện đại.",
     descriptionEn: "Refined cutting boards and accessories for modern kitchen spaces.",
     type: "CURATED_COLLECTION",
-    sortOrder: 4,
+    sortOrder: 5,
     productSlugs: [
       "walnut-chef-cutting-board-cutting-boards",
       "oak-family-serving-board-cutting-boards",
@@ -776,7 +790,7 @@ const homepageSectionSeeds: SectionSeed[] = [
     description: "Giải pháp biển gỗ cá nhân hóa cho nhà ở, quán cà phê và thương hiệu.",
     descriptionEn: "Personalized wood signage for homes, cafés, and brand spaces.",
     type: "CURATED_COLLECTION",
-    sortOrder: 5,
+    sortOrder: 6,
     productSlugs: [
       "heritage-house-name-sign-custom-wood-signs",
       "studio-brand-wall-sign-custom-wood-signs",
@@ -791,7 +805,7 @@ const homepageSectionSeeds: SectionSeed[] = [
     description: "Thiết kế và gia công theo kích thước thực tế cho dự án nội thất cao cấp.",
     descriptionEn: "Tailored design-and-build service for premium interior projects.",
     type: "PROMOTIONAL",
-    sortOrder: 6,
+    sortOrder: 7,
     productSlugs: [
       "imperial-solid-wood-table-top-solid-wood",
       "studio-brand-wall-sign-custom-wood-signs",
@@ -805,7 +819,7 @@ const homepageSectionSeeds: SectionSeed[] = [
     description: "Các mẫu mới nhất từ xưởng gia công gỗ Đại Thiên Phú.",
     descriptionEn: "Latest workshop arrivals from Đại Thiên Phú Wood.",
     type: "FEATURED_PRODUCTS",
-    sortOrder: 7,
+    sortOrder: 8,
     productSlugs: builtProducts.slice(-10).map((product) => product.slug),
   },
 ];
@@ -890,4 +904,3 @@ export function getDemoSearchResults(term: string) {
 
   return { products, categories };
 }
-
