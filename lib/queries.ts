@@ -18,6 +18,51 @@ import {
 import { type Locale, localizeValue, normalizeLocale } from "@/lib/i18n";
 import { logError, logWarn } from "@/lib/logger";
 
+const DEFAULT_HERO_MAIN_IMAGE_URL = "/demo/hero/wood-hero-main.jpg";
+const DEFAULT_HERO_DETAIL_IMAGE_URL = "/demo/hero/wood-hero-side-1.jpg";
+const HOMEPAGE_HERO_IMAGES_SECTION_SLUG = "homepage-hero-images";
+
+const siteSettingSelect = Prisma.validator<Prisma.SiteSettingSelect>()({
+  id: true,
+  companyName: true,
+  companyDescription: true,
+  companyDescriptionEn: true,
+  address: true,
+  addressEn: true,
+  phoneNumber: true,
+  email: true,
+  zaloLink: true,
+  facebookLink: true,
+  tiktokLink: true,
+  logoUrl: true,
+  faviconUrl: true,
+  seoTitle: true,
+  seoTitleEn: true,
+  seoDescription: true,
+  seoDescriptionEn: true,
+  seoKeywords: true,
+  footerContent: true,
+  footerContentEn: true,
+  openingHours: true,
+  openingHoursEn: true,
+  contactPrimaryLabel: true,
+  contactPrimaryLabelEn: true,
+  contactSecondaryLabel: true,
+  contactSecondaryLabelEn: true,
+  leadPopupEnabled: true,
+  leadPopupDelaySeconds: true,
+  leadPopupTitle: true,
+  leadPopupTitleEn: true,
+  leadPopupDescription: true,
+  leadPopupDescriptionEn: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+type SiteSettingBase = Prisma.SiteSettingGetPayload<{ select: typeof siteSettingSelect }>;
+type SiteSettingWithHeroImages = SiteSettingBase &
+  Pick<SiteSetting, "heroMainImageUrl" | "heroDetailImageUrl">;
+
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
@@ -175,8 +220,11 @@ function localizeRecordField<T extends Record<string, unknown>>(
   return localizeValue(locale, vi, en);
 }
 
-function localizeSiteSetting(locale: Locale, setting: SiteSetting): SiteSetting {
-  const source = setting as SiteSetting & Record<string, unknown>;
+function localizeSiteSetting(
+  locale: Locale,
+  setting: SiteSettingWithHeroImages,
+): SiteSettingWithHeroImages {
+  const source = setting as SiteSettingWithHeroImages & Record<string, unknown>;
 
   return {
     ...setting,
@@ -330,6 +378,34 @@ function getFallbackWoodProjectGallery(locale: Locale) {
     : null;
 }
 
+async function getStoredHomepageHeroImages() {
+  const fallback = {
+    heroMainImageUrl: DEFAULT_HERO_MAIN_IMAGE_URL,
+    heroDetailImageUrl: DEFAULT_HERO_DETAIL_IMAGE_URL,
+  };
+
+  return withDatabaseFallback("getStoredHomepageHeroImages", fallback, async () => {
+    const section = await db.homepageSection.findUnique({
+      where: { slug: HOMEPAGE_HERO_IMAGES_SECTION_SLUG },
+      select: {
+        items: {
+          where: { active: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+          select: {
+            imageUrl: true,
+          },
+        },
+      },
+    });
+    const [mainImage, detailImage] = section?.items ?? [];
+
+    return {
+      heroMainImageUrl: mainImage?.imageUrl || fallback.heroMainImageUrl,
+      heroDetailImageUrl: detailImage?.imageUrl || fallback.heroDetailImageUrl,
+    };
+  });
+}
+
 function getFallbackSiteSetting(): SiteSetting {
   const fallbackCompanyPhone = process.env.COMPANY_PHONE || "0786531966";
   const fallbackZaloUrl = process.env.ZALO_URL || "https://zalo.me/0786531966";
@@ -351,8 +427,8 @@ function getFallbackSiteSetting(): SiteSetting {
     tiktokLink: null,
     logoUrl: "/brand/logo-horizontal.svg",
     faviconUrl: "/favicon.svg",
-    heroMainImageUrl: "/demo/hero/wood-hero-main.jpg",
-    heroDetailImageUrl: "/demo/hero/wood-hero-side-1.jpg",
+    heroMainImageUrl: DEFAULT_HERO_MAIN_IMAGE_URL,
+    heroDetailImageUrl: DEFAULT_HERO_DETAIL_IMAGE_URL,
     seoTitle: "ĐẠI THIÊN PHÚ WOOD | Tinh hoa của gia đình Việt",
     seoTitleEn: "ĐẠI THIÊN PHÚ WOOD | The essence of Vietnamese family craftsmanship",
     seoDescription:
@@ -435,54 +511,57 @@ function shouldUseDemoFallback() {
 const getSiteSettingsCached = cache(async (locale: Locale) => {
   const fallbackSettings = getFallbackSiteSetting();
 
-  const settings = await withDatabaseFallback("getSiteSettings", fallbackSettings, async () => {
-    const existing = await db.siteSetting.findUnique({
-      where: { id: "default" },
-    });
+  const [settings, heroImages] = await Promise.all([
+    withDatabaseFallback("getSiteSettings", fallbackSettings, async () => {
+      const existing = await db.siteSetting.findUnique({
+        where: { id: "default" },
+        select: siteSettingSelect,
+      });
 
-    if (existing) return existing;
+      if (existing) return existing;
 
-    return db.siteSetting.create({
-      data: {
-        id: "default",
-        companyName: fallbackSettings.companyName,
-        companyDescription: fallbackSettings.companyDescription,
-        companyDescriptionEn: fallbackSettings.companyDescriptionEn,
-        address: fallbackSettings.address,
-        addressEn: fallbackSettings.addressEn,
-        phoneNumber: fallbackSettings.phoneNumber,
-        email: fallbackSettings.email,
-        zaloLink: fallbackSettings.zaloLink,
-        facebookLink: fallbackSettings.facebookLink,
-        tiktokLink: fallbackSettings.tiktokLink,
-        logoUrl: fallbackSettings.logoUrl,
-        faviconUrl: fallbackSettings.faviconUrl,
-        heroMainImageUrl: fallbackSettings.heroMainImageUrl,
-        heroDetailImageUrl: fallbackSettings.heroDetailImageUrl,
-        seoTitle: fallbackSettings.seoTitle,
-        seoTitleEn: fallbackSettings.seoTitleEn,
-        seoDescription: fallbackSettings.seoDescription,
-        seoDescriptionEn: fallbackSettings.seoDescriptionEn,
-        seoKeywords: fallbackSettings.seoKeywords,
-        footerContent: fallbackSettings.footerContent,
-        footerContentEn: fallbackSettings.footerContentEn,
-        openingHours: fallbackSettings.openingHours,
-        openingHoursEn: fallbackSettings.openingHoursEn,
-        contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
-        contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
-        contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
-        contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
-        leadPopupEnabled: fallbackSettings.leadPopupEnabled,
-        leadPopupDelaySeconds: fallbackSettings.leadPopupDelaySeconds,
-        leadPopupTitle: fallbackSettings.leadPopupTitle,
-        leadPopupTitleEn: fallbackSettings.leadPopupTitleEn,
-        leadPopupDescription: fallbackSettings.leadPopupDescription,
-        leadPopupDescriptionEn: fallbackSettings.leadPopupDescriptionEn,
-      },
-    });
-  });
+      return db.siteSetting.create({
+        select: siteSettingSelect,
+        data: {
+          id: "default",
+          companyName: fallbackSettings.companyName,
+          companyDescription: fallbackSettings.companyDescription,
+          companyDescriptionEn: fallbackSettings.companyDescriptionEn,
+          address: fallbackSettings.address,
+          addressEn: fallbackSettings.addressEn,
+          phoneNumber: fallbackSettings.phoneNumber,
+          email: fallbackSettings.email,
+          zaloLink: fallbackSettings.zaloLink,
+          facebookLink: fallbackSettings.facebookLink,
+          tiktokLink: fallbackSettings.tiktokLink,
+          logoUrl: fallbackSettings.logoUrl,
+          faviconUrl: fallbackSettings.faviconUrl,
+          seoTitle: fallbackSettings.seoTitle,
+          seoTitleEn: fallbackSettings.seoTitleEn,
+          seoDescription: fallbackSettings.seoDescription,
+          seoDescriptionEn: fallbackSettings.seoDescriptionEn,
+          seoKeywords: fallbackSettings.seoKeywords,
+          footerContent: fallbackSettings.footerContent,
+          footerContentEn: fallbackSettings.footerContentEn,
+          openingHours: fallbackSettings.openingHours,
+          openingHoursEn: fallbackSettings.openingHoursEn,
+          contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
+          contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
+          contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
+          contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
+          leadPopupEnabled: fallbackSettings.leadPopupEnabled,
+          leadPopupDelaySeconds: fallbackSettings.leadPopupDelaySeconds,
+          leadPopupTitle: fallbackSettings.leadPopupTitle,
+          leadPopupTitleEn: fallbackSettings.leadPopupTitleEn,
+          leadPopupDescription: fallbackSettings.leadPopupDescription,
+          leadPopupDescriptionEn: fallbackSettings.leadPopupDescriptionEn,
+        },
+      });
+    }),
+    getStoredHomepageHeroImages(),
+  ]);
 
-  return localizeSiteSetting(locale, settings);
+  return localizeSiteSetting(locale, { ...settings, ...heroImages });
 });
 
 export async function getSiteSettings(inputLocale: Locale = "vi") {
@@ -493,52 +572,57 @@ export async function getSiteSettings(inputLocale: Locale = "vi") {
 export async function getSiteSettingsForAdmin() {
   const fallbackSettings = getFallbackSiteSetting();
 
-  return withDatabaseFallback("getSiteSettingsForAdmin", fallbackSettings, async () => {
-    const settings = await db.siteSetting.findUnique({
-      where: { id: "default" },
-    });
+  const [settings, heroImages] = await Promise.all([
+    withDatabaseFallback("getSiteSettingsForAdmin", fallbackSettings, async () => {
+      const settings = await db.siteSetting.findUnique({
+        where: { id: "default" },
+        select: siteSettingSelect,
+      });
 
-    if (settings) return settings;
+      if (settings) return settings;
 
-    return db.siteSetting.create({
-      data: {
-        id: "default",
-        companyName: fallbackSettings.companyName,
-        companyDescription: fallbackSettings.companyDescription,
-        companyDescriptionEn: fallbackSettings.companyDescriptionEn,
-        address: fallbackSettings.address,
-        addressEn: fallbackSettings.addressEn,
-        phoneNumber: fallbackSettings.phoneNumber,
-        email: fallbackSettings.email,
-        zaloLink: fallbackSettings.zaloLink,
-        facebookLink: fallbackSettings.facebookLink,
-        tiktokLink: fallbackSettings.tiktokLink,
-        logoUrl: fallbackSettings.logoUrl,
-        faviconUrl: fallbackSettings.faviconUrl,
-        heroMainImageUrl: fallbackSettings.heroMainImageUrl,
-        heroDetailImageUrl: fallbackSettings.heroDetailImageUrl,
-        seoTitle: fallbackSettings.seoTitle,
-        seoTitleEn: fallbackSettings.seoTitleEn,
-        seoDescription: fallbackSettings.seoDescription,
-        seoDescriptionEn: fallbackSettings.seoDescriptionEn,
-        seoKeywords: fallbackSettings.seoKeywords,
-        footerContent: fallbackSettings.footerContent,
-        footerContentEn: fallbackSettings.footerContentEn,
-        openingHours: fallbackSettings.openingHours,
-        openingHoursEn: fallbackSettings.openingHoursEn,
-        contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
-        contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
-        contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
-        contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
-        leadPopupEnabled: fallbackSettings.leadPopupEnabled,
-        leadPopupDelaySeconds: fallbackSettings.leadPopupDelaySeconds,
-        leadPopupTitle: fallbackSettings.leadPopupTitle,
-        leadPopupTitleEn: fallbackSettings.leadPopupTitleEn,
-        leadPopupDescription: fallbackSettings.leadPopupDescription,
-        leadPopupDescriptionEn: fallbackSettings.leadPopupDescriptionEn,
-      },
-    });
-  });
+      return db.siteSetting.create({
+        select: siteSettingSelect,
+        data: {
+          id: "default",
+          companyName: fallbackSettings.companyName,
+          companyDescription: fallbackSettings.companyDescription,
+          companyDescriptionEn: fallbackSettings.companyDescriptionEn,
+          address: fallbackSettings.address,
+          addressEn: fallbackSettings.addressEn,
+          phoneNumber: fallbackSettings.phoneNumber,
+          email: fallbackSettings.email,
+          zaloLink: fallbackSettings.zaloLink,
+          facebookLink: fallbackSettings.facebookLink,
+          tiktokLink: fallbackSettings.tiktokLink,
+          logoUrl: fallbackSettings.logoUrl,
+          faviconUrl: fallbackSettings.faviconUrl,
+          seoTitle: fallbackSettings.seoTitle,
+          seoTitleEn: fallbackSettings.seoTitleEn,
+          seoDescription: fallbackSettings.seoDescription,
+          seoDescriptionEn: fallbackSettings.seoDescriptionEn,
+          seoKeywords: fallbackSettings.seoKeywords,
+          footerContent: fallbackSettings.footerContent,
+          footerContentEn: fallbackSettings.footerContentEn,
+          openingHours: fallbackSettings.openingHours,
+          openingHoursEn: fallbackSettings.openingHoursEn,
+          contactPrimaryLabel: fallbackSettings.contactPrimaryLabel,
+          contactPrimaryLabelEn: fallbackSettings.contactPrimaryLabelEn,
+          contactSecondaryLabel: fallbackSettings.contactSecondaryLabel,
+          contactSecondaryLabelEn: fallbackSettings.contactSecondaryLabelEn,
+          leadPopupEnabled: fallbackSettings.leadPopupEnabled,
+          leadPopupDelaySeconds: fallbackSettings.leadPopupDelaySeconds,
+          leadPopupTitle: fallbackSettings.leadPopupTitle,
+          leadPopupTitleEn: fallbackSettings.leadPopupTitleEn,
+          leadPopupDescription: fallbackSettings.leadPopupDescription,
+          leadPopupDescriptionEn: fallbackSettings.leadPopupDescriptionEn,
+        },
+      });
+    }),
+    getStoredHomepageHeroImages(),
+  ]);
+
+  return { ...settings, ...heroImages };
 }
 
 export async function getNavigationCategories(inputLocale: Locale = "vi") {

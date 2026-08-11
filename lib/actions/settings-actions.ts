@@ -1,5 +1,6 @@
 "use server";
 
+import { HomepageSectionType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 
@@ -15,6 +16,66 @@ async function ensureAdmin() {
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
+}
+
+const HOMEPAGE_HERO_IMAGES_SECTION_SLUG = "homepage-hero-images";
+
+async function saveHomepageHeroImages(heroMainImageUrl: string, heroDetailImageUrl: string) {
+  const section = await db.homepageSection.upsert({
+    where: { slug: HOMEPAGE_HERO_IMAGES_SECTION_SLUG },
+    update: {
+      title: "Homepage hero images",
+      titleEn: "Homepage hero images",
+      description: "Hidden section used by website settings for homepage hero images.",
+      descriptionEn: "Hidden section used by website settings for homepage hero images.",
+      type: HomepageSectionType.CUSTOM,
+      visible: false,
+      sortOrder: 9999,
+    },
+    create: {
+      title: "Homepage hero images",
+      titleEn: "Homepage hero images",
+      slug: HOMEPAGE_HERO_IMAGES_SECTION_SLUG,
+      description: "Hidden section used by website settings for homepage hero images.",
+      descriptionEn: "Hidden section used by website settings for homepage hero images.",
+      type: HomepageSectionType.CUSTOM,
+      visible: false,
+      sortOrder: 9999,
+    },
+    select: { id: true },
+  });
+
+  await db.homepageSectionItem.deleteMany({
+    where: { sectionId: section.id },
+  });
+
+  const heroItems = [
+    {
+      customTitle: "Main hero image",
+      customTitleEn: "Main hero image",
+      imageUrl: heroMainImageUrl || null,
+      sortOrder: 1,
+    },
+    {
+      customTitle: "Detail hero image",
+      customTitleEn: "Detail hero image",
+      imageUrl: heroDetailImageUrl || null,
+      sortOrder: 2,
+    },
+  ].filter((item) => Boolean(item.imageUrl));
+
+  if (!heroItems.length) return;
+
+  await db.homepageSectionItem.createMany({
+    data: heroItems.map((item) => ({
+      sectionId: section.id,
+      customTitle: item.customTitle,
+      customTitleEn: item.customTitleEn,
+      imageUrl: item.imageUrl,
+      active: true,
+      sortOrder: item.sortOrder,
+    })),
+  });
 }
 
 export async function updateSettingsAction(
@@ -69,48 +130,50 @@ export async function updateSettingsAction(
       };
     }
 
+    const { heroMainImageUrl, heroDetailImageUrl } = parsed.data;
+    const settingsData = {
+      companyName: parsed.data.companyName,
+      companyDescription: parsed.data.companyDescription || null,
+      companyDescriptionEn: parsed.data.companyDescriptionEn || null,
+      address: parsed.data.address || null,
+      addressEn: parsed.data.addressEn || null,
+      phoneNumber: parsed.data.phoneNumber || null,
+      email: parsed.data.email || null,
+      zaloLink: parsed.data.zaloLink || null,
+      facebookLink: parsed.data.facebookLink || null,
+      tiktokLink: parsed.data.tiktokLink || null,
+      logoUrl: parsed.data.logoUrl || null,
+      faviconUrl: parsed.data.faviconUrl || null,
+      seoTitle: parsed.data.seoTitle || null,
+      seoTitleEn: parsed.data.seoTitleEn || null,
+      seoDescription: parsed.data.seoDescription || null,
+      seoDescriptionEn: parsed.data.seoDescriptionEn || null,
+      seoKeywords: parsed.data.seoKeywords || null,
+      footerContent: parsed.data.footerContent || null,
+      footerContentEn: parsed.data.footerContentEn || null,
+      openingHours: parsed.data.openingHours || null,
+      openingHoursEn: parsed.data.openingHoursEn || null,
+      contactPrimaryLabel: parsed.data.contactPrimaryLabel || "Contact via Zalo",
+      contactPrimaryLabelEn: parsed.data.contactPrimaryLabelEn || null,
+      contactSecondaryLabel: parsed.data.contactSecondaryLabel || "Call now",
+      contactSecondaryLabelEn: parsed.data.contactSecondaryLabelEn || null,
+      leadPopupEnabled: parsed.data.leadPopupEnabled,
+      leadPopupDelaySeconds: parsed.data.leadPopupDelaySeconds,
+      leadPopupTitle: parsed.data.leadPopupTitle || null,
+      leadPopupTitleEn: parsed.data.leadPopupTitleEn || null,
+      leadPopupDescription: parsed.data.leadPopupDescription || null,
+      leadPopupDescriptionEn: parsed.data.leadPopupDescriptionEn || null,
+    };
+
     await db.siteSetting.upsert({
       where: { id: "default" },
-      update: {
-        ...parsed.data,
-        companyDescription: parsed.data.companyDescription || null,
-        companyDescriptionEn: parsed.data.companyDescriptionEn || null,
-        address: parsed.data.address || null,
-        addressEn: parsed.data.addressEn || null,
-        phoneNumber: parsed.data.phoneNumber || null,
-        email: parsed.data.email || null,
-        zaloLink: parsed.data.zaloLink || null,
-        facebookLink: parsed.data.facebookLink || null,
-        tiktokLink: parsed.data.tiktokLink || null,
-        logoUrl: parsed.data.logoUrl || null,
-        faviconUrl: parsed.data.faviconUrl || null,
-        heroMainImageUrl: parsed.data.heroMainImageUrl || null,
-        heroDetailImageUrl: parsed.data.heroDetailImageUrl || null,
-        seoTitle: parsed.data.seoTitle || null,
-        seoTitleEn: parsed.data.seoTitleEn || null,
-        seoDescription: parsed.data.seoDescription || null,
-        seoDescriptionEn: parsed.data.seoDescriptionEn || null,
-        seoKeywords: parsed.data.seoKeywords || null,
-        footerContent: parsed.data.footerContent || null,
-        footerContentEn: parsed.data.footerContentEn || null,
-        openingHours: parsed.data.openingHours || null,
-        openingHoursEn: parsed.data.openingHoursEn || null,
-        contactPrimaryLabel: parsed.data.contactPrimaryLabel || "Contact via Zalo",
-        contactPrimaryLabelEn: parsed.data.contactPrimaryLabelEn || null,
-        contactSecondaryLabel: parsed.data.contactSecondaryLabel || "Call now",
-        contactSecondaryLabelEn: parsed.data.contactSecondaryLabelEn || null,
-        leadPopupEnabled: parsed.data.leadPopupEnabled,
-        leadPopupDelaySeconds: parsed.data.leadPopupDelaySeconds,
-        leadPopupTitle: parsed.data.leadPopupTitle || null,
-        leadPopupTitleEn: parsed.data.leadPopupTitleEn || null,
-        leadPopupDescription: parsed.data.leadPopupDescription || null,
-        leadPopupDescriptionEn: parsed.data.leadPopupDescriptionEn || null,
-      },
+      update: settingsData,
       create: {
         id: "default",
-        ...parsed.data,
+        ...settingsData,
       },
     });
+    await saveHomepageHeroImages(heroMainImageUrl || "", heroDetailImageUrl || "");
 
     revalidatePath("/", "layout");
     revalidatePath("/");
