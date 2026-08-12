@@ -66,13 +66,6 @@ export function HeroSection({
             )}
           />
 
-          <p className="max-w-xl text-sm text-stone-600">
-            {t(
-              locale,
-              "Ảnh và dữ liệu sản phẩm được tối ưu để duyệt nhanh, liên hệ báo giá bằng cụm nút bên phải.",
-              "Use the contact actions on the right for instant quote support.",
-            )}
-          </p>
         </motion.div>
 
         <motion.div

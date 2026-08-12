@@ -2,7 +2,6 @@ import { HomepageDynamicSections } from "@/components/public/homepage-dynamic-se
 import { HeroSection } from "@/components/public/hero-section";
 import { CategoryStrip } from "@/components/public/category-strip";
 import { ProductStrip } from "@/components/public/product-strip";
-import { DiscoveryToolbar } from "@/components/public/discovery-toolbar";
 import { withLocalePath } from "@/lib/i18n";
 import {
   getFeaturedCategories,
@@ -43,8 +42,6 @@ export default async function EnglishHomePage() {
         heroDetailImageUrl={settings.heroDetailImageUrl}
         locale={locale}
       />
-      <DiscoveryToolbar categories={featuredCategories} locale={locale} />
-
       {hasDynamicSections ? (
         <HomepageDynamicSections
           sections={orderedSections}

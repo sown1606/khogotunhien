@@ -95,14 +95,6 @@ export function SiteHeader({
               <SearchInput locale={locale} className="mx-auto w-full max-w-4xl" />
             </div>
 
-            <nav className="hidden items-center gap-1 xl:flex">
-              {navigationItems.slice(0, 2).map((item) => (
-                <Button key={item.href} asChild variant="ghost" size="sm" className="text-stone-700">
-                  <Link href={item.href}>{item.label}</Link>
-                </Button>
-              ))}
-            </nav>
-
             <MusicPlayer
               tracks={musicTracks}
               locale={locale}
@@ -165,16 +157,6 @@ export function SiteHeader({
                   </Link>
                 );
               })}
-              <span className="mx-1 h-6 w-px bg-stone-200" />
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={withLocalePath(locale, `/categories/${category.slug}`)}
-                  className="rounded-full border border-stone-300/80 bg-white px-3 py-1.5 text-sm text-stone-700 transition-colors hover:border-amber-400 hover:text-amber-900"
-                >
-                  {category.name}
-                </Link>
-              ))}
             </div>
           </div>
         </div>
