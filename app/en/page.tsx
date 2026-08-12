@@ -11,6 +11,9 @@ import {
   getSiteSettings,
 } from "@/lib/queries";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function EnglishHomePage() {
   const locale = "en";
   const [settings, featuredCategories, featuredProducts, sections] = await Promise.all([
