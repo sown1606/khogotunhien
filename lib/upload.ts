@@ -1,8 +1,16 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import crypto from "node:crypto";
+import path from "node:path";
+
+import { getUploadDirectory } from "@/lib/upload-storage";
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+const EXTENSION_BY_TYPE: Record<string, string> = {
+  "image/avif": "avif",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export class UploadValidationError extends Error {}
@@ -20,16 +28,16 @@ export function validateImageFile(file: File) {
 export async function saveImageFile(file: File) {
   validateImageFile(file);
 
-  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const extension = EXTENSION_BY_TYPE[file.type];
   const fileName = `${crypto.randomUUID()}.${extension}`;
-  const uploadDirectory = path.join(process.cwd(), "public", "uploads");
+  const uploadDirectory = getUploadDirectory();
   const filePath = path.join(uploadDirectory, fileName);
 
-  await mkdir(uploadDirectory, { recursive: true });
+  await mkdir(uploadDirectory, { recursive: true, mode: 0o755 });
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  await writeFile(filePath, buffer);
+  await writeFile(filePath, buffer, { mode: 0o644 });
 
   return `/uploads/${fileName}`;
 }

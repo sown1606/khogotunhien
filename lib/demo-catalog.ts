@@ -742,10 +742,10 @@ const homepageSectionSeeds: SectionSeed[] = [
   },
   {
     slug: "wood-project-gallery",
-    title: "Công trình sử dụng gỗ",
-    titleEn: "Wood Project Gallery",
-    description: "Hình ảnh công trình, góc nội thất và hạng mục thực tế có sử dụng gỗ.",
-    descriptionEn: "Completed project images, interior details, and real wood applications.",
+    title: "Công trình khách hàng",
+    titleEn: "Customer Projects",
+    description: "Những không gian thực tế của khách hàng có sử dụng gỗ tự nhiên.",
+    descriptionEn: "Real customer spaces featuring natural wood.",
     type: "CUSTOM",
     sortOrder: 3,
     productSlugs: [

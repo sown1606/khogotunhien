@@ -81,6 +81,10 @@ export function HomepageSectionForm({
   const [items, setItems] = useState<SectionItemValue[]>(initialValues?.items?.length ? initialValues.items : []);
   const [visible, setVisible] = useState(initialValues?.visible ?? true);
   const fieldErrorMessages = Object.values(state.fieldErrors || {}).flat();
+  const isCustomerProjectSection = Boolean(
+    initialValues?.slug?.match(/customer-project|wood-project|cong-trinh/i) ||
+      initialValues?.title?.match(/công trình|cong trinh|customer project/i),
+  );
 
   useEffect(() => {
     if (state.error) {
@@ -186,8 +190,14 @@ export function HomepageSectionForm({
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Section items</Label>
-              <p className="text-xs text-stone-500">Add products, categories, or custom cards.</p>
+              <Label>
+                {isCustomerProjectSection ? "Ảnh công trình khách hàng" : "Section items"}
+              </Label>
+              <p className="text-xs text-stone-500">
+                {isCustomerProjectSection
+                  ? "Đăng ảnh nhà khách có sử dụng gỗ, kèm tên và mô tả ngắn."
+                  : "Add products, categories, or custom cards."}
+              </p>
             </div>
             <Button
               type="button"
@@ -197,7 +207,7 @@ export function HomepageSectionForm({
               }
             >
               <Plus className="size-4" />
-              Add item
+              {isCustomerProjectSection ? "Thêm ảnh công trình" : "Add item"}
             </Button>
           </div>
 
@@ -270,7 +280,11 @@ export function HomepageSectionForm({
                     </div>
 
                     <div className="space-y-1">
-                      <Label>Custom title (Vietnamese)</Label>
+                      <Label>
+                        {isCustomerProjectSection
+                          ? "Tên công trình (Tiếng Việt)"
+                          : "Custom title (Vietnamese)"}
+                      </Label>
                       <Input
                         value={item.customTitle || ""}
                         onChange={(event) =>
@@ -303,7 +317,9 @@ export function HomepageSectionForm({
 
                     <div className="space-y-1">
                       <ImageUploadField
-                        label="Item image"
+                        label={
+                          isCustomerProjectSection ? "Ảnh nhà khách dùng gỗ" : "Item image"
+                        }
                         name={`sectionItemImage-${index}`}
                         value={item.imageUrl || ""}
                         onChange={(value) =>
@@ -315,12 +331,20 @@ export function HomepageSectionForm({
                             ),
                           )
                         }
-                        helperText="Upload project photos or paste an image URL. This is the image shown on the homepage card."
+                        helperText={
+                          isCustomerProjectSection
+                            ? "Tải ảnh công trình thực tế hoặc dán URL ảnh. Ảnh sẽ hiển thị lớn trên trang chủ."
+                            : "Upload project photos or paste an image URL. This is the image shown on the homepage card."
+                        }
                       />
                     </div>
 
                     <div className="space-y-1 md:col-span-2">
-                      <Label>Custom description (Vietnamese)</Label>
+                      <Label>
+                        {isCustomerProjectSection
+                          ? "Mô tả ngắn (Tiếng Việt)"
+                          : "Custom description (Vietnamese)"}
+                      </Label>
                       <Textarea
                         value={item.customDescription || ""}
                         onChange={(event) =>

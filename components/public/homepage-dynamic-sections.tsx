@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CategoryStrip } from "@/components/public/category-strip";
+import { CustomerProjectGallery } from "@/components/public/customer-project-gallery";
 import { ProductStrip } from "@/components/public/product-strip";
 import { SafeImage } from "@/components/public/safe-image";
 import { SectionHeading } from "@/components/public/section-heading";
@@ -10,6 +11,7 @@ import { resolveWoodDemoImage } from "@/lib/utils";
 
 type HomepageSectionWithItems = {
   id: string;
+  slug: string;
   title: string;
   description: string | null;
   type: "FEATURED_PRODUCTS" | "FEATURED_CATEGORIES" | "CURATED_COLLECTION" | "PROMOTIONAL" | "CUSTOM";
@@ -48,6 +50,20 @@ type HomepageDynamicSectionsProps = {
 
 type SectionProduct = NonNullable<HomepageSectionWithItems["items"][number]["product"]>;
 type SectionCategory = NonNullable<HomepageSectionWithItems["items"][number]["category"]>;
+
+function isCustomerProjectGallery(section: HomepageSectionWithItems) {
+  const slug = section.slug.toLowerCase();
+  const title = section.title.toLowerCase();
+
+  return (
+    slug.includes("customer-project") ||
+    slug.includes("wood-project") ||
+    slug.includes("cong-trinh") ||
+    title.includes("công trình") ||
+    title.includes("cong trinh") ||
+    title.includes("customer project")
+  );
+}
 
 export function HomepageDynamicSections({
   sections,
@@ -104,6 +120,49 @@ export function HomepageDynamicSections({
 
         if (!section.items.length) {
           return null;
+        }
+
+        if (isCustomerProjectGallery(section)) {
+          const items = section.items.map((item) => {
+            const href =
+              (item.linkUrl
+                ? item.linkUrl.startsWith("/")
+                  ? withLocalePath(locale, item.linkUrl)
+                  : item.linkUrl
+                : null) ||
+              (item.product ? withLocalePath(locale, `/products/${item.product.slug}`) : null) ||
+              (item.category ? withLocalePath(locale, `/categories/${item.category.slug}`) : null);
+            const image = resolveWoodDemoImage(
+              item.imageUrl || item.product?.thumbnailUrl || item.category?.imageUrl,
+              item.id,
+            );
+            const title =
+              item.customTitle ||
+              item.product?.name ||
+              item.category?.name ||
+              t(locale, "Công trình khách hàng", "Customer project");
+            const description =
+              item.customDescription ||
+              item.product?.shortDescription ||
+              item.category?.shortDescription ||
+              t(
+                locale,
+                "Không gian thực tế có sử dụng gỗ tự nhiên.",
+                "A real space featuring natural wood.",
+              );
+
+            return { id: item.id, title, description, href, image };
+          });
+
+          return (
+            <CustomerProjectGallery
+              key={section.id}
+              eyebrow={t(locale, "Không gian thực tế", "Real spaces")}
+              title={section.title}
+              description={section.description}
+              items={items}
+            />
+          );
         }
 
         return (

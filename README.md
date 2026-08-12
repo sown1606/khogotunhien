@@ -55,6 +55,10 @@ ADMIN_PASSWORD="your-strong-admin-password"
 COMPANY_PHONE="your-company-phone"
 ZALO_URL="https://zalo.me/your-zalo-number"
 
+# Optional but recommended: persistent uploads outside the GitHub/Hostinger release folder.
+# If omitted in production, the app defaults to $HOME/khogotunhien-uploads.
+UPLOAD_DIR="/home/your-hostinger-user/khogotunhien-uploads"
+
 # Optional storefront fallback. Keep true to show local demo catalog when DB is empty/unreachable.
 DEMO_CATALOG_FALLBACK="true"
 
@@ -187,3 +191,4 @@ Vietnamese fields are primary. English fields are optional and can be left empty
   - or fallback `DB_HOST` + `DB_PORT` + `DB_NAME` + `DB_USER` + `DB_PASSWORD`
 - When building `DATABASE_URL` from `DB_*`, credentials are URL-encoded automatically to support special characters.
 - If the database is temporarily unavailable (or connected to an empty schema), public storefront queries can fall back to a local 12-category / 36-product demo catalog when `DEMO_CATALOG_FALLBACK=true`.
+- Uploaded image URLs stay as `/uploads/...`. In production, set `UPLOAD_DIR` to a persistent directory outside the release folder, or let the app default to `$HOME/khogotunhien-uploads`. The `/uploads/...` route also reads Hostinger's stable `domains/<domain>/nodejs/public/uploads` folder so restored legacy files keep working after hbuild deploys.
