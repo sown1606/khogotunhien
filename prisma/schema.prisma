@@ -188,6 +188,19 @@ model SiteSetting {
   updatedAt           DateTime @updatedAt
 }
 
+model MusicTrack {
+  id         String   @id @default(cuid())
+  title      String
+  youtubeUrl String   @db.VarChar(500)
+  active     Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([sortOrder, createdAt])
+}
+
 model LeadCapture {
   id         String   @id @default(cuid())
   name       String?

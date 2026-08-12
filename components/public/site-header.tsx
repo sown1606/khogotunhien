@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/public/language-switcher";
+import { MusicPlayer, type PublicMusicTrack } from "@/components/public/music-player";
 import { SearchInput } from "@/components/public/search-input";
 import { type Locale, t, withLocalePath } from "@/lib/i18n";
 import { cn, normalizePhoneLink } from "@/lib/utils";
@@ -24,6 +25,7 @@ type SiteHeaderProps = {
   phoneNumber?: string | null;
   zaloLink?: string | null;
   categories: HeaderCategory[];
+  musicTracks?: PublicMusicTrack[];
   locale?: Locale;
 };
 
@@ -33,6 +35,7 @@ export function SiteHeader({
   phoneNumber,
   zaloLink,
   categories,
+  musicTracks = [],
   locale = "vi",
 }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -91,6 +94,12 @@ export function SiteHeader({
                 </Button>
               ))}
             </nav>
+
+            <MusicPlayer
+              tracks={musicTracks}
+              locale={locale}
+              className="ml-auto lg:ml-0"
+            />
 
             <div className="ml-auto hidden items-center gap-2 lg:flex">
               <LanguageSwitcher />

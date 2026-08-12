@@ -7,7 +7,7 @@ import { HtmlLang } from "@/components/public/html-lang";
 import { SiteFooter } from "@/components/public/site-footer";
 import { SiteHeader } from "@/components/public/site-header";
 import { getSiteMetadataBase } from "@/lib/env";
-import { getNavigationCategories, getSiteSettings } from "@/lib/queries";
+import { getActiveMusicTracks, getNavigationCategories, getSiteSettings } from "@/lib/queries";
 
 export const revalidate = 180;
 
@@ -53,7 +53,11 @@ export default async function EnglishPublicLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const locale = "en";
-  const [settings, categories] = await Promise.all([getSiteSettings(locale), getNavigationCategories(locale)]);
+  const [settings, categories, musicTracks] = await Promise.all([
+    getSiteSettings(locale),
+    getNavigationCategories(locale),
+    getActiveMusicTracks(),
+  ]);
 
   return (
     <div className="min-h-screen bg-background" lang={locale}>
@@ -64,6 +68,7 @@ export default async function EnglishPublicLayout({
         phoneNumber={settings.phoneNumber}
         zaloLink={settings.zaloLink}
         categories={categories}
+        musicTracks={musicTracks}
         locale={locale}
       />
       <main className="mx-auto min-h-[60vh] max-w-[1520px] px-4 pb-32 pt-6 lg:px-8">{children}</main>

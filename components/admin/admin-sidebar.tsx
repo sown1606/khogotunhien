@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   ChartNoAxesColumn,
   WandSparkles,
+  Music2,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const items = [
   { href: "/admin/products", label: "Products", icon: Logs },
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/homepage", label: "Homepage", icon: Home },
+  { href: "/admin/music", label: "Nhạc", icon: Music2 },
   { href: "/admin/visual-editor", label: "Visual Editor", icon: WandSparkles },
   { href: "/admin/insights", label: "Insights", icon: ChartNoAxesColumn },
   { href: "/admin/settings", label: "Settings", icon: Settings },

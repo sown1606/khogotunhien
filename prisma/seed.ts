@@ -38,6 +38,21 @@ type ProductSeed = ProductDraft & {
   relatedSlugs: string[];
 };
 
+const musicTracks = [
+  {
+    id: "music_default_lofi_8h",
+    title: "8 Hour Lofi Chill / Study / Relax",
+    youtubeUrl: "https://www.youtube.com/watch?v=a91o81IfCRk",
+    sortOrder: 1,
+  },
+  {
+    id: "music_default_lofi_12h",
+    title: "12 Hours Copyright Free Lofi Beats",
+    youtubeUrl: "https://www.youtube.com/watch?v=3ztDYjkgdCo",
+    sortOrder: 2,
+  },
+];
+
 const categories: CategorySeed[] = [
   {
     nameVi: "Gỗ Tự Nhiên",
@@ -1242,9 +1257,31 @@ async function main() {
     },
   });
 
+  await Promise.all(
+    musicTracks.map((track) =>
+      prisma.musicTrack.upsert({
+        where: { id: track.id },
+        update: {
+          title: track.title,
+          youtubeUrl: track.youtubeUrl,
+          active: true,
+          sortOrder: track.sortOrder,
+        },
+        create: {
+          id: track.id,
+          title: track.title,
+          youtubeUrl: track.youtubeUrl,
+          active: true,
+          sortOrder: track.sortOrder,
+        },
+      }),
+    ),
+  );
+
   console.log("Seed completed successfully.");
   console.log(`Categories ensured: ${categories.length}`);
   console.log(`Products ensured: ${products.length}`);
+  console.log(`Music tracks ensured: ${musicTracks.length}`);
   console.log(`Admin login email: ${adminEmail}`);
 }
 

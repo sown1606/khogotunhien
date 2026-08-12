@@ -645,6 +645,28 @@ export async function getNavigationCategories(inputLocale: Locale = "vi") {
   );
 }
 
+export async function getActiveMusicTracks() {
+  return withDatabaseFallback("getActiveMusicTracks", [], () =>
+    db.musicTrack.findMany({
+      where: { active: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        title: true,
+        youtubeUrl: true,
+      },
+    }),
+  );
+}
+
+export async function getMusicTracksForAdmin() {
+  return withDatabaseFallback("getMusicTracksForAdmin", [], () =>
+    db.musicTrack.findMany({
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    }),
+  );
+}
+
 export async function getHomepageSections(inputLocale: Locale = "vi") {
   const locale = normalizeLocale(inputLocale);
 
