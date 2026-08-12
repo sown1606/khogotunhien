@@ -2,19 +2,14 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
-import { MessageCircle, Phone, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/public/search-input";
 import { type Locale, t } from "@/lib/i18n";
-import { normalizePhoneLink } from "@/lib/utils";
 
 type HeroSectionProps = {
   companyName: string;
   companyDescription?: string | null;
-  phoneNumber?: string | null;
-  zaloLink?: string | null;
   heroMainImageUrl?: string | null;
   heroDetailImageUrl?: string | null;
   locale?: Locale;
@@ -23,8 +18,6 @@ type HeroSectionProps = {
 export function HeroSection({
   companyName,
   companyDescription,
-  phoneNumber,
-  zaloLink,
   heroMainImageUrl,
   heroDetailImageUrl,
   locale = "vi",
@@ -36,24 +29,6 @@ export function HeroSection({
     <section className="relative overflow-hidden rounded-[28px] border border-stone-200 bg-[#fffaf4]">
       <div className="absolute inset-0 bg-[url('/demo/hero/hero-texture.webp')] bg-cover bg-center opacity-[0.1]" />
       <div className="absolute inset-0 bg-[radial-gradient(900px_circle_at_0%_0%,rgba(255,239,214,0.9),transparent_46%),radial-gradient(780px_circle_at_100%_30%,rgba(228,200,165,0.5),transparent_44%)]" />
-      <div className="absolute right-4 top-4 z-10 hidden items-center gap-2 md:flex">
-        {zaloLink ? (
-          <Button asChild size="sm">
-            <Link href={zaloLink} target="_blank" rel="noreferrer">
-              <MessageCircle className="size-4" />
-              {t(locale, "Nhắn tin", "Message")}
-            </Link>
-          </Button>
-        ) : null}
-        {phoneNumber ? (
-          <Button asChild size="sm" variant="secondary">
-            <a href={normalizePhoneLink(phoneNumber)}>
-              <Phone className="size-4" />
-              {t(locale, "Gọi ngay", "Call now")}
-            </a>
-          </Button>
-        ) : null}
-      </div>
       <div className="relative grid items-center gap-8 px-5 py-8 md:px-8 md:py-10 lg:grid-cols-12 lg:gap-10 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -94,8 +69,8 @@ export function HeroSection({
           <p className="max-w-xl text-sm text-stone-600">
             {t(
               locale,
-              "Ảnh và dữ liệu sản phẩm được tối ưu để duyệt nhanh, liên hệ báo giá bằng nút góc phải.",
-              "Use the top-right quick actions for instant quote support.",
+              "Ảnh và dữ liệu sản phẩm được tối ưu để duyệt nhanh, liên hệ báo giá bằng cụm nút bên phải.",
+              "Use the contact actions on the right for instant quote support.",
             )}
           </p>
         </motion.div>

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, MessageCircle, Phone, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export function SiteHeader({
   musicTracks = [],
   locale = "vi",
 }: SiteHeaderProps) {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigationItems = [
@@ -46,6 +48,12 @@ export function SiteHeader({
     { href: withLocalePath(locale, "/about"), label: t(locale, "Giới thiệu", "About") },
     { href: withLocalePath(locale, "/contact"), label: t(locale, "Liên hệ", "Contact") },
   ];
+  const normalizedPathname = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  const homePath = withLocalePath(locale, "/");
+  const isNavigationItemActive = (href: string, index: number) =>
+    normalizedPathname === href ||
+    normalizedPathname.startsWith(`${href}/`) ||
+    (index === 0 && normalizedPathname === homePath);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -138,20 +146,25 @@ export function SiteHeader({
 
           <div className="no-scrollbar -mx-1 mt-3 hidden overflow-x-auto lg:block">
             <div className="flex min-w-max items-center gap-2 px-1">
-              {navigationItems.map((item, index) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
-                    index === 0
-                      ? "border-stone-900 bg-stone-900 text-white"
-                      : "border-stone-300/80 bg-white text-stone-700 hover:border-stone-500 hover:text-stone-900",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {navigationItems.map((item, index) => {
+                const active = isNavigationItemActive(item.href, index);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
+                      active
+                        ? "border-stone-900 bg-stone-900 text-white"
+                        : "border-stone-300/80 bg-white text-stone-700 hover:border-stone-500 hover:text-stone-900",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
               <span className="mx-1 h-6 w-px bg-stone-200" />
               {categories.map((category) => (
                 <Link
@@ -207,16 +220,26 @@ export function SiteHeader({
               </div>
 
               <div className="space-y-1">
-                {navigationItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="block rounded-xl px-3 py-2.5 font-medium text-stone-800 hover:bg-stone-200/70"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {navigationItems.map((item, index) => {
+                  const active = isNavigationItemActive(item.href, index);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "block rounded-xl px-3 py-2.5 font-medium hover:bg-stone-200/70",
+                        active
+                          ? "bg-stone-900 text-white hover:bg-stone-800"
+                          : "text-stone-800",
+                      )}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </div>
 
               <div className="mt-6 grid gap-2">

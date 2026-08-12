@@ -231,24 +231,27 @@ export function SettingsForm({ action, initialValues }: SettingsFormProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="homepage-hero-images" className="scroll-mt-24">
         <CardHeader>
-          <CardTitle>Homepage hero images</CardTitle>
+          <CardTitle>Hai ảnh đầu trang chủ</CardTitle>
+          <p className="text-sm text-stone-600">
+            Thay ảnh lớn và ảnh nhỏ chồng góc trong khối giới thiệu đầu trang.
+          </p>
         </CardHeader>
         <CardContent className="grid gap-5 md:grid-cols-2">
           <ImageUploadField
-            label="Main hero image"
+            label="Ảnh lớn"
             name="heroMainImageUrl"
             value={heroMainImageUrl}
             onChange={setHeroMainImageUrl}
-            helperText="Large image block on the homepage hero."
+            helperText="Ảnh chính hiển thị lớn ở bên phải khối đầu trang."
           />
           <ImageUploadField
-            label="Detail hero image"
+            label="Ảnh nhỏ chồng góc"
             name="heroDetailImageUrl"
             value={heroDetailImageUrl}
             onChange={setHeroDetailImageUrl}
-            helperText="Small overlapping hero image on desktop."
+            helperText="Ảnh vuông nhỏ chồng lên ảnh chính trên desktop."
           />
         </CardContent>
       </Card>

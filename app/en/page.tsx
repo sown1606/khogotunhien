@@ -36,8 +36,6 @@ export default async function EnglishHomePage() {
       <HeroSection
         companyName={settings.companyName}
         companyDescription={settings.companyDescription}
-        phoneNumber={settings.phoneNumber}
-        zaloLink={settings.zaloLink}
         heroMainImageUrl={settings.heroMainImageUrl}
         heroDetailImageUrl={settings.heroDetailImageUrl}
         locale={locale}

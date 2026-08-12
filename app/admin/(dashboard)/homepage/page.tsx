@@ -91,6 +91,20 @@ export default async function AdminHomepagePage({ searchParams }: AdminHomepageP
         description="Manage featured categories, products, and curated homepage blocks."
       />
 
+      <Card className="border-amber-200 bg-amber-50/40">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
+          <div>
+            <CardTitle>Hai ảnh đầu trang chủ</CardTitle>
+            <p className="mt-1 text-sm text-stone-600">
+              Đổi ảnh lớn và ảnh nhỏ chồng góc trong khối hero đầu trang.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/admin/settings#homepage-hero-images">Thay hai ảnh</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
       {params.error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           {params.error}
